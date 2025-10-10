@@ -1,0 +1,52 @@
+/* 全局样式文件 */
+
+/* 导入Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义变量 */
+:root {
+  --primary-text-color: #181511;
+  --secondary-text-color: #887c63;
+  --background-color: #f4f3f0;
+  --white-color: #ffffff;
+}
+
+/* 基础样式重置 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Work Sans", "Noto Sans", sans-serif;
+  color: var(--primary-text-color);
+  background-color: var(--white-color);
+}
+
+/* 导入字体图标 */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* 自定义工具类 */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .content-auto {
+    content-visibility: auto;
+  }
+}
+
+/* 加载外部字体 */
+@import url('https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Work+Sans:wght@400;500;700;900&family=Playfair+Display:wght@700&family=Merriweather:wght@700');
+
+/* 导入Font Awesome */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');

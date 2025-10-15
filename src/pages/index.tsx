@@ -144,24 +144,56 @@ const HomePage: React.FC = () => {
 
           {/* 分页控件 */}
           <div className="flex items-center justify-center p-4">
-            <Link href="#" className="flex size-10 items-center justify-center">
-              <span className="material-symbols-outlined">arrow_back_ios</span>
+            {/* 上一页按钮 - 当在第一页时禁用 */}
+            <Link 
+              href="/?page=1" 
+              className="flex size-10 items-center justify-center opacity-50 cursor-not-allowed"
+              onClick={(e) => e.preventDefault()}
+            >
+              <span className="text-lg">←</span>
             </Link>
-            <Link href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-background font-bold text-sm leading-normal tracking-[0.015em]">
+            
+            {/* 第1页 - 当前页 */}
+            <Link 
+              href="/?page=1" 
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-background font-bold text-sm leading-normal tracking-[0.015em]"
+            >
               1
             </Link>
-            <Link href="#" className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">
+            
+            {/* 第2页 */}
+            <Link 
+              href="/?page=2" 
+              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
+            >
               2
             </Link>
-            <Link href="#" className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">
+            
+            {/* 第3页 */}
+            <Link 
+              href="/?page=3" 
+              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
+            >
               3
             </Link>
+            
+            {/* 省略号 */}
             <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">...</span>
-            <Link href="#" className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">
+            
+            {/* 最后一页 */}
+            <Link 
+              href="/?page=10" 
+              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
+            >
               10
             </Link>
-            <Link href="#" className="flex size-10 items-center justify-center">
-              <span className="material-symbols-outlined">arrow_forward_ios</span>
+            
+            {/* 下一页按钮 */}
+            <Link 
+              href="/?page=2" 
+              className="flex size-10 items-center justify-center hover:bg-background/50 rounded-full transition-colors"
+            >
+              <span className="text-lg">→</span>
             </Link>
           </div>
         </div>

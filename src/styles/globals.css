@@ -11,6 +11,7 @@
   --secondary-text-color: #887c63;
   --background-color: #f4f3f0;
   --white-color: #ffffff;
+  --accent-color: #e6a219;
 }
 
 /* 基础样式重置 */
@@ -43,6 +44,23 @@ html, body {
   .content-auto {
     content-visibility: auto;
   }
+}
+
+/* 文章详情页特定样式 */
+p strong {
+  font-weight: 700;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: var(--accent-color);
+  color: var(--primary-text-color);
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #d39217;
 }
 
 /* 加载外部字体 */

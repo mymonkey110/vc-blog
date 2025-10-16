@@ -22,7 +22,9 @@
 
 - 语言：TypeScript
 - 框架：Next.js
-- 样式：Tailwind CSS
+- 前端库：React, React DOM
+- 样式：Tailwind CSS, PostCSS, Autoprefixer
+- 开发工具：ESLint, Prettier
 
 # 代码规范
 

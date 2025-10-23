@@ -1,26 +1,11 @@
 import React, { useState } from 'react';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-
-// 文章数据接口
-interface Article {
-  id: number;
-  title: string;
-  content: string;
-  author: string;
-  date: string;
-  categories: string[];
-  imageUrl: string;
-  imageAlt: string;
-  sections: ArticleSection[];
-  comments: Comment[];
-}
-
-// 文章章节接口
-interface ArticleSection {
-  title: string;
-  content: string;
-}
+import { ArticleWithContent } from '../../types/article';
+import { getAllArticlesMeta, getArticleById } from '../../utils/markdown';
+import MarkdownRenderer from '../../components/MarkdownRenderer';
+import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 
 // 评论接口
 interface Comment {
@@ -31,60 +16,33 @@ interface Comment {
   content: string;
 }
 
-const ArticleDetail: React.FC<{ id: string }> = ({ id }) => {
-  const [commentText, setCommentText] = useState('');
-  
-  // 模拟文章数据
-  const article: Article = {
-    id: parseInt(id, 10) || 1,
-    title: 'The Future of AI in Software Development',
-    content: 'Artificial intelligence (AI) is rapidly transforming the software development landscape. From automating repetitive tasks to assisting with complex problem-solving, AI tools are becoming indispensable for developers. This article explores the current and future impact of AI on software development, highlighting key trends and potential challenges.',
-    author: 'Sophia Chen',
-    date: 'January 15, 2024',
-    categories: ['人工智能', '技术趋势'],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHHAYNN0OfUPzzPXlz_JMmyw7WlS_7JgOGa8ABl0HPE7LDBUhqzqvKRa04UjrUPxL03w-wvZqMNUBNkjS5nCnocFIz14Eipd7NAw0Wgg44VvnK7bsBX5LbK9wwlxPLz453mREaJipB6oqUeNwPdalsEcDFJLjM7P2C55RqYPE74GdyWg_z6xUbKsHPH7aGpeKXBqT4CmV3GFxdxu03vhuf_2omnjG8TyoSSEJRs8Pm-8XlV7UGY0W3NGmyAsqmePqUT1QIIasBezs',
-    imageAlt: 'The Future of AI in Software Development',
-    sections: [
-      {
-        title: 'Key Trends',
-        content: 'Several key trends are shaping the integration of AI in software development: 1. **AI-Powered Code Generation:** Tools like GitHub Copilot are enabling developers to write code faster and more efficiently by suggesting code snippets and completing functions based on natural language prompts. 2. **Automated Testing:** AI is being used to automate various testing processes, including unit testing, integration testing, and UI testing, leading to faster feedback loops and improved software quality. 3. **Intelligent Debugging:** AI-powered debugging tools can analyze code to identify potential bugs and suggest fixes, reducing the time spent on debugging. 4. **Predictive Analytics:** AI algorithms can analyze project data to predict potential risks, estimate project timelines, and optimize resource allocation. 5. **Personalized Learning:** AI-driven platforms are providing personalized learning experiences for developers, helping them acquire new skills and stay up-to-date with the latest technologies.'
-      },
-      {
-        title: 'Potential Challenges',
-        content: 'While AI offers numerous benefits, it also presents some challenges: 1. **Data Privacy and Security:** AI models require large amounts of data to train, raising concerns about data privacy and security. 2. **Bias and Fairness:** AI algorithms can inherit biases from the data they are trained on, leading to unfair or discriminatory outcomes. 3. **Job Displacement:** The automation of certain tasks may lead to job displacement for some developers, requiring them to adapt to new roles and responsibilities. 4. **Ethical Considerations:** The use of AI in software development raises ethical questions about accountability, transparency, and the potential impact on society.'
-      },
-      {
-        title: 'Conclusion',
-        content: 'AI is poised to revolutionize software development, offering significant opportunities for increased productivity, improved quality, and enhanced innovation. However, it is crucial to address the challenges and ethical considerations associated with AI to ensure its responsible and beneficial integration into the development process. As AI continues to evolve, developers must embrace lifelong learning and adapt to the changing landscape to remain competitive and contribute to the future of software.'
-      }
-    ],
-    comments: [
-      {
-        id: 1,
-        author: 'David Lee',
-        authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFD92tzkp4lvlLDDYnYKHIG5i0LuI6HFUbKai-gzM60AgvkXnvHgtc4xe4i9wmp0D3asxdAvMaUiWdXAb2vftCxXJBqBrlgpxhUfIhCBKGdzBteNF6cAXRRErB8NJIOUChH5AdEfjl1OW54uC6_jpyTcgWsBnW3BgEqYt2HoVS5fzboMgDtTUAdjk7-gqh4Jj7wcJ43Z1H30zLz0_TM0LMkfHCVXsCha5Ms6IBjxuXiii_vkJu1VR2CubUNBPnTWvZrmfNFTGSEqY',
-        date: '2 days ago',
-        content: 'Great article! I\'m particularly interested in the potential of AI-powered code generation. It could significantly speed up development cycles.'
-      },
-      {
-        id: 2,
-        author: 'Emily Wong',
-        authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvvBfT-_jSfyZDxg2smWERp5UMSIoatxcpv-t70BSRxvJ8pumsT8Kg_Mm514vK0S54shuxohaDDCdDyj5GcW6kgZGRzgxVYPRevrDiBBdB2HOrsTHnNs0_szxr6tEQVipC8ipCA9lagRgiLZ4-XPukNqbjqOnPgJJtQckcSiAVp4Vu6ndHYl5etH65yDogxrvLVw6Y6YKnGXzdbo8TSzHrCqxAClL2yBMggnUKvIgpL6n_CxqCmFEwRJ6bc4CEkXgzc6HQ4CLiQFE',
-        date: '1 day ago',
-        content: 'I agree with David. The ethical considerations are also important to keep in mind. We need to ensure AI is used responsibly in software development.'
-      }
-    ]
+// 页面属性接口
+interface ArticlePageProps {
+  article: Omit<ArticleWithContent, 'content'> & {
+    content: MDXRemoteSerializeResult;
   };
+}
 
-  // 处理Markdown格式的文本，将**text**转换为<strong>text</strong>
-  const formatContent = (content: string) => {
-    return content.split(/(\*\*.*?\*\*)/g).map((part, index) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={index}>{part.slice(2, -2)}</strong>;
-      }
-      return part;
-    });
-  };
+// 模拟评论数据（暂时保留）
+const mockComments: Comment[] = [
+  {
+    id: 1,
+    author: 'David Lee',
+    authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFD92tzkp4lvlLDDYnYKHIG5i0LuI6HFUbKai-gzM60AgvkXnvHgtc4xe4i9wmp0D3asxdAvMaUiWdXAb2vftCxXJBqBrlgpxhUfIhCBKGdzBteNF6cAXRRErB8NJIOUChH5AdEfjl1OW54uC6_jpyTcgWsBnW3BgEqYt2HoVS5fzboMgDtTUAdjk7-gqh4Jj7wcJ43Z1H30zLz0_TM0LMkfHCVXsCha5Ms6IBjxuXiii_vkJu1VR2CubUNBPnTWvZrmfNFTGSEqY',
+    date: '2 days ago',
+    content: 'Great article! I\'m particularly interested in the potential of AI-powered code generation.'
+  },
+  {
+    id: 2,
+    author: 'Emily Wong',
+    authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCvvBfT-_jSfyZDxg2smWERp5UMSIoatxcpv-t70BSRxvJ8pumsT8Kg_Mm514vK0S54shuxohaDDCdDyj5GcW6kgZGRzgxVYPRevrDiBBdB2HOrsTHnNs0_szxr6tEQVipC8ipCA9lagRgiLZ4-XPukNqbjqOnPgJJtQckcSiAVp4Vu6ndHYl5etH65yDogxrvLVw6Y6YKnGXzdbo8TSzHrCqxAClL2yBMggnUKvIgpL6n_CxqCmFEwRJ6bc4CEkXgzc6HQ4CLiQFE',
+    date: '1 day ago',
+    content: 'I agree with David. The ethical considerations are also important to keep in mind.'
+  }
+];
+
+const ArticleDetail: React.FC<ArticlePageProps> = ({ article }) => {
+  const [commentText, setCommentText] = useState('');
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,50 +100,56 @@ const ArticleDetail: React.FC<{ id: string }> = ({ id }) => {
           
           {/* 作者信息和分类 */}
           <div className="px-4 py-1">
-            <p className="text-sm text-secondary-text">By {article.author} · Published on {article.date}</p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              {article.categories.map((category, index) => (
-                <Link 
-                  key={index} 
-                  href={`/categories/${category}`} 
-                  className="text-xs text-secondary-text hover:underline"
-                >
-                  {category}
-                </Link>
-              ))}
+            <div className="flex flex-wrap items-center text-sm text-gray-500">
+              <span>{article.author || '未知作者'}</span>
+              <span className="mx-2">·</span>
+              <span>{article.date ? new Date(article.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
+              <span className="mx-2">·</span>
+              <span>阅读时间: 5 分钟</span>
             </div>
+            
+            {/* 分类标签 */}
+            {article.categories && article.categories.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {article.categories.map((category, index) => (
+                  <Link 
+                    key={index} 
+                    href={`/categories/${category}`} 
+                    className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 hover:underline"
+                  >
+                    {category}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* 文章封面图 */}
-          <div className="w-full p-4">
-            <div className="relative w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden">
-              <Image
-                src={article.imageUrl}
-                alt={article.imageAlt}
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority
-              />
+          {article.imageUrl && (
+            <div className="w-full p-4">
+              <div className="relative w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden">
+                <Image
+                  src={article.imageUrl}
+                  alt={article.imageAlt || article.title}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                  priority
+                />
+              </div>
             </div>
+          )}
+          
+          {/* 文章内容 */}
+          <div className="px-4 py-3">
+            <MarkdownRenderer content={article.content} />
           </div>
-          
-          {/* 文章简介 */}
-          <p className="px-4 py-3 text-base leading-normal">{formatContent(article.content)}</p>
-          
-          {/* 文章主体内容 */}
-          {article.sections.map((section, index) => (
-            <div key={index} className="px-4 py-3">
-              <h2 className="py-2 text-lg font-bold leading-tight tracking-[-0.015em]">{section.title}</h2>
-              <p className="text-base leading-normal">{formatContent(section.content)}</p>
-            </div>
-          ))}
           
           {/* 评论区标题 */}
           <h2 className="px-4 py-3 text-2xl font-bold leading-tight tracking-[-0.015em]">Comments</h2>
           
           {/* 评论列表 */}
-          {article.comments.map((comment) => (
+          {mockComments.map((comment) => (
             <div key={comment.id} className="flex w-full gap-3 p-4">
               <div 
                 className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-center bg-no-repeat bg-cover"
@@ -227,10 +191,54 @@ const ArticleDetail: React.FC<{ id: string }> = ({ id }) => {
 
 export default ArticleDetail;
 
-export async function getServerSideProps(context: { params: { id: string } }) {
-  const { id } = context.params;
-  // 这里可以添加从API获取实际文章数据的逻辑
-  return {
-    props: { id }
-  };
+// 静态生成路径配置
+export async function getStaticPaths() {
+  try {
+    const articles = await getAllArticlesMeta();
+    const paths = articles.map((article) => ({
+      params: { id: article.id }
+    }));
+    
+    return {
+      paths,
+      fallback: 'blocking' // 当请求未预构建的页面时，Next.js会在服务器上生成页面
+    };
+  } catch (error) {
+    console.error('Failed to get article paths:', error);
+    return {
+      paths: [],
+      fallback: false
+    };
+  }
+}
+
+// 静态生成文章内容
+export async function getStaticProps({ params }: { params: { id: string } }) {
+  try {
+    const article = await getArticleById(params.id);
+    
+    if (!article) {
+      return {
+        notFound: true
+      };
+    }
+    
+    // 由于getArticleById已经返回序列化后的内容，直接使用
+    const articleWithSerializedContent = {
+      ...article,
+      content: article.content, // content已经是MDXRemoteSerializeResult类型
+    };
+    
+    return {
+      props: {
+        article: articleWithSerializedContent
+      },
+      revalidate: 60 // 增量静态再生，每60秒检查一次更新
+    };
+  } catch (error) {
+    console.error('Failed to get article:', error);
+    return {
+      notFound: true
+    };
+  }
 }

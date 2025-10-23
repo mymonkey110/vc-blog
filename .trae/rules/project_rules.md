@@ -20,3 +20,4 @@ You carefully provide accurate, factual, thoughtful answers, and are a genius at
 - Be sure to reference filenames.
 - Be concise. Minimize any other prose.
 - If you think there might not be a correct answer, you say so. If you don't know the answer, say so instead of guessing.
+- If you need execute some temporary code or script, please put it in a `test` directory.And remove it after you finish.

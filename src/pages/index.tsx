@@ -1,58 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { GetStaticProps } from 'next';
+import { ArticleMeta } from '../types/article';
+import { getAllArticlesMeta } from '../utils/markdown';
 
-// 文章数据接口
-export interface Article {
-  id: number;
-  title: string;
-  excerpt: string;
-  date: string;
-  categories: string[];
-  imageUrl: string;
-  imageAlt: string;
+interface HomePageProps {
+  articles: ArticleMeta[];
 }
 
-const HomePage: React.FC = () => {
-  // 模拟文章数据
-  const articles: Article[] = [
-    {
-      id: 1,
-      title: '探索人工智能的未来趋势',
-      excerpt: '深入了解人工智能领域的最新发展，包括机器学习、自然语言处理等技术。',
-      date: '2023年10月26日',
-      categories: ['人工智能', '技术趋势'],
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHHAYNN0OfUPzzPXlz_JMmyw7WlS_7JgOGa8ABl0HPE7LDBUhqzqvKRa04UjrUPxL03w-wvZqMNUBNkjS5nCnocFIz14Eipd7NAw0Wgg44VvnK7bsBX5LbK9wwlxPLz453mREaJipB6oqUeNwPdalsEcDFJLjM7P2C55RqYPE74GdyWg_z6xUbKsHPH7aGpeKXBqT4CmV3GFxdxu03vhuf_2omnjG8TyoSSEJRs8Pm-8XlV7UGY0W3NGmyAsqmePqUT1QIIasBezs',
-      imageAlt: '探索人工智能的未来趋势',
-    },
-    {
-      id: 2,
-      title: '如何提升你的写作技巧',
-      excerpt: '学习有效的写作技巧，提升你的表达能力和文章质量。',
-      date: '2023年9月15日',
-      categories: ['写作', '技巧'],
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBTYQb7bhy2nKqTscp9GMtOqnAilB7fFfYCJRvCsb86BrxMuwsYMTptwOiVhbFZOzD8Q4TPMODWE1iHpptCyHUAUTvz1ZiWaQfDCD4Bgh-rxnaGUmq3-vWgmxFE9wMgy4sI38y3DU1BZQFdjdSd3OKKogKMUTzTs7lNE_Ttz2J1wj_ABphhClUgSnaTZ9K5r9Z08tFT8MlimonrIbpGkkkVm4CjV60GL8FPaF0nZagsPrW7nsmzXp_Nl9dWuIfSTa8Szdx0xfJ-ZEU',
-      imageAlt: '如何提升你的写作技巧',
-    },
-    {
-      id: 3,
-      title: '健康生活方式的建议',
-      excerpt: '了解如何通过健康饮食、适量运动和良好的作息习惯来改善你的生活质量。',
-      date: '2023年8月01日',
-      categories: ['健康', '生活方式'],
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD1xSk1521Ng3ew26hundI2JcE7mFL1gKZbZOKb2szAo_KmTHHGzRO6p6dhL15M6cji8ERjMnwoNG4P7c-cYWv_ZXn0j0Lu1MiJ9kbDpAFdMYq5Snit_5oJvNqHodS2-f-7xdWBWpfFUFsMHejiggP6ac101z6bfq-cnJBQw0AsIe3ANixi41LHOGtYncquBOCDcbX_Yq9f1I306xTnqprg3W50uXZ2-ipy1axhNTm9hDzyupbthA6SPwyAODyitWSmX8Z5foB8Ngc',
-      imageAlt: '健康生活方式的建议',
-    },
-    {
-      id: 4,
-      title: '旅行见闻：探索未知之地',
-      excerpt: '分享旅行中的见闻和体验，带你领略不同文化的魅力。',
-      date: '2023年7月10日',
-      categories: ['旅行', '文化'],
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD4C_EXdkhuKxQgDxFPxvBVGNOCYRnDoSwV9mKnsDsOYR5Ea9xDFaQbZtSLBRU9CI6oaS2ga6BRgFW7_AikgjDCXkxbAoeHfYhJcNf7ziQka7V0PD9xZjCV5I0bIfE04h1Hvvz-G2hdgJaKkaCToWI2xKfkQwPTWQMb2q_uHXeBfxguaBEqaDH69yeUkQ6wSDI99WVt5VTHNmc6IXRPaPorg5s6KA_zJkAUET5DNr9McLOXo-_WhsztjOQxJbljCyiYa1_8gOcOsgQ',
-      imageAlt: '旅行见闻：探索未知之地',
-    },
-  ];
+const HomePage: React.FC<HomePageProps> = ({ articles }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -107,38 +64,48 @@ const HomePage: React.FC = () => {
           <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
 
           {/* 文章列表 */}
-          <div className="grid gap-8 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             {articles.map((article) => (
-              <div key={article.id} className="flex flex-col items-start gap-4 py-4 sm:flex-row">
-                <div className="flex flex-1 flex-col gap-2">
-                  <p className="text-2xl font-bold leading-tight font-playfair">{article.title}</p>
-                  <p className="text-base font-normal leading-normal">{article.excerpt}</p>
-                  <div className="flex flex-wrap items-center gap-2 pt-2">
-                    <span className="text-xs font-light text-secondary-text">{article.date}</span>
-                    <span className="text-xs font-light text-secondary-text">•</span>
-                    {article.categories.map((category, index) => (
-                      <React.Fragment key={index}>
-                        <Link href={`/categories/${category}`} className="text-xs font-light text-secondary-text">
-                          {category}
-                        </Link>
-                        {index < article.categories.length - 1 && (
-                          <span className="text-xs font-light text-secondary-text">•</span>
-                        )}
-                      </React.Fragment>
+              <article key={article.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
+                  {article.imageUrl && (
+                    <Image
+                      src={article.imageUrl}
+                      alt={article.imageAlt || article.title}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  )}
+                </div>
+                <div className="p-6">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {article.categories?.map((category, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                      >
+                        {category}
+                      </span>
                     ))}
                   </div>
+                  <h2 className="text-xl font-bold mb-2">
+                    <Link href={`/article/${article.id}`} className="hover:text-blue-500 transition-colors">
+                      {article.title}
+                    </Link>
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{article.excerpt || '阅读更多...'}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500 dark:text-gray-500">{article.date ? new Date(article.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
+                    <Link
+                      href={`/article/${article.id}`}
+                      className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
+                    >
+                      阅读更多
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex-shrink-0 h-auto w-full sm:w-[200px] aspect-[3/2]">
-                  <Image 
-                    src={article.imageUrl} 
-                    alt={article.imageAlt} 
-                    width={200} 
-                    height={133} 
-                    className="h-full w-full object-cover"
-                    layout="responsive"
-                  />
-                </div>
-              </div>
+              </article>
             ))}
           </div>
 
@@ -203,3 +170,33 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+
+// 导出getStaticProps函数以在构建时生成静态页面
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  try {
+    // 使用我们的工具函数获取所有文章的元数据
+    const articles = await getAllArticlesMeta();
+    
+    // 按日期排序，最新的文章排在前面
+    const sortedArticles = articles.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });
+    
+    return {
+      props: {
+        articles: sortedArticles
+      },
+      // 设置revalidate以支持增量静态再生
+      revalidate: 60 // 每60秒重新生成
+    };
+  } catch (error) {
+    console.error('获取文章数据失败:', error);
+    return {
+      props: {
+        articles: []
+      }
+    };
+  }
+};

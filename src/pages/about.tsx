@@ -38,7 +38,7 @@ const AboutPage: React.FC = () => {
           </div>
           <div
             className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-            style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCd8lJNh4wF2Yus2iaaJNm-MGlK_CnlCc3ATVeEhe1oIceztO86stEfvBmEb_m0c2fYPqgcbOglh5D9r19PxB2O4q3An4Sq3---EtDvDd62ZoBoB12J275CUcFtPlYjexfoH9AlQ2ayejMK4mI8u0S_g4AoZrXJw50l3zvW3zX0K05EPOYivMVrxghpITgwF2Z0XKNaTezZaAJTyCk5v3poBUt3vM9qh1BTkVeDfdYobRhKR7qcQUZzpx2xVJvlzYyjfLjzf9g0sTI")' }}
+            style={{ backgroundImage: 'url("/images/avatar/profile.png")' }}
           ></div>
         </div>
       </header>
@@ -57,10 +57,10 @@ const AboutPage: React.FC = () => {
               <div className="flex gap-4 flex-col items-center">
                 <div
                   className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32"
-                  style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuANQU7w1tNRkdVGksMVRPurHdVTqFea7sAatIS7qMs-4dXrrdyOEX7ngarsPt4QEp9u7AjrntWRcVGO5vd7QipVhZet79ao9Nh_3jSeLscNYNr5YGKe4TJm4gVKQuka4NlOnF6ZZrxuS0zAIafHwAebjDY0GplTsw-mrpY0ABvi8rGHmWXRpP3-yUVJvY5QejrZo8NTrLNV3AnFGE6FnIfx3YrZMtyk8ORZ89ZOThBvHoMSdyuZTa0UdlfJdyXHwralxC3ON1EjHSI")' }}
+                  style={{ backgroundImage: 'url("/images/avatar/avatar.png")' }}
                 ></div>
                 <div className="flex flex-col items-center justify-center justify-center">
-                  <p className="text-[#181511] text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">艾米丽·陈</p>
+                  <p className="text-[#181511] text-[22px] font-bold leading-tight tracking-[-0.015em] text-center">麦克·蒋</p>
                   <p className="text-[#887c63] text-base font-normal leading-normal text-center">技术爱好者，热爱分享</p>
                 </div>
               </div>
@@ -91,6 +91,17 @@ const AboutPage: React.FC = () => {
               <p className="text-[#181511] text-base font-medium leading-normal">大数据分析师</p>
               <p className="text-[#887c63] text-base font-normal leading-normal">2018年 - 2020年</p>
             </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-[#e5e2dc] h-2"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M251.76,88.94l-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87v48.42a15.91,15.91,0,0,0,4.06,10.65C49.16,191.53,78.51,216,128,216a130,130,0,0,0,48-8.76V240a8,8,0,0,0,16,0V199.51a115.63,115.63,0,0,0,27.94-22.57A15.91,15.91,0,0,0,224,166.29V117.87l27.76-14.81a8,8,0,0,0,0-14.12ZM128,200c-43.27,0-68.72-21.14-80-33.71V126.4l76.24,40.66a8,8,0,0,0,7.52,0L176,143.47v46.34C163.4,195.69,147.52,200,128,200Zm80-33.75a97.83,97.83,0,0,1-16,14.25V134.93l16-8.53ZM188,118.94l-.22-.13-56-29.87a8,8,0,0,0-7.52,14.12L171,128l-43,22.93L25,96,128,41.07,231,96Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-[#e5e2dc] h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-[#181511] text-base font-medium leading-normal">软件与理论硕士</p>
+              <p className="text-[#887c63] text-base font-normal leading-normal">2011年 - 2014年</p>
+            </div>
             <div className="flex flex-col items-center gap-1 pb-3">
               <div className="w-[1.5px] bg-[#e5e2dc] h-2"></div>
               <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
@@ -98,8 +109,8 @@ const AboutPage: React.FC = () => {
               </svg>
             </div>
             <div className="flex flex-1 flex-col py-3">
-              <p className="text-[#181511] text-base font-medium leading-normal">计算机科学学士</p>
-              <p className="text-[#887c63] text-base font-normal leading-normal">2014年 - 2018年</p>
+              <p className="text-[#181511] text-base font-medium leading-normal">网络工程学士</p>
+              <p className="text-[#887c63] text-base font-normal leading-normal">2007年 - 2011年</p>
             </div>
           </div>
           

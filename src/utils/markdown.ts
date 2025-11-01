@@ -41,8 +41,8 @@ export const getAllArticlesMeta = (): ArticleMeta[] => {
           excerpt: matterResult.data.excerpt || '',
           date: typeof matterResult.data.date === 'object' ? matterResult.data.date.toISOString() : matterResult.data.date || '',
           categories: matterResult.data.categories || [],
-          imageUrl: matterResult.data.imageUrl,
-          imageAlt: matterResult.data.imageAlt,
+          imageUrl: matterResult.data.imageUrl || null,
+          imageAlt: matterResult.data.imageAlt || null,
         };
       } catch (error) {
         console.error(`Error processing file ${fileName}:`, error);

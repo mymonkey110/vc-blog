@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -12,17 +14,41 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      // 这里将在后续连接到真实的认证API
-      // 暂时模拟登录过程
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 通过API路由进行登录验证
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password }),
+        credentials: 'include' // 包含cookies
+        // 注意：我们不使用redirect: 'follow'，因为我们想手动处理响应
+      });
       
-      if (username && password) {
-        // 登录成功后的处理，比如保存token，重定向到后台主页
-        console.log('Login successful');
-        // 暂时重定向到首页，后续会改为后台首页
-        window.location.href = '/admin';
+      // 检查是否是重定向响应
+      if (response.redirected) {
+        // 如果是重定向响应，直接跳转到重定向的URL
+        console.log('检测到API重定向，跳转到:', response.url);
+        window.location.href = response.url;
       } else {
-        setError('请填写用户名和密码');
+        // 如果不是重定向，尝试解析JSON
+        try {
+          const data = await response.json();
+          
+          if (response.ok) {
+            // 登录成功的JSON响应情况
+            console.log('登录成功，检查cookie...');
+            setTimeout(() => {
+              router.push('/admin');
+            }, 500);
+          } else {
+            setError(data.error || '登录失败，请重试');
+          }
+        } catch (jsonError) {
+          // 处理JSON解析错误
+          console.error('JSON解析错误:', jsonError);
+          setError('服务器响应格式错误，请重试');
+        }
       }
     } catch (err) {
       setError('登录失败，请重试');
@@ -33,69 +59,55 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="relative flex h-screen w-full flex-col bg-white overflow-x-hidden" style={{ fontFamily: '"Work Sans", "Noto Sans", sans-serif' }}>
-      <div className="layout-container flex h-full grow flex-col">
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f4f3f0] px-10 py-3">
-          <div className="flex items-center gap-4 text-[#181511]">
-            <div className="size-4">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path clipRule="evenodd" d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z" fill="currentColor" fillRule="evenodd"></path>
-              </svg>
-            </div>
-            <h2 className="text-[#181511] text-lg font-bold leading-tight tracking-[-0.015em]">Blog Admin</h2>
-          </div>
-        </header>
-        <div className="px-40 flex flex-1 items-center justify-center py-5">
-          <div className="layout-content-container flex flex-col w-[512px] max-w-[512px] py-5">
-            <h2 className="text-[#181511] tracking-light text-[28px] font-bold leading-tight px-4 pb-3 pt-5">登录</h2>
-            
-            {error && (
-              <div className="px-4 py-2">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  {error}
-                </div>
-              </div>
-            )}
-            
-            <form onSubmit={handleLogin}>
-              <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-                <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-[#181511] text-base font-medium leading-normal pb-2">用户名/邮箱</p>
-                  <input 
-                    type="text" 
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#181511] focus:outline-0 focus:ring-0 border border-[#e5e2dc] bg-white focus:border-[#e5e2dc] h-14 placeholder:text-[#887c63] p-[15px] text-base font-normal leading-normal" 
-                    placeholder="请输入用户名或邮箱" 
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                  />
-                </label>
-              </div>
-              <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-                <label className="flex flex-col min-w-40 flex-1">
-                  <p className="text-[#181511] text-base font-medium leading-normal pb-2">密码</p>
-                  <input 
-                    type="password" 
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#181511] focus:outline-0 focus:ring-0 border border-[#e5e2dc] bg-white focus:border-[#e5e2dc] h-14 placeholder:text-[#887c63] p-[15px] text-base font-normal leading-normal" 
-                    placeholder="请输入密码" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </label>
-              </div>
-              <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
-                <button 
-                  type="submit" 
-                  className={`flex min-w-[84px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 flex-1 bg-[#e6a219] text-[#181511] text-sm font-bold leading-normal tracking-[0.015em] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? '登录中...' : '登录'}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="flex h-screen w-full items-center justify-center bg-white">
+      <div className="w-[400px] bg-white border border-[#e5e2dc] rounded-2xl p-8 shadow-lg">
+        <div className="flex justify-center mb-8">
+          <h1 className="text-3xl font-bold text-[#181511]">VC-BLOG</h1>
         </div>
+        
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="输入访问密码"
+                className={`w-full pl-4 pr-10 py-3 bg-white border ${error ? 'border-red-300' : 'border-[#e5e2dc]'} rounded-lg text-[#181511] placeholder-[#887c63] focus:outline-none focus:ring-2 focus:ring-[#e6a219] focus:border-transparent transition-all duration-200`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#887c63] hover:text-[#e6a219] focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              >
+                {/* 眼睛图标 - 这里使用SVG代码 */}
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.744 1.143L3.707 2.293zM14 10a4 4 0 11-8 0 4 4 0 018 0zm-4-2a2 2 0 11-4 0 2 2 0 014 0zm-6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm">{error}</p>
+            )}
+          </div>
+          
+          <button
+            type="submit"
+            className={`w-full py-3 bg-[#e6a219] text-[#181511] font-bold rounded-lg transition-all duration-200 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d39015]'}`}
+            disabled={isLoading}
+          >
+            {isLoading ? '登录中...' : '登录'}
+          </button>
+        </form>
       </div>
     </div>
   );

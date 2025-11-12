@@ -1,211 +1,229 @@
 /* Markdown内容样式 */
 .markdown-content {
-  line-height: 1.6;
-  color: #333;
+  @apply text-gray-800 dark:text-gray-200 leading-relaxed font-['Work_Sans'];
 }
 
-/* 标题样式 */
+/* 标题样式 - 使用Noto Sans字体，优化字重和间距 */
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4,
 .markdown-content h5,
 .markdown-content h6 {
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  line-height: 1.3;
+  @apply font-bold mt-8 mb-4 font-['Noto_Sans'] tracking-tight;
 }
 
 .markdown-content h1 {
-  font-size: 2rem;
-  border-bottom: 1px solid #eaecef;
-  padding-bottom: 0.3rem;
+  @apply text-3xl md:text-4xl lg:text-5xl border-b border-gray-200 dark:border-gray-700 pb-3 mb-6;
+  @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400;
 }
 
 .markdown-content h2 {
-  font-size: 1.5rem;
-  border-bottom: 1px solid #eaecef;
-  padding-bottom: 0.3rem;
+  @apply text-2xl md:text-3xl border-b border-gray-200 dark:border-gray-700 pb-2 mb-5;
 }
 
 .markdown-content h3 {
-  font-size: 1.25rem;
+  @apply text-xl md:text-2xl mb-4;
 }
 
 .markdown-content h4 {
-  font-size: 1rem;
+  @apply text-lg md:text-xl;
 }
 
 .markdown-content h5 {
-  font-size: 0.875rem;
+  @apply text-base md:text-lg;
 }
 
 .markdown-content h6 {
-  font-size: 0.85rem;
-  color: #6a737d;
+  @apply text-sm md:text-base text-gray-600 dark:text-gray-400;
 }
 
-/* 段落样式 */
+/* 段落样式 - 优化行高和首行缩进 */
 .markdown-content p {
-  margin-top: 0;
-  margin-bottom: 1rem;
+  @apply my-5 leading-relaxed;
+  text-indent: 2em;
 }
 
-/* 链接样式 */
+/* 链接样式 - 添加过渡效果 */
 .markdown-content a {
-  color: #0366d6;
-  text-decoration: none;
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-colors duration-200;
+  @apply font-medium;
 }
 
-.markdown-content a:hover {
-  text-decoration: underline;
-}
-
-/* 代码块样式 */
+/* 代码块样式 - 增强代码高亮效果 */
 .markdown-content pre {
-  background-color: #f6f8fa;
-  border-radius: 3px;
-  padding: 16px;
-  overflow: auto;
-  margin-bottom: 1rem;
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  @apply bg-gray-900 text-gray-100 rounded-lg p-5 overflow-x-auto my-6 shadow-lg;
+  @apply border border-gray-700;
 }
 
+/* 代码块容器 */
+.codeBlock {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-5 overflow-x-auto my-6 shadow-lg;
+  @apply border border-gray-700;
+}
+
+/* 内联代码样式 */
 .markdown-content code {
-  background-color: #f6f8fa;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-  font-size: 85%;
+  @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply border border-gray-200 dark:border-gray-700;
 }
 
-.markdown-content pre code {
-  background-color: transparent;
-  padding: 0;
-  font-size: 100%;
+.markdown-content pre code,
+.codeBlock code {
+  @apply bg-transparent p-0 border-none;
 }
 
-/* 列表样式 */
+/* 列表样式 - 优化间距 */
 .markdown-content ul,
 .markdown-content ol {
-  padding-left: 2rem;
-  margin-bottom: 1rem;
+  @apply my-5 pl-6;
+}
+
+.markdown-content ul {
+  @apply list-disc;
+}
+
+.markdown-content ol {
+  @apply list-decimal;
 }
 
 .markdown-content li {
-  margin-bottom: 0.5rem;
+  @apply my-2;
 }
 
-.markdown-content li > ul,
-.markdown-content li > ol {
-  margin-top: 0.5rem;
-  margin-bottom: 0;
-}
-
-/* 引用样式 */
+/* 引用样式 - 增强视觉效果 */
 .markdown-content blockquote {
-  border-left: 4px solid #dfe2e5;
-  padding-left: 1rem;
-  margin-left: 0;
-  margin-right: 0;
-  color: #6a737d;
+  @apply border-l-4 border-blue-500 pl-5 pr-4 py-2 italic my-5;
+  @apply bg-blue-50 dark:bg-blue-900/20 rounded-r-lg;
+  @apply font-medium;
 }
 
-/* 图片样式 */
+/* 图片样式 - 优化图片展示 */
 .markdown-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 3px;
+  @apply max-w-full h-auto rounded-lg my-6 shadow-md transition-all duration-300;
+  @apply hover:shadow-lg hover:scale-[1.01];
+  @apply border border-gray-200 dark:border-gray-700;
 }
 
-/* 表格样式 */
+/* 图片容器样式 */
+.markdown-content figure {
+  @apply my-8 text-center;
+}
+
+.markdown-content figure img {
+  @apply mx-auto;
+}
+
+.markdown-content figure figcaption {
+  @apply text-sm text-gray-600 dark:text-gray-400 mt-2 italic;
+}
+
+/* 表格样式 - 优化可读性 */
 .markdown-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 1rem;
+  @apply w-full border-collapse my-6 rounded-lg overflow-hidden;
+  @apply shadow-md;
 }
 
 .markdown-content th,
 .markdown-content td {
-  padding: 0.5rem;
-  border: 1px solid #dfe2e5;
+  @apply border border-gray-300 dark:border-gray-600 p-3 text-left;
+  @apply transition-colors duration-150;
 }
 
 .markdown-content th {
-  background-color: #f6f8fa;
-  font-weight: 600;
+  @apply bg-gray-100 dark:bg-gray-800 font-bold text-gray-900 dark:text-white;
 }
 
-/* 水平分割线 */
+.markdown-content tr:nth-child(even) {
+  @apply bg-gray-50 dark:bg-gray-800/50;
+}
+
+.markdown-content tr:hover {
+  @apply bg-gray-100 dark:bg-gray-700/30;
+}
+
+/* 水平线样式 */
 .markdown-content hr {
-  border: 0;
-  border-top: 1px solid #eaecef;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  @apply border-gray-300 dark:border-gray-700 my-8;
+  @apply border-t-0 border-b border-l-0 border-r-0;
+  @apply h-px;
+  background: linear-gradient(to right, transparent, rgba(156, 163, 175, 0.5), transparent);
 }
 
-/* 强调样式 */
-.markdown-content strong {
-  font-weight: 600;
-}
-
-.markdown-content em {
+/* 代码高亮主题样式 - 增强视觉对比 */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6a737d;
   font-style: italic;
 }
 
-/* 代码高亮主题覆盖 */
-.markdown-content .token.comment,
-.markdown-content .token.prolog,
-.markdown-content .token.doctype,
-.markdown-content .token.cdata {
-  color: #6a737d;
+.token.punctuation {
+  color: #d1d5db;
 }
 
-.markdown-content .token.punctuation {
-  color: #565867;
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #f97316;
 }
 
-.markdown-content .token.property,
-.markdown-content .token.tag,
-.markdown-content .token.boolean,
-.markdown-content .token.number,
-.markdown-content .token.constant,
-.markdown-content .token.symbol,
-.markdown-content .token.deleted {
-  color: #032f62;
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #10b981;
 }
 
-.markdown-content .token.selector,
-.markdown-content .token.attr-name,
-.markdown-content .token.string,
-.markdown-content .token.char,
-.markdown-content .token.builtin,
-.markdown-content .token.inserted {
-  color: #0366d6;
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #6366f1;
 }
 
-.markdown-content .token.operator,
-.markdown-content .token.entity,
-.markdown-content .token.url,
-.markdown-content .language-css .token.string,
-.markdown-content .style .token.string {
-  color: #005cc5;
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #8b5cf6;
+  font-weight: 500;
 }
 
-.markdown-content .token.atrule,
-.markdown-content .token.attr-value,
-.markdown-content .token.keyword {
-  color: #d73a49;
+.token.function,
+.token.class-name {
+  color: #3b82f6;
+  font-weight: 500;
 }
 
-.markdown-content .token.function,
-.markdown-content .token.class-name {
-  color: #6f42c1;
+.token.regex,
+.token.important,
+.token.variable {
+  color: #ec4899;
 }
 
-.markdown-content .token.regex,
-.markdown-content .token.important,
-.markdown-content .token.variable {
-  color: #e36209;
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .markdown-content p {
+    text-indent: 1.5em;
+  }
+  
+  .markdown-content h1 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  .markdown-content h2 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  .markdown-content h3 {
+    @apply text-lg md:text-xl;
+  }
 }

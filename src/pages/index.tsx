@@ -3,13 +3,21 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { ArticleMeta } from '../types/article';
-import { getAllArticlesMeta } from '../utils/markdown';
+import prisma from '../lib/db';
+import Pagination from '../components/pagination';
 
 interface HomePageProps {
   articles: ArticleMeta[];
+  currentPage: number;
+  totalPages: number;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ articles }) => {
+// 简化的URL格式化函数，只保留必要的处理，确保中文标题能正确显示
+const formatUrlTitle = (text: string): string => {
+  return text.toString().trim();
+};
+
+const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -90,15 +98,15 @@ const HomePage: React.FC<HomePageProps> = ({ articles }) => {
                     ))}
                   </div>
                   <h2 className="text-xl font-bold mb-2">
-                    <Link href={`/article/${article.id}`} className="hover:text-blue-500 transition-colors">
-                      {article.title}
-                    </Link>
+                    <Link href={`/article/${new Date(article.date).getFullYear()}/${String(new Date(article.date).getMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} className="hover:text-blue-500 transition-colors">
+                    {article.title}
+                  </Link>
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">{article.excerpt || '阅读更多...'}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500 dark:text-gray-500">{article.date ? new Date(article.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
                     <Link
-                      href={`/article/${article.id}`}
+                      href={`/article/${new Date(article.date).getFullYear()}/${String(new Date(article.date).getMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`}
                       className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
                     >
                       阅读更多
@@ -110,59 +118,11 @@ const HomePage: React.FC<HomePageProps> = ({ articles }) => {
           </div>
 
           {/* 分页控件 */}
-          <div className="flex items-center justify-center p-4">
-            {/* 上一页按钮 - 当在第一页时禁用 */}
-            <Link 
-              href="/?page=1" 
-              className="flex size-10 items-center justify-center opacity-50 cursor-not-allowed"
-              onClick={(e) => e.preventDefault()}
-            >
-              <span className="text-lg">←</span>
-            </Link>
-            
-            {/* 第1页 - 当前页 */}
-            <Link 
-              href="/?page=1" 
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-background font-bold text-sm leading-normal tracking-[0.015em]"
-            >
-              1
-            </Link>
-            
-            {/* 第2页 */}
-            <Link 
-              href="/?page=2" 
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
-            >
-              2
-            </Link>
-            
-            {/* 第3页 */}
-            <Link 
-              href="/?page=3" 
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
-            >
-              3
-            </Link>
-            
-            {/* 省略号 */}
-            <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">...</span>
-            
-            {/* 最后一页 */}
-            <Link 
-              href="/?page=10" 
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal hover:bg-background/50 transition-colors"
-            >
-              10
-            </Link>
-            
-            {/* 下一页按钮 */}
-            <Link 
-              href="/?page=2" 
-              className="flex size-10 items-center justify-center hover:bg-background/50 rounded-full transition-colors"
-            >
-              <span className="text-lg">→</span>
-            </Link>
-          </div>
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            basePath="/"
+          />
         </div>
       </div>
     </div>
@@ -172,31 +132,70 @@ const HomePage: React.FC<HomePageProps> = ({ articles }) => {
 export default HomePage;
 
 // 导出getStaticProps函数以在构建时生成静态页面
-export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+export const getStaticProps: GetStaticProps<HomePageProps> = async (context) => {
   try {
-    // 使用我们的工具函数获取所有文章的元数据
-    const articles = await getAllArticlesMeta();
+    // 从查询参数中获取页码，默认为第1页
+    const page = context.params?.page ? Number(context.params.page) : 1;
+    const currentPage = Math.max(1, isNaN(page) ? 1 : page);
     
-    // 按日期排序，最新的文章排在前面
-    const sortedArticles = articles.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+    // 每页显示的文章数量
+    const pageSize = 10;
+    
+    // 计算偏移量
+    const offset = (currentPage - 1) * pageSize;
+    
+    // 获取文章总数
+    const totalCount = await prisma.article.count();
+    
+    // 计算总页数
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    // 从数据库查询当前页的文章
+    const dbArticles = await prisma.article.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc' // 按创建时间倒序排列，最新的文章排在前面
+      },
+      skip: offset,
+      take: pageSize
     });
+    
+    // 转换数据库模型为前端需要的ArticleMeta格式
+    const articles: ArticleMeta[] = dbArticles.map((article) => ({
+      id: article.id,
+      title: article.title,
+      excerpt: article.description || '',
+      date: article.createdAt.toISOString(),
+      categories: [], // 目前数据库模型中没有categories字段
+      imageUrl: '', // 设置默认空字符串以避免undefined
+      imageAlt: '', // 设置默认空字符串以避免undefined
+    }));
     
     return {
       props: {
-        articles: sortedArticles
+        articles,
+        currentPage,
+        totalPages
       },
       // 设置revalidate以支持增量静态再生
       revalidate: 60 // 每60秒重新生成
     };
   } catch (error) {
-    console.error('获取文章数据失败:', error);
+    console.error('从数据库获取文章数据失败:', error);
     return {
       props: {
-        articles: []
+        articles: [],
+        currentPage: 1,
+        totalPages: 1
       }
     };
   }
 };
+
+// 首页使用getStaticProps获取数据，不需要getStaticPaths
+export const revalidate = 60; // 每分钟重新生成静态页面

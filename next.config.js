@@ -12,6 +12,14 @@ const nextConfig = {
       },
     ],
   },
+  // 配置路径别名
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': './src',
+    };
+    return config;
+  },
 };
 
 module.exports = nextConfig;

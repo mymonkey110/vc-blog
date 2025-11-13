@@ -4,13 +4,15 @@
   "description": "博客项目的前端部分",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "next": "14.2.3",
     "next-mdx-remote": "^5.0.0",
+    "@prisma/client": "^6.19.0",
     "prismjs": "^1.30.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -19,7 +21,6 @@
     "vditor": "^3.11.2"
   },
   "devDependencies": {
-    "@prisma/client": "^6.19.0",
     "@types/node": "20.19.20",
     "@types/prismjs": "^1.26.5",
     "@types/react": "18.2.0",

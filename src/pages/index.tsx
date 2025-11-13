@@ -182,9 +182,7 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async (context) => 
         articles,
         currentPage,
         totalPages
-      },
-      // 设置revalidate以支持增量静态再生
-      revalidate: 60 // 每60秒重新生成
+      }
     };
   } catch (error) {
     console.error('从数据库获取文章数据失败:', error);

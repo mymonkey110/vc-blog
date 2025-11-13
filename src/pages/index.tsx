@@ -12,9 +12,9 @@ interface HomePageProps {
   totalPages: number;
 }
 
-// 简化的URL格式化函数，只保留必要的处理，确保中文标题能正确显示
+// 简化的URL格式化函数：按原始标题生成链接，不做任何转换
 const formatUrlTitle = (text: string): string => {
-  return text.toString().trim();
+  return text.toString();
 };
 
 const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }) => {
@@ -98,7 +98,7 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
                     ))}
                   </div>
                   <h2 className="text-xl font-bold mb-2">
-                    <Link href={`/article/${new Date(article.date).getFullYear()}/${String(new Date(article.date).getMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} className="hover:text-blue-500 transition-colors">
+                    <Link href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} className="hover:text-blue-500 transition-colors">
                     {article.title}
                   </Link>
                   </h2>
@@ -106,7 +106,7 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500 dark:text-gray-500">{article.date ? new Date(article.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
                     <Link
-                      href={`/article/${new Date(article.date).getFullYear()}/${String(new Date(article.date).getMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`}
+                      href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`}
                       className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
                     >
                       阅读更多

@@ -119,18 +119,12 @@ export const getStaticPaths: GetStaticPaths = async () => {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       
-      // 简化的URL格式化，只替换空格为连字符
-      const titleSlug = article.title
-        .replace(/\s+/g, '-')
-        .replace(/\-\-+/g, '-')
-        .trim();
-      
       return [{
         params: {
           yyyy: year,
           mm: month,
           dd: day,
-          title: titleSlug
+          title: article.title
         }
       }];
     });
@@ -159,29 +153,29 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
     };
 
     // 对URL中的title进行decode
-    const titleSlug = decodeURIComponent(params.title);
+    const decodedTitle = decodeURIComponent(params.title);
 
-    // 构建日期字符串
-    const dateString = `${params.yyyy}-${params.mm}-${params.dd}`;
-    
-    // 从数据库查询文章
-    const articles = await prisma.article.findMany({
+    // 先按标题查询，再用UTC日期组件进行筛选，避免时区导致的跨日问题
+    const yearNum = Number(params.yyyy);
+    const monthNum = Number(params.mm);
+    const dayNum = Number(params.dd);
+
+    const titleMatched = await prisma.article.findMany({
       where: {
-        createdAt: {
-          gte: new Date(dateString),
-          lt: new Date(new Date(dateString).setDate(new Date(dateString).getDate() + 1))
-        }
+        title: decodedTitle
       }
     });
 
-    // 查找匹配的文章
-    const article = articles.find(article => {
-      if (!article.title) return false;
-      const articleTitleSlug = article.title
-        .replace(/\s+/g, '-')
-        .replace(/\-\-+/g, '-')
-        .trim();
-      return articleTitleSlug === titleSlug;
+    // 查找同时匹配日期与标题的文章（日期按 UTC 组件）
+    const article = titleMatched.find(article => {
+      if (!article.title || !article.createdAt) return false;
+      const d = new Date(article.createdAt);
+      return (
+        article.title === decodedTitle &&
+        d.getUTCFullYear() === yearNum &&
+        d.getUTCMonth() + 1 === monthNum &&
+        d.getUTCDate() === dayNum
+      );
     });
 
     if (!article) {

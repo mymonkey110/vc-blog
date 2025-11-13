@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Prism from 'prismjs';
 import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
 
@@ -21,18 +21,16 @@ import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/themes/prism-tomorrow.css';
 
-// 自定义代码块组件，添加复制功能
-const CodeBlock = ({ children, className }: { children: string; className?: string }) => {
+// 自定义代码块组件（拦截 <pre>），添加复制功能，仅保留单一 <pre>
+const PreBlock = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   const [copied, setCopied] = useState(false);
-  
-  // 提取语言信息
-  const language = className?.replace('language-', '') || '';
-  
-  // 复制代码到剪贴板
+  const preRef = useRef<HTMLPreElement | null>(null);
+
+  // 复制代码到剪贴板（从 DOM 提取纯文本）
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(children);
+    const text = preRef.current?.innerText || '';
+    navigator.clipboard.writeText(text);
     setCopied(true);
-    // 2秒后重置复制状态
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -47,8 +45,8 @@ const CodeBlock = ({ children, className }: { children: string; className?: stri
           {copied ? '已复制!' : '复制'}
         </button>
       </div>
-      <pre className={`${styles.codeBlock} ${language ? `language-${language}` : ''}`}>
-        <code>{children}</code>
+      <pre ref={preRef} className={`${styles.codeBlock} ${className || ''}`}>
+        {children}
       </pre>
     </div>
   );
@@ -70,13 +68,11 @@ const CustomImage = ({ src, alt }: { src: string; alt?: string }) => {
 
 // 自定义组件映射
 const components = {
-  code: ({ className, children }: { className?: string; children: string }) => {
-    // 判断是否为代码块
-    if (className && className.includes('language-')) {
-      return <CodeBlock className={className}>{children}</CodeBlock>;
-    }
-    // 内联代码
-    return <code className={className}>{children}</code>;
+  pre: ({ className, children }: { className?: string; children: React.ReactNode }) => {
+    return <PreBlock className={className}>{children}</PreBlock>;
+  },
+  code: ({ className, children }: { className?: string; children: React.ReactNode }) => {
+    return <code className={className as string}>{children as any}</code>;
   },
   img: ({ src, alt }: { src: string; alt?: string }) => {
     return <CustomImage src={src} alt={alt} />;

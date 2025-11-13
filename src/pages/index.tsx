@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { GetStaticProps } from 'next';
 import { ArticleMeta } from '../types/article';
 import prisma from '../lib/db';
+import { toSlug } from '../utils/slug';
 import Pagination from '../components/pagination';
 
 interface HomePageProps {
@@ -14,7 +15,7 @@ interface HomePageProps {
 
 // 简化的URL格式化函数：按原始标题生成链接，不做任何转换
 const formatUrlTitle = (text: string): string => {
-  return text.toString();
+  return toSlug(text.toString());
 };
 
 const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }) => {

@@ -4,6 +4,9 @@ import Link from 'next/link';
 import prisma from "@/lib/db";
 import { serialize } from 'next-mdx-remote/serialize';
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { toSlug } from "@/utils/slug";
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 interface ArticleDetailPageProps {
   article: {
@@ -115,16 +118,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
       if (!article.createdAt) return [];
       
       const date = new Date(article.createdAt);
-      const year = date.getFullYear().toString();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getUTCFullYear().toString();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
       
       return [{
         params: {
           yyyy: year,
           mm: month,
           dd: day,
-          title: article.title
+          title: toSlug(article.title)
         }
       }];
     });
@@ -142,7 +145,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   }
 };
 
-// 获取静态数据
+// 获取静态数据y
 export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (context) => {
   try {
     const params = context.params as {
@@ -155,14 +158,19 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
     // 对URL中的title进行decode
     const decodedTitle = decodeURIComponent(params.title);
 
-    // 先按标题查询，再用UTC日期组件进行筛选，避免时区导致的跨日问题
     const yearNum = Number(params.yyyy);
     const monthNum = Number(params.mm);
     const dayNum = Number(params.dd);
 
+    const dayStart = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0));
+    const dayEnd = new Date(Date.UTC(yearNum, monthNum - 1, dayNum + 1, 0, 0, 0));
+
     const titleMatched = await prisma.article.findMany({
       where: {
-        title: decodedTitle
+        createdAt: {
+          gte: dayStart,
+          lt: dayEnd
+        }
       }
     });
 
@@ -171,7 +179,7 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
       if (!article.title || !article.createdAt) return false;
       const d = new Date(article.createdAt);
       return (
-        article.title === decodedTitle &&
+        toSlug(article.title) === decodedTitle &&
         d.getUTCFullYear() === yearNum &&
         d.getUTCMonth() + 1 === monthNum &&
         d.getUTCDate() === dayNum
@@ -182,11 +190,15 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
       return { notFound: true };
     }
 
-    // 序列化文章内容为MDX
-    const serializedContent = await serialize(article.content || '', {
+    // 严格序列化文章内容为MDX，任何异常都阻断构建
+    if (!article.content || !article.content.trim()) {
+      throw new Error(`文章内容为空，无法渲染: id=${article.id}`);
+    }
+    const serializedContent = await serialize(article.content, {
       mdxOptions: {
-        remarkPlugins: [],
-        rehypePlugins: []
+        format: 'md',
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [rehypeRaw]
       }
     });
 
@@ -204,6 +216,6 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
     };
   } catch (error) {
     console.error('获取文章详情失败:', error);
-    return { notFound: true };
+    throw error;
   }
 };

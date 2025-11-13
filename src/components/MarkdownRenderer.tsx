@@ -1,7 +1,7 @@
-import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef } from 'react';
 import Prism from 'prismjs';
 import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
+import { MDXRemote } from 'next-mdx-remote';
 
 // 导入Markdown样式模块
 import styles from '../styles/markdown.module.css';
@@ -78,11 +78,6 @@ const components = {
     return <CustomImage src={src} alt={alt} />;
   }
 };
-
-// 正确导入MDXRemote组件
-const MDXRemote = dynamic(() => import('next-mdx-remote').then(mod => ({ default: mod.MDXRemote })), {
-  ssr: false,
-});
 
 interface MarkdownRendererProps {
   content: MDXRemoteSerializeResult;

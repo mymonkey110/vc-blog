@@ -212,7 +212,7 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
           content: serializedContent
         }
       },
-      revalidate: 60
+      revalidate: 3600
     };
   } catch (error) {
     console.error('获取文章详情失败:', error);

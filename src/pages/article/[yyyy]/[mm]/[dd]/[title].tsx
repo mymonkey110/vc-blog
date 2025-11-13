@@ -134,13 +134,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
     return {
       paths,
-      fallback: 'blocking'
+      fallback: false
     };
   } catch (error) {
     console.error('生成静态路径失败:', error);
     return {
       paths: [],
-      fallback: 'blocking'
+      fallback: false
     };
   }
 };
@@ -211,8 +211,7 @@ export const getStaticProps: GetStaticProps<ArticleDetailPageProps> = async (con
           description: article.description || '',
           content: serializedContent
         }
-      },
-      revalidate: 3600
+      }
     };
   } catch (error) {
     console.error('获取文章详情失败:', error);

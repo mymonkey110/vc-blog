@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/router';
+import { useRouter } from 'next/router';
 import Sidebar from '../components/Sidebar';
 import type { Article } from '../../../types/article';
 
@@ -7,11 +7,15 @@ import type { Article } from '../../../types/article';
 import 'vditor/dist/index.css';
 
 // 导入Vditor编辑器组件
-  import VditorEditor from '../../../../components/VditorEditor';
+  import VditorEditor from '../../../components/VditorEditor';
 
 export default function ArticleEditor() {
   const router = useRouter();
-  const { id } = useParams<{ id: string }>();
+  const id = typeof router.query.id === 'string'
+    ? router.query.id
+    : Array.isArray(router.query.id)
+    ? router.query.id[0]
+    : undefined;
   const [article, setArticle] = useState<Article>({
     id: id === 'new' ? `draft-${Date.now()}` : id || `draft-${Date.now()}`,
     title: '',
@@ -27,7 +31,7 @@ export default function ArticleEditor() {
   });
   
   const vditorRef = useRef<any>(null);
-  const [isNewArticle, setIsNewArticle] = useState(id === 'new');
+  const isNewArticle = id === 'new';
   const [categoryInput, setCategoryInput] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -94,11 +98,12 @@ export default function ArticleEditor() {
   
   // 初始化编辑器内容（如果不是新文章）
   useEffect(() => {
+    if (!id) return;
     if (!isNewArticle) {
       // 模拟从API获取文章数据
       // 在实际应用中，这里应该调用API获取文章内容
       // 这里简单地设置一些示例内容
-      const mockArticleData = {
+      const mockArticleData: Article = {
         id,
         title: '示例文章标题',
         excerpt: '这是文章摘要...',
@@ -115,7 +120,7 @@ export default function ArticleEditor() {
       setSlug('example-article');
       setTags(['示例', '测试']);
     }
-  }, [id, isNewArticle]);
+  }, [id]);
 
   // 添加分类
   const handleAddCategory = () => {
@@ -207,12 +212,10 @@ export default function ArticleEditor() {
     try {
       setIsPublishing(true);
       // 准备发布的数据
-      const publishData = {
+      const publishData: Article = {
         ...article,
         status: 'published',
         publishDate: new Date().toISOString(),
-        tags,
-        slug,
       };
       
       // 在实际应用中，这里会调用API发布文章
@@ -245,7 +248,7 @@ export default function ArticleEditor() {
 
   // 复制文章
   const handleDuplicate = () => {
-    // 创建一个新的文章副本
+    if (!id) return;
     const newArticleId = `draft-${Date.now()}`;
     console.log('复制文章为:', newArticleId);
     router.push(`/admin/articles/new?duplicate=${id}`);

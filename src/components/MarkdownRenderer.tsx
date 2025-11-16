@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
-import Prism from 'prismjs';
-import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { MDXRemote } from 'next-mdx-remote';
+ 'use client'
+ import { useEffect, useState, useRef } from 'react';
+ import Prism from 'prismjs';
+ import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
+ import { MDXRemote } from 'next-mdx-remote';
 
 // 导入Markdown样式模块
 import styles from '../styles/markdown.module.css';

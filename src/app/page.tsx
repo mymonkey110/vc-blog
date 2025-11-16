@@ -1,28 +1,50 @@
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { GetStaticProps } from 'next';
-import { ArticleMeta } from '../types/article';
-import prisma from '../lib/db';
-import { toSlug } from '../utils/slug';
-import Pagination from '../components/pagination';
+import Link from 'next/link'
+import Image from 'next/image'
+import prisma from '@/lib/db'
+import { toSlug } from '@/utils/slug'
+import Pagination from '@/components/pagination'
+import type { ArticleMeta } from '@/types/article'
 
-interface HomePageProps {
-  articles: ArticleMeta[];
-  currentPage: number;
-  totalPages: number;
+export const revalidate = 60
+
+const formatUrlTitle = (text: string): string => {
+  return toSlug(text.toString())
 }
 
-// 简化的URL格式化函数：按原始标题生成链接，不做任何转换
-const formatUrlTitle = (text: string): string => {
-  return toSlug(text.toString());
-};
+export default async function Page({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
+  const sp = (await searchParams) ?? {}
+  const page = sp.page ? Number(sp.page) : 1
+  const currentPage = Math.max(1, isNaN(page) ? 1 : page)
+  const pageSize = 10
+  const offset = (currentPage - 1) * pageSize
 
-const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }) => {
+  const totalCount = await prisma.article.count()
+  const totalPages = Math.ceil(totalCount / pageSize)
+
+  const dbArticles = await prisma.article.findMany({
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: 'desc' },
+    skip: offset,
+    take: pageSize,
+  })
+
+  const articles: ArticleMeta[] = dbArticles.map((article) => ({
+    id: article.id,
+    title: article.title,
+    excerpt: article.description || '',
+    date: article.createdAt?.toISOString() || new Date().toISOString(),
+    categories: [],
+    imageUrl: '',
+    imageAlt: '',
+  }))
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* 头部导航 */}
       <header className="flex items-center justify-between border-b border-background px-10 py-3 whitespace-nowrap">
         <div className="flex items-center gap-4 text-primary-text">
           <div className="size-4">
@@ -37,7 +59,7 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
           </div>
           <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">Blog</h2>
         </div>
-        
+
         <div className="flex flex-1 justify-end gap-8">
           <div className="flex items-center gap-9">
             <Link href="/" className="text-sm font-medium leading-normal">首页</Link>
@@ -50,29 +72,25 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
         </div>
       </header>
 
-      {/* 主要内容区域 */}
       <div className="flex flex-1 justify-center px-40 py-5">
         <div className="flex max-w-[960px] flex-1 flex-col">
-          {/* 搜索框 */}
           <div className="px-4 py-3">
             <label className="flex min-w-40 h-12 w-full flex-col">
               <div className="flex h-full w-full flex-1 items-stretch rounded-lg">
                 <div className="flex border-none bg-background items-center justify-center pl-4 text-secondary-text rounded-l-lg">
                   <span className="material-symbols-outlined">search</span>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="搜索文章..." 
+                <input
+                  type="text"
+                  placeholder="搜索文章..."
                   className="flex h-full w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg border-none bg-background px-4 text-base font-normal leading-normal placeholder:text-secondary-text focus:border-none focus:outline-0 focus:ring-0"
                 />
               </div>
             </label>
           </div>
 
-          {/* 最新文章标题 */}
           <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
 
-          {/* 文章列表 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
             {articles.map((article) => (
               <article key={article.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
@@ -100,8 +118,8 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
                   </div>
                   <h2 className="text-xl font-bold mb-2">
                     <Link href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} className="hover:text-blue-500 transition-colors">
-                    {article.title}
-                  </Link>
+                      {article.title}
+                    </Link>
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">{article.excerpt || '阅读更多...'}</p>
                   <div className="flex justify-between items-center">
@@ -118,83 +136,9 @@ const HomePage: React.FC<HomePageProps> = ({ articles, currentPage, totalPages }
             ))}
           </div>
 
-          {/* 分页控件 */}
-          <Pagination 
-            currentPage={currentPage} 
-            totalPages={totalPages} 
-            basePath="/"
-          />
+          <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/" />
         </div>
       </div>
     </div>
-  );
-};
-
-export default HomePage;
-
-// 导出getStaticProps函数以在构建时生成静态页面
-export const getStaticProps: GetStaticProps<HomePageProps> = async (context) => {
-  try {
-    // 从查询参数中获取页码，默认为第1页
-    const page = context.params?.page ? Number(context.params.page) : 1;
-    const currentPage = Math.max(1, isNaN(page) ? 1 : page);
-    
-    // 每页显示的文章数量
-    const pageSize = 10;
-    
-    // 计算偏移量
-    const offset = (currentPage - 1) * pageSize;
-    
-    // 获取文章总数
-    const totalCount = await prisma.article.count();
-    
-    // 计算总页数
-    const totalPages = Math.ceil(totalCount / pageSize);
-    
-    // 从数据库查询当前页的文章
-    const dbArticles = await prisma.article.findMany({
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        createdAt: true
-      },
-      orderBy: {
-        createdAt: 'desc' // 按创建时间倒序排列，最新的文章排在前面
-      },
-      skip: offset,
-      take: pageSize
-    });
-    
-    // 转换数据库模型为前端需要的ArticleMeta格式
-    const articles: ArticleMeta[] = dbArticles.map((article) => ({
-      id: article.id,
-      title: article.title,
-      excerpt: article.description || '',
-      date: article.createdAt.toISOString(),
-      categories: [], // 目前数据库模型中没有categories字段
-      imageUrl: '', // 设置默认空字符串以避免undefined
-      imageAlt: '', // 设置默认空字符串以避免undefined
-    }));
-    
-    return {
-      props: {
-        articles,
-        currentPage,
-        totalPages
-      }
-    };
-  } catch (error) {
-    console.error('从数据库获取文章数据失败:', error);
-    return {
-      props: {
-        articles: [],
-        currentPage: 1,
-        totalPages: 1
-      }
-    };
-  }
-};
-
-// 首页使用getStaticProps获取数据，不需要getStaticPaths
-export const revalidate = 60; // 每分钟重新生成静态页面
+  )
+}

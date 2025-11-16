@@ -1,6 +1,7 @@
+ 'use client'
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -10,8 +11,7 @@ interface MenuItem {
 }
 
 export default function Sidebar() {
-  const router = useRouter();
-  const currentPath = router.pathname;
+  const currentPath = usePathname();
 
   const menuItems: MenuItem[] = [
     {

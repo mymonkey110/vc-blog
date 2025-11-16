@@ -1,3 +1,7 @@
+/* 加载外部字体 */
+@import url('https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Work+Sans:wght@400;500;700;900&family=Playfair+Display:wght@700&family=Merriweather:wght@700');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
 /* 全局样式文件 */
 
 /* 导入Tailwind CSS */
@@ -63,8 +67,4 @@ p strong {
   background-color: #d39217;
 }
 
-/* 加载外部字体 */
-@import url('https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Work+Sans:wght@400;500;700;900&family=Playfair+Display:wght@700&family=Merriweather:wght@700');
-
-/* 导入Font Awesome */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+/* 导入Font */

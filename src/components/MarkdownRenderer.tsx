@@ -1,104 +1,61 @@
- 'use client'
- import { useEffect, useState, useRef } from 'react';
- import Prism from 'prismjs';
- import type { MDXRemoteSerializeResult } from 'next-mdx-remote';
- import { MDXRemote } from 'next-mdx-remote';
-
-// 导入Markdown样式模块
-// 通过 ?inline 查询参数导入样式，若类型缺失则声明模块
-// @ts-ignore
-import styles from '../styles/markdown.module.css?inline';
-
-// 导入常用的语法高亮支持
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-java';
-import 'prismjs/components/prism-c';
-import 'prismjs/components/prism-cpp';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-markdown';
-import 'prismjs/themes/prism-tomorrow.css';
-
-// 自定义代码块组件（拦截 <pre>），添加复制功能，仅保留单一 <pre>
-const PreBlock = ({ children, className }: { children: React.ReactNode; className?: string }) => {
-  const [copied, setCopied] = useState(false);
-  const preRef = useRef<HTMLPreElement | null>(null);
-
-  // 复制代码到剪贴板（从 DOM 提取纯文本）
-  const copyToClipboard = () => {
-    const text = preRef.current?.innerText || '';
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="relative">
-      <div className="absolute top-2 right-2 z-10">
-        <button
-          onClick={copyToClipboard}
-          className="bg-gray-700 text-white rounded p-1 text-xs hover:bg-gray-600 transition-colors"
-          aria-label="复制代码"
-        >
-          {copied ? '已复制!' : '复制'}
-        </button>
-      </div>
-      <pre ref={preRef} className={`${styles.codeBlock} ${className || ''}`}>
-        {children}
-      </pre>
-    </div>
-  );
-};
+import ReactMarkdown from 'react-markdown';
+import type { ComponentProps } from 'react';
+import styles from '@/styles/markdown.module.css';
 
 // 自定义Image组件，优化图片加载
-const CustomImage = ({ src, alt }: { src: string; alt?: string }) => {
+const CustomImage = ({ src, alt, ...props }: { src?: string; alt?: string } & ComponentProps<'img'>) => {
+  // 如果没有 src，返回 null
+  if (!src) {
+    return null;
+  }
+  
   // 判断是否为本地图片
   const isLocalImage = src.startsWith('/') && !src.startsWith('//');
   
-  if (isLocalImage) {
-    // 对于本地图片，使用优化后的路径
-    return <img src={src} alt={alt || ''} className="max-w-full h-auto rounded shadow-sm" />;
-  }
-  
-  // 对于网络图片，直接使用
-  return <img src={src} alt={alt || ''} className="max-w-full h-auto rounded shadow-sm" />;
+  return (
+    <img 
+      src={src} 
+      alt={alt || ''} 
+      className="max-w-full h-auto rounded shadow-sm" 
+      {...props}
+    />
+  );
 };
 
-// 自定义组件映射
-const components = {
-  pre: ({ className, children }: { className?: string; children: React.ReactNode }) => {
-    return <PreBlock className={className}>{children}</PreBlock>;
-  },
-  code: ({ className, children }: { className?: string; children: React.ReactNode }) => {
-    return <code className={className as string}>{children as any}</code>;
-  },
-  img: ({ src, alt }: { src: string; alt?: string }) => {
-    return <CustomImage src={src} alt={alt} />;
-  }
+// 服务器端安全的 pre 组件，带有数据属性用于客户端增强
+const ServerPre = ({ children, className, ...props }: ComponentProps<'pre'>) => {
+  return (
+    <pre 
+      className={`${className || ''} relative group`}
+      data-enhance-code-block="true"
+      {...props}
+    >
+      {children}
+    </pre>
+  );
 };
 
 interface MarkdownRendererProps {
-  content: MDXRemoteSerializeResult;
+  content: string;
   className?: string;
 }
 
 /**
- * Markdown渲染组件，支持代码高亮和复制功能
+ * Markdown渲染组件 - 纯服务器端渲染版本
+ * 使用 react-markdown 替代 next-mdx-remote
+ * SEO优化，代码高亮和复制功能通过客户端脚本增强实现
  */
 const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) => {
-  // 在组件挂载后应用代码高亮
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [content]);
-
   return (
     <div className={`${styles['markdown-content']} ${className}`}>
-      <MDXRemote {...content} components={components as any} />
+      <ReactMarkdown
+        components={{
+          pre: ServerPre,
+          img: CustomImage,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 };

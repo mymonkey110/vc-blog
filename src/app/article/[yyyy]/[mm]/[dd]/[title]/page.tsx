@@ -1,11 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/db'
-import { serialize } from 'next-mdx-remote/serialize'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { toSlug } from '@/utils/slug'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
 
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
@@ -66,10 +63,7 @@ export default async function Page({
     throw new Error(`文章内容为空，无法渲染: id=${article.id}`)
   }
 
-  const serializedContent = await serialize(article.content, {
-    mdxOptions: { format: 'md', remarkPlugins: [remarkGfm], rehypePlugins: [rehypeRaw] },
-  })
-
+  // 直接使用原始内容，不需要序列化
   const formattedDate = article.createdAt
     ? new Date(article.createdAt).toLocaleDateString('zh-CN', {
         year: 'numeric',
@@ -121,7 +115,7 @@ export default async function Page({
           )}
 
           <div className="mb-12">
-            <MarkdownRenderer content={serializedContent as any} />
+            <MarkdownRenderer content={article.content} />
           </div>
 
           <div className="mt-16 pt-8 border-t border-background">

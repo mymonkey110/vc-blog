@@ -94,21 +94,6 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
 
       <div className="flex flex-1 justify-center px-40 py-5">
         <div className="flex max-w-[960px] flex-1 flex-col">
-          <div className="px-4 py-3">
-            <label className="flex min-w-40 h-12 w-full flex-col">
-              <div className="flex h-full w-full flex-1 items-stretch rounded-lg">
-                <div className="flex border-none bg-background items-center justify-center pl-4 text-secondary-text rounded-l-lg">
-                  <span className="material-symbols-outlined">search</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="搜索文章..."
-                  className="flex h-full w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg border-none bg-background px-4 text-base font-normal leading-normal placeholder:text-secondary-text focus:border-none focus:outline-0 focus:ring-0"
-                />
-              </div>
-            </label>
-          </div>
-
           <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">

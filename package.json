@@ -6,11 +6,11 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
+    "lint": "next lint"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "lucide-react": "^0.554.0",
     "next": "16.0.3",
     "next-mdx-remote": "^5.0.0",
@@ -23,6 +23,7 @@
     "vditor": "^3.11.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@prisma/client": "^6.19.0",
     "@types/node": "20.19.20",
     "@types/prismjs": "^1.26.5",
@@ -30,8 +31,9 @@
     "@types/react-dom": "19.0.0",
     "autoprefixer": "10.4.19",
     "dotenv": "^17.2.3",
-    "eslint": "9.0.0",
+    "eslint": "^9.7.0",
     "eslint-config-next": "16.0.3",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "gray-matter": "^4.0.3",
     "postcss": "8.4.38",
     "prettier": "3.3.3",

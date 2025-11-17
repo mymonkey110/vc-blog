@@ -14,6 +14,23 @@ export const dynamic = 'force-static'
 // 设置重新生成时间（秒）
 export const revalidate = 3600 // 每小时重新生成一次
 
+// 生成静态参数 - 为所有可能的分页页面生成静态路径
+export async function generateStaticParams() {
+  const pageSize = 10
+  const totalCount = await prisma.article.count()
+  const totalPages = Math.ceil(totalCount / pageSize)
+  
+  // 为每一页生成静态参数
+  const params = []
+  for (let page = 1; page <= totalPages; page++) {
+    params.push({
+      page: page.toString()
+    })
+  }
+  
+  return params
+}
+
 export default async function Page({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
   const sp = (await searchParams) ?? {}
   const page = sp.page ? Number(sp.page) : 1
@@ -139,7 +156,7 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
             ))}
           </div>
 
-          <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/page" />
+          <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/" />
         </div>
       </div>
     </div>

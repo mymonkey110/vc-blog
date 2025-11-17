@@ -57,14 +57,11 @@ const Pagination: React.FC<PaginationProps> = ({
 
   // 根据basePath生成正确的链接
   const getPageLink = (page: number) => {
-    if (page === 1 && basePath === '/') {
-      return '/';
-    } else if (basePath === '/') {
-      return `/?page=${page}`;
-    } else {
-      return `${basePath}/${page}`;
+    if (page === 1) {
+      return '/'
     }
-  };
+    return `/?page=${page}`
+  }
 
   return (
     <div className="flex items-center justify-center p-4">

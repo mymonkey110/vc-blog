@@ -5,7 +5,9 @@
  import { MDXRemote } from 'next-mdx-remote';
 
 // 导入Markdown样式模块
-import styles from '../styles/markdown.module.css';
+// 通过 ?inline 查询参数导入样式，若类型缺失则声明模块
+// @ts-ignore
+import styles from '../styles/markdown.module.css?inline';
 
 // 导入常用的语法高亮支持
 import 'prismjs/components/prism-javascript';

@@ -4,6 +4,7 @@ import prisma from '@/lib/db'
 import { toSlug } from '@/utils/slug'
 import Pagination from '@/components/pagination'
 import type { ArticleMeta } from '@/types/article'
+import { notFound } from 'next/navigation'
 
 const formatUrlTitle = (text: string): string => {
   return toSlug(text.toString())
@@ -14,15 +15,37 @@ export const dynamic = 'force-static'
 // 设置重新生成时间（秒）
 export const revalidate = 3600 // 每小时重新生成一次
 
-export default async function Page({ searchParams }: { searchParams?: Promise<{ page?: string }> }) {
-  const sp = (await searchParams) ?? {}
-  const page = sp.page ? Number(sp.page) : 1
+// 生成静态参数
+export async function generateStaticParams() {
+  const pageSize = 10
+  const totalCount = await prisma.article.count()
+  const totalPages = Math.ceil(totalCount / pageSize)
+  
+  // 为每一页生成静态路径
+  const paths = []
+  for (let page = 1; page <= totalPages; page++) {
+    paths.push({
+      page: page.toString()
+    })
+  }
+  
+  return paths
+}
+
+export default async function Page({ params }: { params: Promise<{ page: string }> }) {
+  const resolvedParams = await params
+  const page = Number(resolvedParams.page)
   const currentPage = Math.max(1, isNaN(page) ? 1 : page)
   const pageSize = 10
   const offset = (currentPage - 1) * pageSize
 
   const totalCount = await prisma.article.count()
   const totalPages = Math.ceil(totalCount / pageSize)
+
+  // 如果请求的页码超出范围，返回 404
+  if (currentPage > totalPages && totalPages > 0) {
+    notFound()
+  }
 
   const dbArticles = await prisma.article.findMany({
     select: {

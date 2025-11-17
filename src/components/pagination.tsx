@@ -55,11 +55,22 @@ const Pagination: React.FC<PaginationProps> = ({
 
   const pageNumbers = getPageNumbers();
 
+  // 根据basePath生成正确的链接
+  const getPageLink = (page: number) => {
+    if (page === 1 && basePath === '/') {
+      return '/';
+    } else if (basePath === '/') {
+      return `/?page=${page}`;
+    } else {
+      return `${basePath}/${page}`;
+    }
+  };
+
   return (
     <div className="flex items-center justify-center p-4">
       {/* 上一页按钮 */}
       <Link
-        href={`${basePath}?page=${Math.max(1, currentPage - 1)}`}
+        href={getPageLink(Math.max(1, currentPage - 1))}
         className={`flex size-10 items-center justify-center rounded-full transition-colors ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background/50'}`}
         aria-disabled={currentPage === 1}
       >
@@ -71,7 +82,7 @@ const Pagination: React.FC<PaginationProps> = ({
         <React.Fragment key={index}>
           {typeof page === 'number' ? (
             <Link
-              href={`${basePath}?page=${page}`}
+              href={getPageLink(page)}
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal transition-colors ${currentPage === page ? 'bg-background font-bold' : 'hover:bg-background/50'}`}
             >
               {page}
@@ -86,7 +97,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       {/* 下一页按钮 */}
       <Link
-        href={`${basePath}?page=${Math.min(totalPages, currentPage + 1)}`}
+        href={getPageLink(Math.min(totalPages, currentPage + 1))}
         className={`flex size-10 items-center justify-center rounded-full transition-colors ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background/50'}`}
         aria-disabled={currentPage === totalPages}
       >

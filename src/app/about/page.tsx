@@ -1,10 +1,9 @@
-import Link from 'next/link'
 import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <NavigationBarWrapper showUserActions={false} showSearchMenu={true} />
+      <NavigationBarWrapper />
 
       <div className="flex flex-1 justify-center px-40 py-5">
         <div className="flex max-w-[960px] flex-1 flex-col">

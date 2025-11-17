@@ -1,18 +1,8 @@
 import Link from 'next/link'
 
-interface NavigationBarProps {
-  showUserActions?: boolean
-  showSearchMenu?: boolean
-  userAvatar?: string
-  pathname?: string
-}
-
 export default function NavigationBar({ 
-  showUserActions = true, 
-  showSearchMenu = false,
-  userAvatar = "/images/avatar/profile.png",
   pathname = '/'
-}: NavigationBarProps) {
+}) {
   const isActive = (href: string) => {
     if (href === '/' && pathname === '/') return true
     if (href !== '/' && pathname.startsWith(href)) return true
@@ -32,7 +22,7 @@ export default function NavigationBar({
             />
           </svg>
         </div>
-        <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">Blog</h2>
+        <Link href="/" className="text-lg font-bold leading-tight tracking-[-0.015em]">修行码农</Link>
       </div>
 
       <div className="flex flex-1 justify-end gap-8">
@@ -62,33 +52,6 @@ export default function NavigationBar({
             关于
           </Link>
         </div>
-
-        {showSearchMenu && (
-          <div className="flex gap-2">
-            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f4f3f0] text-[#181511] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
-              </svg>
-            </button>
-            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f4f3f0] text-[#181511] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {showUserActions && (
-          <>
-            <button className="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg px-4 bg-background font-bold text-sm leading-normal tracking-[0.015em] hover:bg-gray-100 transition-colors">
-              <span className="truncate">登录</span>
-            </button>
-          </>
-        )}
-
-        {showSearchMenu && (
-          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style={{ backgroundImage: `url("${userAvatar}")` }}></div>
-        )}
       </div>
     </header>
   )

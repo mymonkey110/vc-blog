@@ -5,8 +5,6 @@ import { toSlug } from '@/utils/slug'
 import Pagination from '@/components/pagination'
 import type { ArticleMeta } from '@/types/article'
 
-export const revalidate = 60
-
 const formatUrlTitle = (text: string): string => {
   return toSlug(text.toString())
 }

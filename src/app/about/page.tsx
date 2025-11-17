@@ -1,38 +1,10 @@
 import Link from 'next/link'
+import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <header className="flex items-center justify-between border-b border-[#f4f3f0] px-10 py-3 whitespace-nowrap">
-        <div className="flex items-center gap-4 text-[#181511]">
-          <div className="size-4">
-            <svg viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z"></path>
-            </svg>
-          </div>
-          <h2 className="text-[#181511] text-lg font-bold leading-tight tracking-[-0.015em]">技术博客</h2>
-        </div>
-        <div className="flex flex-1 justify-end gap-8">
-          <div className="flex items-center gap-9">
-            <Link href="/" className="text-[#181511] text-sm font-medium leading-normal">首页</Link>
-            <Link href="/article" className="text-[#181511] text-sm font-medium leading-normal">文章</Link>
-            <Link href="/about" className="text-[#181511] text-sm font-medium leading-normal">关于我</Link>
-          </div>
-          <div className="flex gap-2">
-            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f4f3f0] text-[#181511] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
-              </svg>
-            </button>
-            <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f4f3f0] text-[#181511] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
-              </svg>
-            </button>
-          </div>
-          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style={{ backgroundImage: 'url("/images/avatar/profile.png")' }}></div>
-        </div>
-      </header>
+      <NavigationBarWrapper showUserActions={false} showSearchMenu={true} />
 
       <div className="flex flex-1 justify-center px-40 py-5">
         <div className="flex max-w-[960px] flex-1 flex-col">

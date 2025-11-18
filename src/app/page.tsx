@@ -72,48 +72,52 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
         <div className="flex max-w-[960px] flex-1 flex-col">
           <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+          <div className="grid gap-8 p-4">
             {articles.map((article) => (
-              <article key={article.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
-                  {article.imageUrl && (
-                    <Image
-                      src={article.imageUrl}
-                      alt={article.imageAlt || article.title}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  )}
-                </div>
-                <div className="p-6">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {article.categories?.map((category, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      >
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-                  <h2 className="text-xl font-bold mb-2">
-                    <Link href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} className="hover:text-blue-500 transition-colors">
+              <div key={article.id} className="flex flex-col sm:flex-row items-start gap-4 py-4">
+                <div className="flex flex-col gap-2 flex-1">
+                  <h2 className="text-gray-900 text-2xl font-bold leading-tight">
+                    <Link 
+                      href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} 
+                      className="hover:text-blue-600 transition-colors"
+                    >
                       {article.title}
                     </Link>
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">{article.excerpt || '阅读更多...'}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500 dark:text-gray-500">{article.date ? new Date(article.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</span>
-                    <Link
-                      href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`}
-                      className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
-                    >
-                      阅读更多
-                    </Link>
+                  
+                  <p className="text-gray-900 text-base font-normal leading-normal">
+                    {article.excerpt || '阅读更多...'}
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center gap-2 pt-2">
+                    <span className="text-gray-500 text-xs font-light">
+                      {article.date ? new Date(article.date).toLocaleDateString('zh-CN', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      }) : ''}
+                    </span>
+                    <span className="text-gray-500 text-xs font-light">•</span>
+                    {/* 分类标签位置 - 暂时隐藏但保留位置 */}
+                    <a className="text-gray-500 text-xs font-light" href="#">分类</a>
+                    <a className="text-gray-500 text-xs font-light" href="#">标签</a>
                   </div>
                 </div>
-              </article>
+                
+                <div className="flex-shrink-0 w-full sm:w-[200px] h-auto aspect-[3/2]">
+                  <div className="w-full h-full bg-gray-200 rounded">
+                    {article.imageUrl && (
+                      <Image
+                        src={article.imageUrl}
+                        alt={article.imageAlt || article.title}
+                        fill
+                        className="object-cover rounded"
+                        priority
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 

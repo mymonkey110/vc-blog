@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // 中间件函数，用于保护后台页面
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // 检查是否在登录页面
   const isLoginPage = request.nextUrl.pathname === '/admin/login';
   

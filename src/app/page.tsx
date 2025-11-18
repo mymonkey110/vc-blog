@@ -6,6 +6,11 @@ import Pagination from '@/components/pagination'
 import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 import type { ArticleMeta } from '@/types/article'
 
+export const metadata = {
+  title: '修行码农的博客',
+  description: '欢迎来到我的技术博客，主要分享我对代码、技术、团队和生活的理解',
+}
+
 const formatUrlTitle = (text: string): string => {
   return toSlug(text.toString())
 }

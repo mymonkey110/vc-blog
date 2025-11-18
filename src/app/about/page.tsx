@@ -1,5 +1,10 @@
 import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 
+export const metadata = {
+  title: '关于我 - 修行码农',
+  description: '了解更多关于我的信息，包括学习工作经历和技术兴趣',
+}
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">

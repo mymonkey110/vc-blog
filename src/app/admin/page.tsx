@@ -1,11 +1,6 @@
 'use client'
 import Sidebar from '@/pages/admin/components/Sidebar'
 
-export const metadata = {
-  title: '管理后台 - 修行码农',
-  description: '博客管理后台仪表盘',
-}
-
 export default function AdminDashboard() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-white overflow-x-hidden" style={{ fontFamily: '"Work Sans", "Noto Sans", sans-serif' }}>

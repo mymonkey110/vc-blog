@@ -1,0 +1,14 @@
+{
+  "name": "修行码农",
+  "short_name": "修行码农",
+  "description": "代码❤技术❤生活",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

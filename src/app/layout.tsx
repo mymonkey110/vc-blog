@@ -4,8 +4,12 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 import Footer from '@/components/Footer'
 
 export const metadata = {
-  title: 'Blog',
-  description: '技术博客',
+  title: '修行码农',
+  description: '代码❤技术❤生活',
+  icons: {
+    icon: '/favicon.png'
+  },
+  manifest: '/site.webmanifest',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

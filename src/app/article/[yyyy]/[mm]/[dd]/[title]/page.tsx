@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/db'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
-import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 import { toSlug } from '@/utils/slug'
 
 export async function generateStaticParams() {
@@ -127,11 +126,8 @@ export default async function Page({
     : ''
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <NavigationBarWrapper />
-
-      <main className="flex flex-1 justify-center px-4 py-12">
-        <div className="max-w-3xl w-full">
+    <main className="flex flex-1 justify-center px-4 py-12">
+      <div className="max-w-3xl w-full">
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{article.title}</h1>
             <div className="text-sm text-gray-600">{formattedDate}</div>
@@ -153,11 +149,6 @@ export default async function Page({
           </div>
         </div>
       </main>
-
-      <footer className="border-t border-background py-8 px-10 text-center text-sm text-gray-600">
-        <p>© {new Date().getFullYear()} 博客. 保留所有权利.</p>
-      </footer>
-    </div>
-  )
-}
+    )
+  }
 

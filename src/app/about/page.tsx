@@ -1,5 +1,3 @@
-import NavigationBarWrapper from '@/components/NavigationBarWrapper'
-
 export const metadata = {
   title: '关于我 - 修行码农',
   description: '了解更多关于我的信息，包括学习工作经历和技术兴趣',
@@ -7,11 +5,8 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <NavigationBarWrapper />
-
-      <div className="flex flex-1 justify-center px-40 py-5">
-        <div className="flex max-w-[960px] flex-1 flex-col">
+    <div className="flex flex-1 justify-center px-40 py-5">
+      <div className="flex max-w-[960px] flex-1 flex-col">
           <div className="flex flex-wrap justify-between gap-3 p-4">
             <p className="text-[#181511] tracking-light text-[32px] font-bold leading-tight min-w-72">关于我</p>
           </div>
@@ -86,7 +81,6 @@ export default function AboutPage() {
           </div>
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 

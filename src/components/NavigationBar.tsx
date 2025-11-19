@@ -1,8 +1,9 @@
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-export default function NavigationBar({ 
-  pathname = '/'
-}) {
+export default function NavigationBar() {
+  const pathname = usePathname()
+  
   const isActive = (href: string) => {
     if (href === '/' && pathname === '/') return true
     if (href !== '/' && pathname.startsWith(href)) return true

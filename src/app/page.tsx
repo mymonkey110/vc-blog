@@ -3,7 +3,6 @@ import Image from 'next/image'
 import prisma from '@/lib/db'
 import { toSlug } from '@/utils/slug'
 import Pagination from '@/components/pagination'
-import NavigationBarWrapper from '@/components/NavigationBarWrapper'
 import type { ArticleMeta } from '@/types/article'
 
 export const metadata = {
@@ -70,12 +69,9 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
   }))
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <NavigationBarWrapper />
-
-      <div className="flex flex-1 justify-center px-40 py-5">
-        <div className="flex max-w-[960px] flex-1 flex-col">
-          <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
+    <div className="flex flex-1 justify-center px-40 py-5">
+      <div className="flex max-w-[960px] flex-1 flex-col">
+        <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
 
           <div className="grid gap-8 p-4">
             {articles.map((article) => (
@@ -129,6 +125,5 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
           <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/" />
         </div>
       </div>
-    </div>
-  )
-}
+    )
+  }

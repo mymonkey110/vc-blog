@@ -1,8 +1,5 @@
-/* 加载优质阅读字体 - 使用更可靠的CDN */
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.17/index.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.0.13/index.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.18/index.css');
-@import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css');
+/* 优化字体加载 - 使用系统字体栈提升性能 */
+/* 移除外部字体依赖，使用系统字体栈 */
 
 /* 全局样式文件 */
 
@@ -20,11 +17,11 @@
   --surface-color: #f8f9fa;
   --border-color: #e9ecef;
   
-  /* 字体系统变量 */
-  --font-family-heading: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
-  --font-family-body: 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
-  --font-family-ui: 'Inter', 'Noto Sans SC', 'Source Han Sans SC', sans-serif;
+  /* 字体系统变量 - 优化系统字体栈 */
+  --font-family-heading: 'Georgia', 'Times New Roman', '宋体', 'SimSun', '华文宋体', 'STSong', serif;
+  --font-family-body: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
+  --font-family-ui: 'SF Pro Display', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', system-ui, -apple-system, sans-serif;
   
   /* 字体大小系统 - 基于黄金比例 */
   --font-size-xs: 0.75rem;     /* 12px */

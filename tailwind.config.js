@@ -14,10 +14,10 @@ module.exports = {
         'border': '#e9ecef',
       },
       fontFamily: {
-        'heading': ['"Source Han Serif SC"', '"Noto Serif SC"', '"Songti SC"', 'serif'],
-        'body': ['"Source Han Sans SC"', '"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
-        'mono': ['"JetBrains Mono"', '"Consolas"', '"Monaco"', 'monospace'],
-        'ui': ['"Inter"', '"Source Han Sans SC"', '"Noto Sans SC"', 'sans-serif'],
+        'heading': ['"Georgia"', '"Times New Roman"', '"宋体"', '"SimSun"', '"华文宋体"', '"STSong"', 'serif'],
+        'body': ['"SF Pro Text"', '"Helvetica Neue"', '"Helvetica"', '"Arial"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"微软雅黑"', '"WenQuanYi Micro Hei"', 'sans-serif'],
+        'mono': ['"SF Mono"', '"Monaco"', '"Inconsolata"', '"Roboto Mono"', '"Source Code Pro"', '"Menlo"', '"Consolas"', '"Courier New"', 'monospace'],
+        'ui': ['"SF Pro Display"', '"Helvetica Neue"', '"Helvetica"', '"Arial"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"微软雅黑"', 'system-ui', '-apple-system', 'sans-serif'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1.25' }],

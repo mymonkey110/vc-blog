@@ -1,14 +1,16 @@
 /* Markdown内容样式 - 优化阅读体验 */
 .markdown-content {
-  font-family: var(--font-family-body);
+  font-family: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
   color: var(--primary-text-color);
-  line-height: var(--line-height-relaxed);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--letter-spacing-normal);
+  line-height: 1.7;
+  font-size: 1.0625rem; /* 17px - 优化阅读体验 */
+  font-weight: 400;
+  letter-spacing: 0.01em; /* 轻微增加字间距 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* 标题样式系统 - 增强视觉层次 */
@@ -79,12 +81,15 @@
 /* 段落样式 - 优化阅读体验 */
 .markdown-content p {
   margin: 1.5rem 0;
-  line-height: var(--line-height-relaxed);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
+  line-height: 1.7;
+  font-size: 1.0625rem; /* 17px - 保持一致 */
+  font-weight: 400;
+  letter-spacing: 0.01em;
   color: var(--primary-text-color);
   text-align: justify;
-  text-justify: inter-character;
+  text-justify: inter-ideograph; /* 优化中文两端对齐 */
+  word-break: break-word;
+  overflow-wrap: break-word;
   orphans: 2;
   widows: 2;
 }
@@ -113,7 +118,7 @@
   padding: 1.5rem;
   overflow-x: auto;
   margin: 2rem 0;
-  font-family: var(--font-family-mono);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   border: 1px solid #333;
@@ -141,7 +146,7 @@
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.875em;
-  font-family: var(--font-family-mono);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
   font-weight: var(--font-weight-medium);
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -160,6 +165,8 @@
 .markdown-content ol {
   margin: 1.5rem 0;
   padding-left: 2rem;
+  line-height: 1.7;
+  font-size: 1.0625rem; /* 17px - 保持一致 */
 }
 
 .markdown-content ul {
@@ -172,8 +179,11 @@
 
 .markdown-content li {
   margin: 0.75rem 0;
-  line-height: var(--line-height-relaxed);
-  font-size: var(--font-size-base);
+  line-height: 1.7;
+  font-size: 1.0625rem; /* 17px - 保持一致 */
+  letter-spacing: 0.01em;
+  word-break: break-word;
+  overflow-wrap: break-word;
   color: var(--primary-text-color);
 }
 
@@ -191,6 +201,9 @@
   border-radius: 0 8px 8px 0;
   font-style: italic;
   font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
   color: var(--secondary-text-color);
   position: relative;
 }
@@ -245,7 +258,9 @@
   width: 100%;
   border-collapse: collapse;
   margin: 2rem 0;
-  font-size: var(--font-size-base);
+  font-size: 0.9375rem; /* 15px - 稍小 */
+  line-height: 1.5;
+  letter-spacing: 0.01em;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

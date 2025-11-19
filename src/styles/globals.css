@@ -1,6 +1,8 @@
-/* 加载外部字体 */
-@import url('https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Work+Sans:wght@400;500;700;900&family=Playfair+Display:wght@700&family=Merriweather:wght@700');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+/* 加载优质阅读字体 - 使用更可靠的CDN */
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.17/index.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.0.13/index.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.18/index.css');
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.20/index.css');
 
 /* 全局样式文件 */
 
@@ -9,26 +11,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 自定义变量 */
+/* 自定义变量 - 优化阅读体验 */
 :root {
-  --primary-text-color: #181511;
-  --secondary-text-color: #887c63;
-  --background-color: #f4f3f0;
-  --white-color: #ffffff;
-  --accent-color: #e6a219;
+  --primary-text-color: #1a1a1a;
+  --secondary-text-color: #666666;
+  --accent-color: #007bff;
+  --background-color: #ffffff;
+  --surface-color: #f8f9fa;
+  --border-color: #e9ecef;
+  
+  /* 字体系统变量 */
+  --font-family-heading: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --font-family-body: 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  --font-family-ui: 'Inter', 'Noto Sans SC', 'Source Han Sans SC', sans-serif;
+  
+  /* 字体大小系统 - 基于黄金比例 */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-5xl: 3rem;      /* 48px */
+  
+  /* 行高系统 - 优化阅读节奏 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* 字重系统 */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+  
+  /* 字间距系统 */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
 }
 
-/* 基础样式重置 */
+/* 基础样式重置与优化 */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
-  font-family: "Work Sans", "Noto Sans", sans-serif;
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family-body);
   color: var(--primary-text-color);
-  background-color: var(--white-color);
+  background-color: var(--background-color);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* 优化文本渲染 */
+body, p, span, div {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* 导入字体图标 */
@@ -40,13 +99,133 @@ html, body {
     'opsz' 24;
 }
 
-/* 自定义工具类 */
+/* 自定义工具类 - 增强排版系统 */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
   .content-auto {
     content-visibility: auto;
+  }
+  
+  /* 字体族工具类 */
+  .font-heading {
+    font-family: var(--font-family-heading);
+  }
+  .font-body {
+    font-family: var(--font-family-body);
+  }
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+  .font-ui {
+    font-family: var(--font-family-ui);
+  }
+  
+  /* 字重工具类 */
+  .font-light {
+    font-weight: var(--font-weight-light);
+  }
+  .font-medium {
+    font-weight: var(--font-weight-medium);
+  }
+  .font-semibold {
+    font-weight: var(--font-weight-semibold);
+  }
+  .font-extrabold {
+    font-weight: var(--font-weight-extrabold);
+  }
+  
+  /* 字间距工具类 */
+  .tracking-tight {
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  .tracking-wide {
+    letter-spacing: var(--letter-spacing-wide);
+  }
+  .tracking-wider {
+    letter-spacing: var(--letter-spacing-wider);
+  }
+  .tracking-widest {
+    letter-spacing: var(--letter-spacing-widest);
+  }
+  
+  /* 行高工具类 */
+  .leading-tight {
+    line-height: var(--line-height-tight);
+  }
+  .leading-relaxed {
+    line-height: var(--line-height-relaxed);
+  }
+  
+  /* 文本渲染优化 */
+  .text-sharp {
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    text-rendering: geometricPrecision;
+  }
+  
+  .text-smooth {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* 阅读优化 */
+  .reading-optimized {
+    max-width: 65ch;
+    line-height: var(--line-height-relaxed);
+    text-align: justify;
+    text-justify: inter-character;
+  }
+  
+  /* 标题系统 */
+  .title-1 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-5xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  
+  .title-2 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+  
+  .title-3 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+  
+  .title-4 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+  
+  .title-5 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-normal);
+  }
+  
+  .title-6 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-normal);
   }
 }
 

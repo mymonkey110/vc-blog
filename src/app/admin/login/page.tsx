@@ -44,10 +44,10 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg白">
-      <div className="w-[400px] bg-white border border-[#e5e2dc] rounded-2xl p-8 shadow-lg">
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="w-[400px] bg-white border border-border rounded-2xl p-8 shadow-lg">
         <div className="flex justify-center mb-8">
-          <h1 className="text-3xl font-bold text-[#181511]">VC-BLOG</h1>
+          <h1 className="title-2 text-primary-text">VC-BLOG</h1>
         </div>
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
@@ -55,12 +55,12 @@ export default function AdminLogin() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="输入访问密码"
-                className={`w-full pl-4 pr-10 py-3 bg白 border ${error ? 'border-red-300' : 'border-[#e5e2dc]'} rounded-lg text-[#181511] placeholder-[#887c63] focus:outline-none focus:ring-2 focus:ring-[#e6a219] focus:border-transparent transition-all duration-200`}
+                className={`w-full pl-4 pr-10 py-3 bg-background border ${error ? 'border-red-300' : 'border-border'} rounded-lg text-primary-text placeholder-secondary-text font-body focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#887c63] hover:text-[#e6a219] focus:outline-none" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? '隐藏密码' : '显示密码'}>
+              <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-text hover:text-accent focus:outline-none" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? '隐藏密码' : '显示密码'}>
                 {showPassword ? (
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
                 ) : (
@@ -68,9 +68,9 @@ export default function AdminLogin() {
                 )}
               </button>
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm font-ui">{error}</p>}
           </div>
-          <button type="submit" className={`w-full py-3 bg-[#e6a219] text-[#181511] font-bold rounded-lg transition-all duration-200 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#d39015]'}`} disabled={isLoading}>
+          <button type="submit" className={`w-full py-3 bg-accent text-primary-text font-bold rounded-lg transition-all duration-200 font-ui ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'}`} disabled={isLoading}>
             {isLoading ? '登录中...' : '登录'}
           </button>
         </form>

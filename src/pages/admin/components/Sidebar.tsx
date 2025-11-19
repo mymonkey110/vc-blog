@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -69,18 +69,18 @@ export default function Sidebar() {
     <div className="flex flex-col w-80">
       <div className="flex h-full min-h-[700px] flex-col justify-between bg-white p-4">
         <div className="flex flex-col gap-4">
-          <h1 className="text-[#181511] text-base font-medium leading-normal">博客后台</h1>
+          <h1 className="text-primary-text text-base font-medium leading-normal font-ui">博客后台</h1>
           <div className="flex flex-col gap-2">
             {menuItems.map((item, index) => (
               <Link
                 key={index}
                 href={item.path}
-                className={`flex items-center gap-3 px-3 py-2 transition-colors ${item.isActive ? 'rounded-lg bg-[#f4f3f0]' : 'hover:bg-[#f4f3f0] hover:rounded-lg'}`}
+                className={`flex items-center gap-3 px-3 py-2 transition-colors font-ui ${item.isActive ? 'rounded-lg bg-surface' : 'hover:bg-surface hover:rounded-lg'}`}
               >
-                <div className="text-[#181511]">
+                <div className="text-primary-text">
                   {item.icon}
                 </div>
-                <p className="text-[#181511] text-sm font-medium leading-normal">{item.label}</p>
+                <p className="text-primary-text text-sm font-medium leading-normal">{item.label}</p>
               </Link>
             ))}
           </div>
@@ -88,14 +88,14 @@ export default function Sidebar() {
         <div className="flex flex-col gap-1">
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2 hover:bg-[#f4f3f0] hover:rounded-lg transition-colors"
+            className="flex items-center gap-3 px-3 py-2 hover:bg-surface hover:rounded-lg transition-colors font-ui"
           >
-            <div className="text-[#181511]">
+            <div className="text-primary-text">
               <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
                 <path d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"></path>
               </svg>
             </div>
-            <p className="text-[#181511] text-sm font-medium leading-normal">返回博客</p>
+            <p className="text-primary-text text-sm font-medium leading-normal">返回博客</p>
           </Link>
         </div>
       </div>

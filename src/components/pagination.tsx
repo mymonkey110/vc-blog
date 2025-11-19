@@ -68,7 +68,7 @@ const Pagination: React.FC<PaginationProps> = ({
       {/* 上一页按钮 */}
       <Link
         href={getPageLink(Math.max(1, currentPage - 1))}
-        className={`flex size-10 items-center justify-center rounded-full transition-colors ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background/50'}`}
+        className={`flex size-10 items-center justify-center rounded-full transition-colors font-ui ${currentPage === 1 ? 'opacity-50 cursor-not-allowed text-secondary-text' : 'hover:bg-surface text-primary-text'}`}
         aria-disabled={currentPage === 1}
       >
         <span className="text-lg">←</span>
@@ -80,12 +80,12 @@ const Pagination: React.FC<PaginationProps> = ({
           {typeof page === 'number' ? (
             <Link
               href={getPageLink(page)}
-              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal transition-colors ${currentPage === page ? 'bg-background font-bold' : 'hover:bg-background/50'}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-ui leading-normal transition-colors ${currentPage === page ? 'bg-surface font-bold text-primary-text' : 'hover:bg-surface text-secondary-text'}`}
             >
               {page}
             </Link>
           ) : (
-            <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-normal leading-normal">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-ui leading-normal text-secondary-text">
               {page}
             </span>
           )}
@@ -95,7 +95,7 @@ const Pagination: React.FC<PaginationProps> = ({
       {/* 下一页按钮 */}
       <Link
         href={getPageLink(Math.min(totalPages, currentPage + 1))}
-        className={`flex size-10 items-center justify-center rounded-full transition-colors ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background/50'}`}
+        className={`flex size-10 items-center justify-center rounded-full transition-colors font-ui ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed text-secondary-text' : 'hover:bg-surface text-primary-text'}`}
         aria-disabled={currentPage === totalPages}
       >
         <span className="text-lg">→</span>

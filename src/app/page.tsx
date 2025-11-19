@@ -71,13 +71,13 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
   return (
     <div className="flex flex-1 justify-center px-40 py-5">
       <div className="flex max-w-[960px] flex-1 flex-col">
-        <h2 className="px-4 py-3 pt-5 text-2xl font-bold leading-tight tracking-[-0.015em]">最新文章</h2>
+        <h2 className="px-4 py-3 pt-5 title-1 leading-tight tracking-[-0.015em]">最新文章</h2>
 
           <div className="grid gap-8 p-4">
             {articles.map((article) => (
               <div key={article.id} className="flex flex-col sm:flex-row items-start gap-4 py-4">
                 <div className="flex flex-col gap-2 flex-1">
-                  <h2 className="text-gray-900 text-2xl font-bold leading-tight">
+                  <h2 className="title-3 leading-tight">
                     <Link 
                       href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.title)}`} 
                       className="hover:text-blue-600 transition-colors"
@@ -86,12 +86,12 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
                     </Link>
                   </h2>
                   
-                  <p className="text-gray-900 text-base font-normal leading-normal">
+                  <p className="text-base font-body text-secondary-text leading-normal">
                     {article.excerpt || '阅读更多...'}
                   </p>
                   
                   <div className="flex flex-wrap items-center gap-2 pt-2">
-                    <span className="text-gray-500 text-xs font-light">
+                    <span className="text-sm font-ui text-secondary-text">
                       {article.date ? new Date(article.date).toLocaleDateString('zh-CN', { 
                         year: 'numeric', 
                         month: 'long', 
@@ -100,8 +100,8 @@ export default async function Page({ searchParams }: { searchParams?: Promise<{ 
                     </span>
                     <span className="text-gray-500 text-xs font-light">•</span>
                     {/* 分类标签位置 - 暂时隐藏但保留位置 */}
-                    <a className="text-gray-500 text-xs font-light" href="#">分类</a>
-                    <a className="text-gray-500 text-xs font-light" href="#">标签</a>
+                    <a className="text-sm font-ui text-secondary-text" href="#">分类</a>
+                    <a className="text-sm font-ui text-secondary-text" href="#">标签</a>
                   </div>
                 </div>
                 

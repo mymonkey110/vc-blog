@@ -129,12 +129,12 @@ export default async function Page({
     <main className="flex flex-1 justify-center px-4 py-12">
       <div className="max-w-3xl w-full">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{article.title}</h1>
-            <div className="text-sm text-gray-600">{formattedDate}</div>
+            <h1 className="title-1 mb-4 leading-tight">{article.title}</h1>
+            <div className="text-sm font-ui text-secondary-text">{formattedDate}</div>
           </div>
 
           {article.description && (
-            <div className="mb-8 text-lg text-gray-700 border-l-4 border-background pl-4 italic">
+            <div className="mb-8 text-lg font-body text-secondary-text border-l-4 border-accent/20 pl-4 italic reading-optimized">
               {article.description}
             </div>
           )}
@@ -143,9 +143,9 @@ export default async function Page({
             <MarkdownRenderer content={article.content} />
           </div>
 
-          <div className="mt-16 pt-8 border-t border-background">
-            <h3 className="text-xl font-bold mb-6">评论</h3>
-            <div className="text-gray-500 italic">评论功能正在开发中...</div>
+          <div className="mt-16 pt-8 border-t border-border">
+            <h3 className="title-3 mb-6">评论</h3>
+            <div className="text-sm font-ui text-secondary-text italic">评论功能正在开发中...</div>
           </div>
         </div>
       </main>

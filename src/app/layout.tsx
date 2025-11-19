@@ -16,6 +16,17 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
+      <head>
+        {/* 字体预加载 - 优化性能 */}
+        <link 
+          rel="preconnect" 
+          href="https://cdn.jsdelivr.net" 
+        />
+        <link 
+          rel="dns-prefetch" 
+          href="https://cdn.jsdelivr.net" 
+        />
+      </head>
       <body className="min-h-screen flex flex-col">
         <NavigationBar />
         <main className="flex-1">{children}</main>

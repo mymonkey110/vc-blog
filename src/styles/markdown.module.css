@@ -1,6 +1,5 @@
 /* Markdown内容样式 - 优化阅读体验 */
 .markdown-content {
-  font-family: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
   color: var(--primary-text-color);
   line-height: 1.7;
   font-size: 1.0625rem; /* 17px - 优化阅读体验 */

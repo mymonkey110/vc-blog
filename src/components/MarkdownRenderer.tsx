@@ -47,7 +47,7 @@ interface MarkdownRendererProps {
  */
 const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) => {
   return (
-    <div className={`${styles['markdown-content']} ${className}`}>
+    <div className={`${styles['markdown-content']} ${className} font-article`}>
       <ReactMarkdown
         components={{
           pre: ServerPre,

@@ -1,5 +1,12 @@
 /* 优化字体加载 - 使用系统字体栈提升性能 */
 /* 移除外部字体依赖，使用系统字体栈 */
+/* 为文章详情页正文单独加载霞鹜文楷屏幕阅读版 */
+@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css');
+
+/* 霞鹜文楷字体变量定义 */
+:root {
+  --font-family-article: 'LXGW WenKai Screen', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
+}
 
 /* 全局样式文件 */
 
@@ -20,6 +27,7 @@
   /* 字体系统变量 - 优化系统字体栈 */
   --font-family-heading: 'Georgia', 'Times New Roman', '宋体', 'SimSun', '华文宋体', 'STSong', serif;
   --font-family-body: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
+  --font-family-article: 'LXGW WenKai Screen', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
   --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
   --font-family-ui: 'SF Pro Display', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', system-ui, -apple-system, sans-serif;
   
@@ -111,6 +119,9 @@ body, p, span, div {
   }
   .font-body {
     font-family: var(--font-family-body);
+  }
+  .font-article {
+    font-family: var(--font-family-article);
   }
   .font-mono {
     font-family: var(--font-family-mono);

@@ -16,6 +16,7 @@ module.exports = {
       fontFamily: {
         'heading': ['"Georgia"', '"Times New Roman"', '"宋体"', '"SimSun"', '"华文宋体"', '"STSong"', 'serif'],
         'body': ['"SF Pro Text"', '"Helvetica Neue"', '"Helvetica"', '"Arial"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"微软雅黑"', '"WenQuanYi Micro Hei"', 'sans-serif'],
+        'article': ['"LXGW WenKai Screen"', '"SF Pro Text"', '"Helvetica Neue"', '"Helvetica"', '"Arial"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"微软雅黑"', '"WenQuanYi Micro Hei"', 'sans-serif'],
         'mono': ['"SF Mono"', '"Monaco"', '"Inconsolata"', '"Roboto Mono"', '"Source Code Pro"', '"Menlo"', '"Consolas"', '"Courier New"', 'monospace'],
         'ui': ['"SF Pro Display"', '"Helvetica Neue"', '"Helvetica"', '"Arial"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"微软雅黑"', 'system-ui', '-apple-system', 'sans-serif'],
       },

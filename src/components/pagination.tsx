@@ -9,9 +9,7 @@ interface PaginationProps {
 
 const Pagination: React.FC<PaginationProps> = ({ 
   currentPage, 
-  totalPages, 
-  basePath = '/' 
-}) => {
+  totalPages}) => {
   // 生成页码数组，最多显示当前页周围的几个页码
   const getPageNumbers = () => {
     const pages = [];
@@ -60,7 +58,7 @@ const Pagination: React.FC<PaginationProps> = ({
     if (page === 1) {
       return '/'
     }
-    return `/?page=${page}`
+    return `/page/${page}`
   }
 
   return (

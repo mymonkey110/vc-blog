@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { prisma } from '../src/lib/db';
+import prisma from '../src/lib/db';
 
 // 加载环境变量
 dotenv.config();

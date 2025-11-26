@@ -2,13 +2,10 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { PrismaClient } from '../src/generated/prisma/client';
+import { prisma } from '../src/lib/db';
 
 // 加载环境变量
 dotenv.config();
-
-// 初始化Prisma客户端
-const prisma = new PrismaClient();
 
 // 文章目录路径
 const POSTS_DIRECTORY = path.join(process.cwd(), 'content', 'posts');
@@ -51,6 +48,7 @@ async function parseArticles() {
         // 提取元数据
         const title = data.title || file.replace('.md', '');
         const description = data.description || '';
+        const category = Array.isArray(data.categories) && data.categories.length > 0 ? data.categories[0] : '';
         if(!data.date) {
           console.warn(`警告: ${file} 缺少日期元数据`);
           continue;
@@ -68,11 +66,12 @@ async function parseArticles() {
             description,
             content,
             createdAt,
+            category,
           },
         });
         
         successCount++;
-        console.log(`保存成功: ${title}`);
+        console.log(`保存成功: ${title} - ${category}`);
         
       } catch (error) {
         errorCount++;

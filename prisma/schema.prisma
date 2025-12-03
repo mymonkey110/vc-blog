@@ -14,6 +14,7 @@ model Article {
   content     String
   createdAt   DateTime @default(now()) @map("created_at")
   category    String?  @db.VarChar(128)
+  status      String   @default("publish") @db.VarChar(10)
 
   @@map("article")
 }

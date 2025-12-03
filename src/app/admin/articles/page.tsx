@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,31 +7,39 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Plus } from 'lucide-react'
+import { getArticles } from './actions'
 
 interface Article {
   id: string
   title: string
-  status: 'published' | 'draft'
-  publishDate: string
+  status: 'draft' | 'publish'
+  createdAt: string
+  category?: string
 }
 
 export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [articles, setArticles] = useState<Article[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const articles: Article[] = [
-    { id: '1', title: '如何写出引人入胜的博客文章', status: 'published', publishDate: '2023-11-15' },
-    { id: '2', title: '提升博客流量的实用技巧', status: 'published', publishDate: '2023-11-10' },
-    { id: '3', title: '博客写作工具推荐', status: 'published', publishDate: '2023-11-05' },
-    { id: '4', title: '如何选择合适的博客主题', status: 'published', publishDate: '2023-10-30' },
-    { id: '5', title: '博客文章排版技巧', status: 'published', publishDate: '2023-10-25' },
-    { id: '6', title: '博客推广策略', status: 'published', publishDate: '2023-10-20' },
-    { id: '7', title: '博客内容规划', status: 'published', publishDate: '2023-10-15' },
-    { id: '8', title: '博客写作灵感来源', status: 'published', publishDate: '2023-10-10' },
-    { id: '9', title: '博客SEO优化指南', status: 'published', publishDate: '2023-10-05' },
-    { id: '10', title: '博客写作常见问题解答', status: 'published', publishDate: '2023-09-30' },
-  ]
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const data = await getArticles()
+        setArticles(data)
+      } catch (error) {
+        console.error('Failed to fetch articles:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  const filteredArticles = articles.filter((article) => article.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    fetchArticles()
+  }, [])
+
+  const filteredArticles = articles.filter((article) => 
+    article.title.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-stone-50 text-stone-900">
@@ -84,21 +92,37 @@ export default function ArticlesPage() {
                   <TableRow>
                     <TableHead className="text-left">标题</TableHead>
                     <TableHead className="w-40 text-left">状态</TableHead>
-                    <TableHead className="w-48 text-left">发布日期</TableHead>
+                    <TableHead className="w-48 text-left">创建日期</TableHead>
+                    <TableHead className="w-40 text-left">分类</TableHead>
                     <TableHead className="w-32 text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredArticles.length > 0 ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        加载中...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredArticles.length > 0 ? (
                     filteredArticles.map((article) => (
                       <TableRow key={article.id}>
                         <TableCell className="font-medium">{article.title}</TableCell>
                         <TableCell>
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                            已发布
+                          <Badge className={
+                            article.status === 'publish' 
+                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                              : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                          }>
+                            {article.status === 'publish' ? '已发布' : '草稿'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-stone-600">{article.publishDate}</TableCell>
+                        <TableCell className="text-stone-600">
+                          {new Date(article.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-stone-600">
+                          {article.category || '未分类'}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Link href={`/admin/articles/edit/${article.id}`} className="font-medium text-stone-900 hover:underline">
                             编辑
@@ -108,7 +132,7 @@ export default function ArticlesPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                         没有找到匹配的文章
                       </TableCell>
                     </TableRow>

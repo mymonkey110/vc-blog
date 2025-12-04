@@ -32,9 +32,9 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const articleId = params.id
+    const { id: articleId } = await params
     const data: ArticleData = await req.json()
     
     if (!data.title.trim() || !data.content.trim()) {
@@ -60,9 +60,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const articleId = params.id
+    const { id: articleId } = await params
     
     const article = await prisma.article.findUnique({
       where: {

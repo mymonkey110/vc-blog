@@ -4,7 +4,6 @@ import type { NextRequest } from 'next/server';
 // 中间件函数，用于保护后台页面
 export function proxy(request: NextRequest) {
   // 检查是否在登录页面
-  const isLoginPage = request.nextUrl.pathname === '/admin/login';
   
   // 获取认证cookie
   const token = request.cookies.get('admin_token')?.value;

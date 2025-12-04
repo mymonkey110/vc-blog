@@ -1,14 +1,13 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Sidebar from '@/pages/admin/components/Sidebar'
+import { useRouter } from 'next/navigation'
 import type { Article } from '@/types/article'
 import 'vditor/dist/index.css'
 import VditorEditor from '@/components/VditorEditor'
 
-export default function ArticleEditor({ params }: { params: { id: string } }) {
+export default async function ArticleEditor({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const id = params.id
+  const id = (await params).id
   const [article, setArticle] = useState<Article>({
     id: id === 'new' ? `draft-${Date.now()}` : id || `draft-${Date.now()}`,
     title: '',
@@ -197,7 +196,6 @@ export default function ArticleEditor({ params }: { params: { id: string } }) {
     <div className="relative flex h-auto min-h-screen w-full flex-col bg白 overflow-x-hidden" style={{ fontFamily: '"Work Sans", "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
         <div className="gap-1 px-6 flex flex-1 justify-center py-5">
-          <Sidebar />
           <div className="layout-content-container flex flex-col max-w-[1000px] flex-1">
             <div className="flex flex-wrap justify之间 gap-3 p-4">
               <p className="text-[#181511] tracking-light text-[32px] font-bold leading-tight min-w-72">{isNewArticle ? '新建文章' : '编辑文章'}</p>

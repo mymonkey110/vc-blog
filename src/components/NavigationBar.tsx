@@ -5,7 +5,7 @@ export default function NavigationBar() {
   return (
     <header className="flex items-center justify-between border-b border-border px-10 py-3 whitespace-nowrap">
       <div className="flex items-center gap-3 text-primary-text">
-        <div className="size-8 text-accent">
+        <div className="size-8 text-accent text-blue-600">
           <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <path d="M24 4L4 14v20l20 10 20-10V14L24 4zm0 6.5l15 8.5-15 8.5-15-8.5 15-8.5z"/>
             <path d="M24 22.5l10 5.75-10 5.75-10-5.75 10-5.75z"/>

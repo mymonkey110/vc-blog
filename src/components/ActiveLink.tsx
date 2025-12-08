@@ -21,9 +21,7 @@ export default function ActiveLink({ href, children, className = '' }: ActiveLin
   return (
     <Link 
       href={href} 
-      className={`text-sm font-ui leading-normal transition-colors ${
-        isActive(href) ? 'text-accent' : 'hover:text-accent text-secondary-text'
-      } ${className}`}
+      className={`text-sm font-ui leading-normal transition-colors ${isActive(href) ? 'text-blue-600' : 'hover:text-blue-600 text-primary-text'} ${className}`}
     >
       {children}
     </Link>

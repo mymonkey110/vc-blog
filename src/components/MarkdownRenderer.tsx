@@ -3,14 +3,14 @@ import type { ComponentProps } from 'react';
 import styles from '@/styles/markdown.module.css';
 
 // 自定义Image组件，优化图片加载
-const CustomImage = ({ src, alt, ...props }: { src?: string; alt?: string } & ComponentProps<'img'>) => {
+const CustomImage = ({ src, alt, ...props }: { src?: string | Blob; alt?: string } & ComponentProps<'img'>) => {
   // 如果没有 src，返回 null
   if (!src) {
     return null;
   }
   
   // 判断是否为本地图片
-  const isLocalImage = src.startsWith('/') && !src.startsWith('//');
+  const isLocalImage = typeof src === 'string' && src.startsWith('/') && !src.startsWith('//');
   
   return (
     <img 

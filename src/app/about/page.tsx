@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export const metadata = {
   title: '关于我 - 修行码农',
   description: '了解更多关于我的信息，包括学习工作经历和技术兴趣',
@@ -14,7 +16,10 @@ export default function AboutPage() {
           <div className="flex p-4">
             <div className="flex w-full flex-col gap-4 items-center">
               <div className="flex gap-4 flex-col items-center">
-                <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32" style={{ backgroundImage: 'url("/images/avatar/avatar.png")' }}></div>
+                <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32">
+                  <Image src="/images/avatar/avatar.png" alt="avatar" className="rounded-full"
+                  width={200} height={200} />
+                </div>
                 <div className="flex flex-col items-center justify-center justify-center">
                   <p className="title-3 text-center">麦克·蒋</p>
                   <p className="text-lg font-body text-secondary-text text-center">技术爱好者，热爱分享</p>

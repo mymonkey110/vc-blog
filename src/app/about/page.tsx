@@ -38,8 +38,8 @@ export default function AboutPage() {
               <div className="w-[1.5px] bg-border h-2 grow"></div>
             </div>
             <div className="flex flex-1 flex-col py-3">
-              <p className="text-base font-medium text-primary-text leading-normal">软件工程师</p>
-              <p className="text-base font-body text-secondary-text leading-normal">2020年至今</p>
+              <p className="text-base font-medium text-primary-text leading-normal">上海某大厂</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2020.7 - 至今</p>
             </div>
             <div className="flex flex-col items-center gap-1">
               <div className="w-[1.5px] bg-border h-2"></div>
@@ -49,10 +49,60 @@ export default function AboutPage() {
               <div className="w-[1.5px] bg-border h-2 grow"></div>
             </div>
             <div className="flex flex-1 flex-col py-3">
-              <p className="text-base font-medium text-primary-text leading-normal">大数据分析师</p>
-              <p className="text-base font-body text-secondary-text leading-normal">2018年 - 2020年</p>
+              <p className="text-base font-medium text-primary-text leading-normal">网易云计算</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2016.9 - 2020.5</p>
             </div>
-            {/* 其余段落保持一致 */}
+            
+            {/* 2015.8 - 2016.8 加入IoT创业公司 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M224,152a8,8,0,0,1-8,8h-32a8,8,0,0,1,0-16h32A8,8,0,0,1,224,152Zm-56,0a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h72A8,8,0,0,1,168,152Zm-88,0a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H24a8,8,0,0,1,8-8H56a8,8,0,0,1,8,8Zm176-32a8,8,0,0,1-8,8h-32a8,8,0,0,1,0-16h32A8,8,0,0,1,200,120Zm-56,0a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h72A8,8,0,0,1,144,120Zm-88,0a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H24a8,8,0,0,1,8-8H56a8,8,0,0,1,8,8Zm176-32a8,8,0,0,1-8,8h-32a8,8,0,0,1,0-16h32A8,8,0,0,1,176,88Zm-56,0a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h72A8,8,0,0,1,120,88Zm-88,0a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H24a8,8,0,0,1,8-8H56a8,8,0,0,1,8,8Zm104,96a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,144,184Zm-88,0a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H24a8,8,0,0,1,8-8H56a8,8,0,0,1,8,8Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">加入IoT创业公司</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2015.8 - 2016.8</p>
+            </div>
+            
+            {/* 2014.7 - 2015.7 毕业后加入天猫 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M216,40H136V24a8,8,0,0,0-16,0V40H40A16,16,0,0,0,24,56V176a16,16,0,0,0,16,16H79.36L57.75,219a8,8,0,0,0,12.5,10l29.59-37h56.32l29.59,37a8,8,0,1,0,12.5-10l-21.61-27H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,136H40V56H216V176ZM104,120a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,120Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">毕业后加入天猫</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2014.7 - 2015.7</p>
+            </div>
+            
+            {/* 2011.7 - 2014.7 在电子科大研究云计算，获得硕士学位 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M224,72H32a8,8,0,0,0-8,8V176a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A8,8,0,0,0,224,72Zm-56,104H88a8,8,0,0,1,0-16h80a8,8,0,0,1,0,16Zm48-32H88a8,8,0,0,1,0-16h136a8,8,0,0,1,0,16Zm0-32H88a8,8,0,0,1,0-16h136a8,8,0,0,1,0,16Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">在电子科大研究云计算，获得硕士学位</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2011.7 - 2014.7</p>
+            </div>
+            
+            {/* 2007.9 - 2011.6 在湘潭大学学习网络工程，获得学士学位 */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M224,72H32a8,8,0,0,0-8,8V176a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A8,8,0,0,0,224,72Zm-56,104H88a8,8,0,0,1,0-16h80a8,8,0,0,1,0,16Zm48-32H88a8,8,0,0,1,0-16h136a8,8,0,0,1,0,16Zm0-32H88a8,8,0,0,1,0-16h136a8,8,0,0,1,0,16Z"></path>
+              </svg>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">在湘潭大学学习网络工程，获得学士学位</p>
+              <p className="text-base font-body text-secondary-text leading-normal">2007.9 - 2011.6</p>
+            </div>
           </div>
 
           <h2 className="title-3 px-4 pb-3 pt-5">我目前感兴趣的领域</h2>

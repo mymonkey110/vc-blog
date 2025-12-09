@@ -1,11 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
+
+// 验证JWT token的函数
+async function verifyToken(token: string): Promise<boolean> {
+  try {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('JWT_SECRET environment variable is not set');
+      return false;
+    }
+
+    const secret = new TextEncoder().encode(jwtSecret);
+    await jwtVerify(token, secret);
+    return true;
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    return false;
+  }
+}
 
 // 中间件函数，用于保护后台页面
-export function proxy(request: NextRequest) {  
+export async function proxy(request: NextRequest) {  
   // 获取认证cookie
   const token = request.cookies.get('admin_token')?.value;
-  const isLoggedIn = !!token;
+  let isLoggedIn = false;
+  
+  if (token) {
+    isLoggedIn = await verifyToken(token);
+  }
+  
   console.log(`中间件调试 - URL: ${request.nextUrl.pathname}, 已登录: ${isLoggedIn}, token: ${token}`);
   
   // 如果用户在登录页面且已登录，重定向到后台首页

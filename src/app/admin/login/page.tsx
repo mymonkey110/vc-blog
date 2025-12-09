@@ -1,43 +1,25 @@
 'use client'
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { login } from '@/actions/auth'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-        credentials: 'include',
-      })
-      if (response.redirected) {
-        window.location.href = response.url
-      } else {
-        try {
-          const data = await response.json()
-          if (response.ok) {
-            setTimeout(() => { router.push('/admin') }, 500)
-          } else {
-            setError(data.error || '登录失败，请重试')
-          }
-        } catch (jsonError) {
-          console.error('JSON解析错误:', jsonError)
-          setError('服务器响应格式错误，请重试')
-        }
+      const result = await login(password)
+      if (result && !result.success) {
+        setError(result.message)
+        console.error('Login error:', result.message)
       }
     } catch (err) {
-      setError('登录失败，请重试')
-      console.error('Login error:', err)
+      setError(typeof err === 'string' ? err : err instanceof Error ? err.message : '登录失败，请重试')
     } finally {
       setIsLoading(false)
     }

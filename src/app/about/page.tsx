@@ -107,15 +107,69 @@ export default function AboutPage() {
 
           <h2 className="title-3 px-4 pb-3 pt-5">我目前感兴趣的领域</h2>
           <div className="grid grid-cols-[40px_1fr] gap-x-2 px-4">
-            {/* 省略细节，结构保持一致 */}
             <div className="flex flex-col items-center gap-1 pt-3">
+              {/* DDD - 领域驱动设计 */}
               <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"></path>
+                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm-16,16v72H120V48Zm-88,0H64v72H48V48ZM48,208V136H64v72Zm88,0V136h80v72Zm48,0H184V168h32v40Z"></path>
               </svg>
               <div className="w-[1.5px] bg-border h-2 grow"></div>
             </div>
-            <div className="flex flex-1 flex-col pt-3 pb-5">
-              <p className="text-base font-medium text-primary-text leading-normal">编程（Python，JavaScript，Go）</p>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">DDD</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              {/* Vibe Coding - 氛围编码 */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M237.66,90.34A104,104,0,0,0,24,128a103.08,103.08,0,0,0,17.72,58.61L96,128,41.72,79.39A103.08,103.08,0,0,0,24,128a104,104,0,0,0,213.66-37.66ZM48,128a80,80,0,0,1,158.18-16.13L160,128l46.18,16.13A80,80,0,0,1,48,128Zm64,64L72.81,148.07A88.34,88.34,0,0,0,112,192Zm0-128a88.34,88.34,0,0,0-39.19,11.93L112,64Zm64,96L176,128l16-5.71A87.55,87.55,0,0,0,176,160Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">Vibe Coding</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              {/* Software Architecture & Theory - 软件架构与理论 */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M216,168H40a16,16,0,0,1-16-16V48A16,16,0,0,1,40,32H216a16,16,0,0,1,16,16V152A16,16,0,0,1,216,168ZM40,48V152H216V48Zm0,0V48H216V48Zm176,112H40V152H216v8Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">Software Architecture & Theory</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              {/* Java & WEB */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM128,208a80,80,0,1,1,80-80A80.09,80.09,0,0,1,128,208Zm0-144a64,64,0,1,0,64,64A64.07,64.07,0,0,0,128,64Zm40,96a8,8,0,0,1-8,8h-16v16a8,8,0,0,1-16,0V168H96a8,8,0,0,1,0-16h16V136a8,8,0,0,1,16,0v16h16A8,8,0,0,1,168,160Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">Java & WEB</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              {/* TypeScript */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M216,32H40A16,16,0,0,0,24,48V208a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V48A16,16,0,0,0,216,32ZM216,208H40V48H216V208ZM176,80h-8v48h16a24,24,0,0,1,0,48H152V176h16a8,8,0,0,0,0-16H152V80Zm-64,96H88v16H72a8,8,0,0,1,0-16H88V136H72a24,24,0,0,1,0-48H104V80H88a8,8,0,0,1,0-16h48a24,24,0,0,1,24,24v80A24,24,0,0,1,136,192H112Z"></path>
+              </svg>
+              <div className="w-[1.5px] bg-border h-2 grow"></div>
+            </div>
+            <div className="flex flex-1 flex-col py-3">
+              <p className="text-base font-medium text-primary-text leading-normal">TypeScript</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-[1.5px] bg-border h-2"></div>
+              {/* Rust */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M232,128a104,104,0,1,1-104-104A104.11,104.11,0,0,1,232,128Zm-96,88a87.86,87.86,0,0,0,48.86-14.91l-34-27.18-34,27.18A87.6,87.6,0,0,0,136,216Zm48.86-140.91A87.86,87.86,0,0,0,136,40a87.6,87.6,0,0,0-48.86,14.91l34,27.18,34-27.18ZM40,128a87.6,87.6,0,0,0,48.86,81.09l34-27.18-34-27.18A87.86,87.86,0,0,0,40,128Zm128,0a40,40,0,1,1,40-40A40.05,40.05,0,0,1,168,128Z"></path>
+              </svg>
+            </div>
+            <div className="flex flex-1 flex-col py-3 pb-5">
+              <p className="text-base font-medium text-primary-text leading-normal">Rust</p>
             </div>
           </div>
 

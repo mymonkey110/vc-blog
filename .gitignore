@@ -50,3 +50,4 @@ lerna-debug.log*
 /src/generated/prisma
 .idea/*
 .idea
+.next-env.d.ts

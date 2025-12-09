@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // 中间件函数，用于保护后台页面
-export function proxy(request: NextRequest) {
-  // 检查是否在登录页面
-  
+export function proxy(request: NextRequest) {  
   // 获取认证cookie
   const token = request.cookies.get('admin_token')?.value;
   const isLoggedIn = !!token;
@@ -17,7 +15,7 @@ export function proxy(request: NextRequest) {
   }
   
   // 如果用户未登录且尝试访问非登录页的后台页面，重定向到登录页
-  if (!isLoggedIn && request.nextUrl.pathname.startsWith('/admin/') && request.nextUrl.pathname !== '/admin/login') {
+  if (!isLoggedIn && request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') {
     console.log('中间件: 用户未登录且访问非登录页的后台页面，重定向到登录页');
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
@@ -28,5 +26,5 @@ export function proxy(request: NextRequest) {
 
 // 配置中间件应用的路径
 export const config = {
-  matcher: '/admin/:path*',
+  matcher: ['/admin/:path*','/admin'],
 };

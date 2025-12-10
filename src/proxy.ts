@@ -38,10 +38,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
   
-  // 如果用户未登录且尝试访问非登录页的后台页面，重定向到登录页
-  if (!isLoggedIn && request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') {
-    console.log('中间件: 用户未登录且访问非登录页的后台页面，重定向到登录页');
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+  // 检查是否为API请求
+  const isApiRequest = request.nextUrl.pathname.startsWith('/admin/api');
+  
+  // 如果用户未登录且尝试访问受保护的路径
+  if (!isLoggedIn && (
+    (request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/admin/login') ||
+    request.nextUrl.pathname.startsWith('/api/articles')
+  )) {
+    console.log(`中间件: 用户未登录且访问受保护路径，URL: ${request.nextUrl.pathname}`);
+    
+    if (isApiRequest || request.nextUrl.pathname.startsWith('/api')) {
+      // API请求返回JSON响应
+      return NextResponse.json({ success: false, message: "authenticate failed" }, { status: 403 });
+    } else {
+      // 页面请求重定向到登录页
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
   }
   
   // 其他情况允许继续
@@ -50,5 +63,5 @@ export async function proxy(request: NextRequest) {
 
 // 配置中间件应用的路径
 export const config = {
-  matcher: ['/admin/:path*','/admin'],
+  matcher: ['/admin/:path*', '/admin'],
 };

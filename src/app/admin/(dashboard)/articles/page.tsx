@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from '@/components/ui/pagination'
 import { Search, Plus } from 'lucide-react'
 import { getArticles } from './actions'
 import { ArticleModel } from '@/generated/prisma/models'
@@ -13,14 +14,21 @@ import { ArticleModel } from '@/generated/prisma/models'
 
 export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [articles, setArticles] = useState<ArticleModel[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const data = await getArticles()
-        setArticles(data)
+        setIsLoading(true)
+        const data = await getArticles(currentPage, pageSize)
+        setArticles(data.articles)
+        setTotalPages(data.totalPages)
+        setTotalCount(data.totalCount)
       } catch (error) {
         console.error('Failed to fetch articles:', error)
       } finally {
@@ -29,11 +37,23 @@ export default function ArticlesPage() {
     }
 
     fetchArticles()
-  }, [])
+  }, [currentPage, pageSize])
 
   const filteredArticles = articles.filter((article) => 
     article.title.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  // Handle page size change
+  const handlePageSizeChange = (value: string) => {
+    const newPageSize = parseInt(value, 10)
+    setPageSize(newPageSize)
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
 
   return (
     <>
@@ -111,6 +131,97 @@ export default function ArticlesPage() {
               )}
             </TableBody>
           </Table>
+          
+          {/* 分页控制 */}
+          {!isLoading && filteredArticles.length > 0 && (
+            <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-4 whitespace-nowrap">
+                <span className="text-sm text-stone-600 whitespace-nowrap">
+                  共 {totalCount} 篇文章，第 {currentPage} / {totalPages} 页
+                </span>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-sm text-stone-600 whitespace-nowrap">每页显示：</span>
+                  <select 
+                    value={pageSize} 
+                    onChange={(e) => handlePageSizeChange(e.target.value)}
+                    className="border border-stone-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-stone-500"
+                    style={{ width: '60px' }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* 使用shadcn分页组件 */}
+              <Pagination className='justify-end'>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handlePageChange(Math.max(1, currentPage - 1))
+                      }}
+                      className={currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''}
+                    >
+                      上一页
+                    </PaginationPrevious>
+                  </PaginationItem>
+                  
+                  {/* 页码按钮 */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    // 只显示当前页、首页、末页以及当前页前后各1页
+                    if (
+                      pageNum === 1 || 
+                      pageNum === totalPages || 
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink
+                            isActive={currentPage === pageNum}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              handlePageChange(pageNum)
+                            }}
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    }
+                    
+                    // 显示省略号
+                    if (
+                      (pageNum === currentPage - 2 && currentPage > 3) ||
+                      (pageNum === currentPage + 2 && currentPage < totalPages - 2)
+                    ) {
+                      return (
+                        <PaginationItem key={`ellipsis-${pageNum}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    
+                    return null
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handlePageChange(Math.min(totalPages, currentPage + 1))
+                      }}
+                      className={currentPage === totalPages ? 'cursor-not-allowed opacity-50' : ''}
+                    >
+                      下一页
+                    </PaginationNext>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
     </>

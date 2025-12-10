@@ -3,14 +3,28 @@
 import prisma from '@/lib/db'
 
 // 获取文章列表
-export async function getArticles() {
+export async function getArticles(pageNumber: number = 1, pageSize: number = 10) {
   try {
-    const articles = await prisma.article.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-    return articles
+    const skip = (pageNumber - 1) * pageSize
+    
+    const [articles, totalCount] = await Promise.all([
+      prisma.article.findMany({
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip,
+        take: pageSize
+      }),
+      prisma.article.count()
+    ])
+    
+    return {
+      articles,
+      totalCount,
+      pageNumber,
+      pageSize,
+      totalPages: Math.ceil(totalCount / pageSize)
+    }
   } catch (error) {
     console.error('Failed to get articles:', error)
     throw new Error('获取文章列表失败')

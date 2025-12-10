@@ -36,23 +36,27 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const category = searchParams.get('category')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const page = parseInt(searchParams.get('page') || '1')
+    const pageSize = parseInt(searchParams.get('pageSize') || '10')
+    const pageNumber = parseInt(searchParams.get('pageNumber') || '1')
+    
+    // 限制pageSize只能是10、20或50
+    const validPageSizes = [10, 20, 50]
+    const finalPageSize = validPageSizes.includes(pageSize) ? pageSize : 10
     
     const whereClause = category ? { category } : {}
-    const skip = (page - 1) * limit
+    const skip = (pageNumber - 1) * finalPageSize
     
     const [articles, total] = await Promise.all([
       prisma.article.findMany({
         where: whereClause,
         orderBy: { createdAt: 'desc' },
-        take: limit,
+        take: finalPageSize,
         skip: skip
       }),
       prisma.article.count({ where: whereClause })
     ])
     
-    return NextResponse.json({ articles, total }, { status: 200 })
+    return NextResponse.json({ articles, total, pageNumber, pageSize: finalPageSize, totalPages: Math.ceil(total / finalPageSize) }, { status: 200 })
   } catch (error) {
     console.error('Failed to fetch articles:', error)
     return NextResponse.json({ error: '获取文章列表失败，请重试' }, { status: 500 })

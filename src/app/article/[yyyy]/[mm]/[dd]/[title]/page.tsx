@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/db'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import CCLicense from '@/components/CCLicense'
 import { toSlug } from '@/utils/slug'
 
 export async function generateStaticParams() {
@@ -125,6 +126,10 @@ export default async function Page({
       })
     : ''
 
+  // 构建文章完整URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const articleUrl = `${baseUrl}/article/${p.yyyy}/${p.mm}/${p.dd}/${p.title}`
+
   return (
     <main className="flex flex-1 justify-center px-4 py-12">
       <div className="max-w-3xl w-full">
@@ -143,10 +148,13 @@ export default async function Page({
           <MarkdownRenderer content={article.content} />
         </div>
 
+        <CCLicense articleUrl={articleUrl} />
+
         <div className="mt-16 pt-8 border-t border-border">
           <h3 className="title-3 mb-6">评论</h3>
           <div className="text-sm font-ui text-secondary-text italic">评论功能正在开发中...</div>
         </div>
+ 
       </div>
     </main>
   )

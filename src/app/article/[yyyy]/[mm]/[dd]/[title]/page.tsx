@@ -1,64 +1,65 @@
-import { notFound } from 'next/navigation'
-import prisma from '@/lib/db'
-import MarkdownRenderer from '@/components/MarkdownRenderer'
-import CCLicense from '@/components/CCLicense'
-import { toSlug } from '@/utils/slug'
+import { notFound } from 'next/navigation';
+import prisma from '@/lib/db';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import CCLicense from '@/components/CCLicense';
+import Comment from '@/components/Comment';
+import { toSlug } from '@/utils/slug';
 
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
     select: { title: true, createdAt: true },
-  })
+  });
 
   return articles.flatMap((article) => {
-    if (!article.createdAt || !article.title) return []
-    const d = new Date(article.createdAt)
-    const yyyy = d.getUTCFullYear().toString()
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
-    const dd = String(d.getUTCDate()).padStart(2, '0')
-    return [{ yyyy, mm, dd, title: toSlug(article.title) }]
-  })
+    if (!article.createdAt || !article.title) return [];
+    const d = new Date(article.createdAt);
+    const yyyy = d.getUTCFullYear().toString();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    return [{ yyyy, mm, dd, title: toSlug(article.title) }];
+  });
 }
 
 // 动态生成metadata
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>
+  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>;
 }): Promise<import('next').Metadata> {
-  const p = await params
-  const yearNum = Number(p.yyyy)
-  const monthNum = Number(p.mm)
-  const dayNum = Number(p.dd)
-  const decodedTitle = decodeURIComponent(p.title)
+  const p = await params;
+  const yearNum = Number(p.yyyy);
+  const monthNum = Number(p.mm);
+  const dayNum = Number(p.dd);
+  const decodedTitle = decodeURIComponent(p.title);
 
   if (!Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum)) {
     return {
       title: '文章未找到 - 博客',
-    }
+    };
   }
 
-  const dayStart = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0))
-  const dayEnd = new Date(Date.UTC(yearNum, monthNum - 1, dayNum + 1, 0, 0, 0))
+  const dayStart = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0));
+  const dayEnd = new Date(Date.UTC(yearNum, monthNum - 1, dayNum + 1, 0, 0, 0));
 
   const titleMatched = await prisma.article.findMany({
     where: { createdAt: { gte: dayStart, lt: dayEnd } },
-  })
+  });
 
   const article = titleMatched.find((article) => {
-    if (!article.title || !article.createdAt) return false
-    const d = new Date(article.createdAt)
+    if (!article.title || !article.createdAt) return false;
+    const d = new Date(article.createdAt);
     return (
       toSlug(article.title) === decodedTitle &&
       d.getUTCFullYear() === yearNum &&
       d.getUTCMonth() + 1 === monthNum &&
       d.getUTCDate() === dayNum
-    )
-  })
+    );
+  });
 
   if (!article) {
     return {
       title: '文章未找到 - 博客',
-    }
+    };
   }
 
   return {
@@ -70,51 +71,51 @@ export async function generateMetadata({
       type: 'article',
       publishedTime: article.createdAt?.toISOString(),
     },
-  }
+  };
 }
 
 export default async function Page({
   params,
 }: {
-  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>
+  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>;
 }) {
-  const p = await params
-  const yearNum = Number(p.yyyy)
-  const monthNum = Number(p.mm)
-  const dayNum = Number(p.dd)
-  const decodedTitle = decodeURIComponent(p.title)
+  const p = await params;
+  const yearNum = Number(p.yyyy);
+  const monthNum = Number(p.mm);
+  const dayNum = Number(p.dd);
+  const decodedTitle = decodeURIComponent(p.title);
 
   if (!Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum)) {
-    return notFound()
+    return notFound();
   }
   if (yearNum < 1970 || monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) {
-    return notFound()
+    return notFound();
   }
 
-  const dayStart = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0))
-  const dayEnd = new Date(Date.UTC(yearNum, monthNum - 1, dayNum + 1, 0, 0, 0))
+  const dayStart = new Date(Date.UTC(yearNum, monthNum - 1, dayNum, 0, 0, 0));
+  const dayEnd = new Date(Date.UTC(yearNum, monthNum - 1, dayNum + 1, 0, 0, 0));
 
   const titleMatched = await prisma.article.findMany({
     where: { createdAt: { gte: dayStart, lt: dayEnd } },
-  })
+  });
 
   const article = titleMatched.find((article) => {
-    if (!article.title || !article.createdAt) return false
-    const d = new Date(article.createdAt)
+    if (!article.title || !article.createdAt) return false;
+    const d = new Date(article.createdAt);
     return (
       toSlug(article.title) === decodedTitle &&
       d.getUTCFullYear() === yearNum &&
       d.getUTCMonth() + 1 === monthNum &&
       d.getUTCDate() === dayNum
-    )
-  })
+    );
+  });
 
   if (!article) {
-    return notFound()
+    return notFound();
   }
 
   if (!article.content || !article.content.trim()) {
-    throw new Error(`文章内容为空，无法渲染: id=${article.id}`)
+    throw new Error(`文章内容为空，无法渲染: id=${article.id}`);
   }
 
   // 直接使用原始内容，不需要序列化
@@ -124,11 +125,11 @@ export default async function Page({
         month: 'long',
         day: 'numeric',
       })
-    : ''
+    : '';
 
   // 构建文章完整URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  const articleUrl = `${baseUrl}/article/${p.yyyy}/${p.mm}/${p.dd}/${p.title}`
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const articleUrl = `${baseUrl}/article/${p.yyyy}/${p.mm}/${p.dd}/${p.title}`;
 
   return (
     <main className="flex flex-1 justify-center px-4 py-12">
@@ -139,7 +140,15 @@ export default async function Page({
         </div>
 
         {article.description && (
-          <div className="mb-8 text-lg font-body text-secondary-text border-l-4 border-accent/20 pl-4 italic" style={{fontFamily: 'SF Pro Text, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, 微软雅黑, WenQuanYi Micro Hei, sans-serif', lineHeight: '1.6', letterSpacing: '0.01em'}}>
+          <div
+            className="mb-8 text-lg font-body text-secondary-text border-l-4 border-accent/20 pl-4 italic"
+            style={{
+              fontFamily:
+                'SF Pro Text, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, 微软雅黑, WenQuanYi Micro Hei, sans-serif',
+              lineHeight: '1.6',
+              letterSpacing: '0.01em',
+            }}
+          >
             {article.description}
           </div>
         )}
@@ -152,11 +161,9 @@ export default async function Page({
 
         <div className="mt-16 pt-8 border-t border-border">
           <h3 className="title-3 mb-6">评论</h3>
-          <div className="text-sm font-ui text-secondary-text italic">评论功能正在开发中...</div>
+          <Comment title={article.title} />
         </div>
- 
       </div>
     </main>
-  )
-  }
-
+  );
+}

@@ -34,8 +34,6 @@ export default function Comment({ title }: CommentProps) {
     title: title,
   };
 
-  console.log('Disqus Config:', disqusConfig);
-
   return (
     <div className="mt-4">
       <DiscussionEmbed shortname={disqusShortname} config={disqusConfig} />

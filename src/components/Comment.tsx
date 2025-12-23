@@ -24,16 +24,16 @@ export default function Comment({ title }: CommentProps) {
   }
 
   const decodedPathname = decodeURI(pathname || '');
-  const hexoPath = `${decodedPathname.replace(/^\/article/, '') + '/'}`;
-  const finalUrl = `http://${domain}${encodeURI(hexoPath).toLowerCase()}`;
-  const finalIdentifier = hexoPath.startsWith('/') ? hexoPath.slice(1) : hexoPath;
+  const finalUrl = `http://${domain}${encodeURI(decodedPathname).toLowerCase()}`;
+  //const finalIdentifier = decodedPathname.startsWith('/') ? decodedPathname.slice(1) : decodedPathname;
 
   const disqusConfig = {
     url: finalUrl,
-    identifier: finalIdentifier,
+    identifier: decodedPathname,
     title: title,
   };
 
+  console.log('disqusConfig', disqusConfig);
   return (
     <div className="mt-4">
       <DiscussionEmbed shortname={disqusShortname} config={disqusConfig} />

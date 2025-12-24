@@ -24,14 +24,19 @@ export default function Comment({ title }: CommentProps) {
 
   const decodedPathname = decodeURI(pathname || '');
   const finalUrl = `http://${domain}${encodeURI(decodedPathname).toLowerCase()}`;
+  const oldIdentifier =
+    title === 'about'
+      ? 'about/index.html'
+      : decodedPathname.startsWith('/article/')
+        ? decodedPathname.replace('/article/', '') + '/'
+        : decodedPathname;
 
   const disqusConfig = {
     url: finalUrl,
-    identifier: decodedPathname,
+    identifier: oldIdentifier,
     title: title,
   };
 
-  console.log('disqusConfig', disqusConfig);
   return (
     <div className="mt-4">
       <DiscussionEmbed shortname={disqusShortname} config={disqusConfig} />

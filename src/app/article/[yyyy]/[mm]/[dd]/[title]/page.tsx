@@ -3,20 +3,19 @@ import prisma from '@/lib/db';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CCLicense from '@/components/CCLicense';
 import Comment from '@/components/Comment';
-import { toSlug } from '@/utils/slug';
 
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
-    select: { title: true, createdAt: true },
+    select: { title: true, createdAt: true, slug: true },
   });
 
   return articles.flatMap((article) => {
-    if (!article.createdAt || !article.title) return [];
+    if (!article.createdAt || !article.title || !article.slug) return [];
     const d = new Date(article.createdAt);
     const yyyy = d.getUTCFullYear().toString();
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');
-    return [{ yyyy, mm, dd, title: toSlug(article.title) }];
+    return [{ yyyy, mm, dd, title: article.slug }];
   });
 }
 
@@ -43,13 +42,14 @@ export async function generateMetadata({
 
   const titleMatched = await prisma.article.findMany({
     where: { createdAt: { gte: dayStart, lt: dayEnd } },
+    select: { id: true, title: true, description: true, createdAt: true, slug: true, status: true },
   });
 
   const article = titleMatched.find((article) => {
-    if (!article.title || !article.createdAt) return false;
+    if (!article.title || !article.createdAt || !article.slug) return false;
     const d = new Date(article.createdAt);
     return (
-      toSlug(article.title) === decodedTitle &&
+      article.slug === decodedTitle &&
       d.getUTCFullYear() === yearNum &&
       d.getUTCMonth() + 1 === monthNum &&
       d.getUTCDate() === dayNum
@@ -100,10 +100,10 @@ export default async function Page({
   });
 
   const article = titleMatched.find((article) => {
-    if (!article.title || !article.createdAt) return false;
+    if (!article.title || !article.createdAt || !article.slug) return false;
     const d = new Date(article.createdAt);
     return (
-      toSlug(article.title) === decodedTitle &&
+      article.slug === decodedTitle &&
       d.getUTCFullYear() === yearNum &&
       d.getUTCMonth() + 1 === monthNum &&
       d.getUTCDate() === dayNum

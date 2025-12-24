@@ -1,6 +1,5 @@
 'use client';
 
-import { toSlug } from '@/utils/slug';
 import dayjs from 'dayjs';
 import { DiscussionEmbed } from 'disqus-react';
 import { usePathname } from 'next/navigation';
@@ -25,7 +24,6 @@ export default function Comment({ title }: CommentProps) {
 
   const decodedPathname = decodeURI(pathname || '');
   const finalUrl = `http://${domain}${encodeURI(decodedPathname).toLowerCase()}`;
-  //const finalIdentifier = decodedPathname.startsWith('/') ? decodedPathname.slice(1) : decodedPathname;
 
   const disqusConfig = {
     url: finalUrl,

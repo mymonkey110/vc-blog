@@ -1,37 +1,33 @@
-import Link from 'next/link'
-import prisma from '@/lib/db'
-import { toSlug } from '@/utils/slug'
-import { notFound } from 'next/navigation'
+import Link from 'next/link';
+import prisma from '@/lib/db';
+import { notFound } from 'next/navigation';
 
 export const metadata = {
   title: '分类详情 - 修行码农',
   description: '查看该分类下的所有文章',
-}
+};
 
-export const dynamic = 'force-static'
+export const dynamic = 'force-static';
 
 export async function generateStaticParams() {
   // 生成所有分类的静态参数
   const categories = await prisma.article.groupBy({
     by: ['category'],
     where: {
-      AND: [
-        { category: { not: null } },
-        { category: { not: '' } },
-      ],
+      AND: [{ category: { not: null } }, { category: { not: '' } }],
     },
-  })
+  });
 
   return categories.map((category) => ({
     name: category.category as string,
-  }))
+  }));
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ name: string }> }) {
   // 确保 params.name 存在
-  const categoryName = (await params).name ? decodeURIComponent((await params).name) : ''
+  const categoryName = (await params).name ? decodeURIComponent((await params).name) : '';
   if (categoryName == null || categoryName === '') {
-    return notFound()
+    return notFound();
   }
 
   const articles = await prisma.article.findMany({
@@ -39,6 +35,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ name:
       id: true,
       title: true,
       createdAt: true,
+      slug: true,
     },
     where: {
       category: categoryName,
@@ -46,25 +43,24 @@ export default async function CategoryPage({ params }: { params: Promise<{ name:
     orderBy: {
       createdAt: 'desc',
     },
-  })
-
+  });
 
   // 按年份分组
-  const articlesByYear: Record<string, typeof articles> = {}
+  const articlesByYear: Record<string, typeof articles> = {};
 
   articles.forEach((article) => {
     // 确保 article.createdAt 存在
     if (article.createdAt) {
-      const year = article.createdAt.getFullYear().toString()
+      const year = article.createdAt.getFullYear().toString();
       if (!articlesByYear[year]) {
-        articlesByYear[year] = []
+        articlesByYear[year] = [];
       }
-      articlesByYear[year].push(article)
+      articlesByYear[year].push(article);
     }
-  })
+  });
 
   // 按年份降序排序
-  const sortedYears = Object.keys(articlesByYear).sort((a, b) => parseInt(b) - parseInt(a))
+  const sortedYears = Object.keys(articlesByYear).sort((a, b) => parseInt(b) - parseInt(a));
 
   return (
     <div className="flex flex-1 justify-center px-40 py-5">
@@ -86,12 +82,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ name:
                 {articlesByYear[year].map((article) => (
                   <Link
                     key={article.id}
-                    href={`/article/${article.createdAt.getUTCFullYear()}/${String(article.createdAt.getUTCMonth() + 1).padStart(2, '0')}/${String(article.createdAt.getUTCDate()).padStart(2, '0')}/${toSlug(article.title)}`}
+                    href={`/article/${article.createdAt.getUTCFullYear()}/${String(article.createdAt.getUTCMonth() + 1).padStart(2, '0')}/${String(article.createdAt.getUTCDate()).padStart(2, '0')}/${article.slug || ''}`}
                     className="flex flex-wrap items-baseline gap-x-4 py-2 transition-colors hover:text-primary dark:hover:text-primary"
                   >
-                    <p className="text-base font-medium leading-normal grow font-heading">{article.title}</p>
+                    <p className="text-base font-medium leading-normal grow font-heading">
+                      {article.title}
+                    </p>
                     <p className="text-sm font-normal text-secondary-text font-body">
-                      {String(article.createdAt.getUTCMonth() + 1).padStart(2, '0')}-{String(article.createdAt.getUTCDate()).padStart(2, '0')}
+                      {String(article.createdAt.getUTCMonth() + 1).padStart(2, '0')}-
+                      {String(article.createdAt.getUTCDate()).padStart(2, '0')}
                     </p>
                   </Link>
                 ))}
@@ -101,5 +100,5 @@ export default async function CategoryPage({ params }: { params: Promise<{ name:
         </div>
       </div>
     </div>
-  )
+  );
 }

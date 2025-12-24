@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "article" ADD COLUMN     "category" VARCHAR(128),
-ALTER COLUMN "created_at" SET DEFAULT CURRENT_TIMESTAMP;

@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { GoogleTagManager } from '@next/third-parties/google';
 import Footer from '@/components/Footer';
 import NavigationBar from '@/components/NavigationBar';
 
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
       </head>
+      <GoogleTagManager gtmId="GTM-NHDX7Q36" />
       <body className="min-h-screen flex flex-col">
         <NavigationBar />
         <main className="flex-1">{children}</main>

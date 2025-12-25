@@ -15,6 +15,21 @@ const nextConfig = {
         destination: '/article/:year/:month/:day/:slug',
         permanent: true,
       },
+      {
+        source: '/rss2.xml',
+        destination: '/rss.xml',
+        permanent: true,
+      },
+      {
+        source: '/atom.xml',
+        destination: '/rss.xml',
+        permanent: true,
+      },
+      {
+        source: '/feed',
+        destination: '/rss.xml',
+        permanent: true,
+      },
     ];
   },
   images: {

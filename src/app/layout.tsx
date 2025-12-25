@@ -1,31 +1,29 @@
-import '../styles/globals.css'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/react'
-import Footer from '@/components/Footer'
-import NavigationBar from '@/components/NavigationBar'
+import '../styles/globals.css';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+import Footer from '@/components/Footer';
+import NavigationBar from '@/components/NavigationBar';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_DOMAIN || ''),
   title: '修行码农',
   description: '代码❤技术❤生活',
   icons: {
-    icon: '/favicon.png'
+    icon: '/favicon.png',
   },
   manifest: '/site.webmanifest',
-}
+  alternates: {
+    canonical: './',
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
       <head>
         {/* 字体预加载 - 优化性能 */}
-        <link 
-          rel="preconnect" 
-          href="https://cdn.jsdelivr.net" 
-        />
-        <link 
-          rel="dns-prefetch" 
-          href="https://cdn.jsdelivr.net" 
-        />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
       </head>
       <body className="min-h-screen flex flex-col">
         <NavigationBar />
@@ -35,6 +33,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <Analytics />
       <SpeedInsights />
     </html>
-  )
+  );
 }
-

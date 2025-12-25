@@ -23,7 +23,7 @@ export default function Comment({ title }: CommentProps) {
   }
 
   const decodedPathname = decodeURI(pathname || '');
-  const finalUrl = `http://${domain}${encodeURI(decodedPathname).toLowerCase()}`;
+  const finalUrl = `${domain}${encodeURI(decodedPathname).toLowerCase()}`;
   const oldIdentifier =
     title === 'about'
       ? 'about/index.html'

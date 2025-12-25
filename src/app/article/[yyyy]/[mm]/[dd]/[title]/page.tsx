@@ -128,7 +128,7 @@ export default async function Page({
     : '';
 
   // 构建文章完整URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_DOMAIN;
   const articleUrl = `${baseUrl}/article/${p.yyyy}/${p.mm}/${p.dd}/${p.title}`;
 
   return (

@@ -1,35 +1,31 @@
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { ComponentProps } from 'react';
 import styles from '@/styles/markdown.module.css';
 
 // 自定义Image组件，优化图片加载
-const CustomImage = ({ src, alt, ...props }: { src?: string | Blob; alt?: string } & ComponentProps<'img'>) => {
+const CustomImage = ({
+  src,
+  alt,
+  ...props
+}: { src?: string | Blob; alt?: string } & ComponentProps<'img'>) => {
   // 如果没有 src，返回 null
   if (!src) {
     return null;
   }
-  
+
   // 判断是否为本地图片
   const isLocalImage = typeof src === 'string' && src.startsWith('/') && !src.startsWith('//');
-  
+
   return (
-    <img 
-      src={src} 
-      alt={alt || ''} 
-      className="max-w-full h-auto rounded shadow-sm" 
-      {...props}
-    />
+    <img src={src} alt={alt || ''} className="max-w-full h-auto rounded shadow-sm" {...props} />
   );
 };
 
 // 服务器端安全的 pre 组件，带有数据属性用于客户端增强
 const ServerPre = ({ children, className, ...props }: ComponentProps<'pre'>) => {
   return (
-    <pre 
-      className={`${className || ''} relative group`}
-      data-enhance-code-block="true"
-      {...props}
-    >
+    <pre className={`${className || ''} relative group`} data-enhance-code-block="true" {...props}>
       {children}
     </pre>
   );
@@ -49,6 +45,7 @@ const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) =>
   return (
     <div className={`${styles['markdown-content']} ${className} font-article`}>
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           pre: ServerPre,
           img: CustomImage,

@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { getArticleById, updateArticle } from '../../actions';
 import Vditor from 'vditor';
+import { upload } from '@vercel/blob/client';
+import { showToast } from '@/components/Toast';
 import 'vditor/dist/index.css';
 
 interface EditArticleForm {
@@ -42,6 +44,47 @@ function Editor({ content, onReady }: EditorProps) {
         },
         cache: {
           enable: false,
+        },
+        upload: {
+          handler: async (files: File[]) => {
+            if (files.length === 0) {
+              return { errFiles: [], succMap: {} };
+            }
+
+            const file = files[0];
+            showToast('图片上传中...', 'info', 0);
+
+            try {
+              const ext = file.name.split('.').pop() || 'png';
+              const filename = `images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+              const blob = await upload(filename, file, {
+                access: 'public',
+                handleUploadUrl: '/admin/api/upload/auth',
+              });
+
+              showToast('图片上传成功', 'success', 2000);
+
+              return {
+                errFiles: [],
+                succMap: {
+                  [file.name]: blob.url,
+                },
+              };
+            } catch (error) {
+              console.error('Upload error:', error);
+              showToast('图片上传失败', 'error', 3000);
+              return {
+                errFiles: [file.name],
+                succMap: {},
+              };
+            }
+          },
+          filename: (name: string) => {
+            const ext = name.split('.').pop() || 'png';
+            return `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          },
+          max: 5 * 1024 * 1024,
         },
         after: () => {
           isInitializedRef.current = true;

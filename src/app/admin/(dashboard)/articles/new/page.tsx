@@ -1,37 +1,37 @@
-'use client'
-import React, { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
-import { createArticle } from '../actions'
-import Vditor from 'vditor'
-import 'vditor/dist/index.css'
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { createArticle } from '../actions';
+import Vditor from 'vditor';
+import 'vditor/dist/index.css';
 
 interface NewArticleForm {
-  title: string
-  category?: string
-  description?: string
-  content: string
-  status: 'draft' | 'publish'
+  title: string;
+  category?: string;
+  description?: string;
+  content: string;
+  status: 'draft' | 'publish';
 }
 
 export default function NewArticlePage() {
-  const router = useRouter()
-  const editorRef = useRef<HTMLDivElement>(null)
-  const vditorRef = useRef<Vditor | null>(null)
+  const router = useRouter();
+  const editorRef = useRef<HTMLDivElement>(null);
+  const vditorRef = useRef<Vditor | null>(null);
   const [formData, setFormData] = useState<NewArticleForm>({
     title: '',
     category: '',
     description: '',
     content: '',
-    status: 'publish'
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+    status: 'publish',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -40,81 +40,78 @@ export default function NewArticlePage() {
         preview: {
           mode: 'both',
           theme: {
-            current: 'light'
-          }
+            current: 'light',
+          },
         },
         cache: {
-          enable: false
+          enable: false,
         },
-        after: () => {
-          vditorRef.current?.setValue('')
-        }
-      })
+      });
     }
 
     return () => {
-      if (vditorRef.current) {
+      if (vditorRef.current && !(vditorRef.current as any).isDestroyed) {
         try {
-          vditorRef.current.destroy()
-          vditorRef.current = null
+          vditorRef.current.destroy();
+          vditorRef.current = null;
         } catch (error) {
-          console.error('Failed to destroy Vditor:', error)
+          console.error('Failed to destroy Vditor:', error);
         }
       }
-    }
-  }, [])
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      status: e.target.value as 'draft' | 'publish'
-    }))
-  }
+      status: e.target.value as 'draft' | 'publish',
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!formData.title.trim()) {
-      setError('标题不能为空')
-      return
+      setError('标题不能为空');
+      return;
     }
 
     if (!vditorRef.current) {
-      setError('编辑器初始化失败')
-      return
+      setError('编辑器初始化失败');
+      return;
     }
 
-    const content = vditorRef.current.getValue()
+    const content = vditorRef.current.getValue();
     if (!content.trim()) {
-      setError('内容不能为空')
-      return
+      setError('内容不能为空');
+      return;
     }
 
-    setIsSubmitting(true)
-    setError(null)
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       await createArticle({
         ...formData,
-        content: content.trim()
-      })
-      
-      router.push('/admin/articles')
+        content: content.trim(),
+      });
+
+      router.push('/admin/articles');
     } catch (err) {
-      console.error('Failed to create article:', err)
-      setError('创建文章失败，请重试')
+      console.error('Failed to create article:', err);
+      setError('创建文章失败，请重试');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -124,13 +121,9 @@ export default function NewArticlePage() {
           <Button variant="outline">返回列表</Button>
         </Link>
       </div>
-      
-      {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
-      )}
-      
+
+      {error && <div className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -147,7 +140,7 @@ export default function NewArticlePage() {
               />
               <p className="text-xs text-stone-500">最多255个字符</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="category">分类</Label>
@@ -175,7 +168,7 @@ export default function NewArticlePage() {
                 </select>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">描述</Label>
               <Textarea
@@ -187,18 +180,18 @@ export default function NewArticlePage() {
                 rows={3}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="content">内容 *</Label>
               <div ref={editorRef} className="min-h-[400px] border rounded-md"></div>
             </div>
-            
+
             <div className="flex justify-end gap-3">
               <Link href="/admin/articles">
                 <Button variant="outline">取消</Button>
               </Link>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-stone-900 hover:bg-stone-900/90"
                 disabled={isSubmitting}
               >
@@ -209,5 +202,5 @@ export default function NewArticlePage() {
         </CardContent>
       </Card>
     </>
-  )
+  );
 }

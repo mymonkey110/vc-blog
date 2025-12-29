@@ -19,13 +19,59 @@ interface EditArticleForm {
   status: 'draft' | 'publish';
 }
 
+interface EditorProps {
+  content: string;
+  onReady: (vditor: Vditor) => void;
+}
+
+function Editor({ content, onReady }: EditorProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const vditorRef = useRef<Vditor | null>(null);
+  const isInitializedRef = useRef(false);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      vditorRef.current = new Vditor(editorRef.current, {
+        mode: 'sv',
+        value: content,
+        preview: {
+          mode: 'both',
+          theme: {
+            current: 'light',
+          },
+        },
+        cache: {
+          enable: false,
+        },
+        after: () => {
+          isInitializedRef.current = true;
+          if (vditorRef.current) {
+            onReady(vditorRef.current);
+          }
+        },
+      });
+    }
+
+    return () => {
+      if (vditorRef.current && isInitializedRef.current) {
+        try {
+          vditorRef.current.destroy();
+          vditorRef.current = null;
+        } catch (error) {
+          console.error('Failed to destroy Vditor:', error);
+        }
+      }
+    };
+  }, [content, onReady]);
+
+  return <div ref={editorRef} className="min-h-[400px] border rounded-md"></div>;
+}
+
 export default function EditArticlePage() {
   const router = useRouter();
   const params = useParams();
   const articleId = params.id as string;
-  const editorRef = useRef<HTMLDivElement>(null);
   const vditorRef = useRef<Vditor | null>(null);
-  const isMountedRef = useRef(true);
   const [formData, setFormData] = useState<EditArticleForm>({
     title: '',
     category: '',
@@ -36,7 +82,6 @@ export default function EditArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editorInitialized, setEditorInitialized] = useState(false);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -69,54 +114,11 @@ export default function EditArticlePage() {
     };
 
     fetchArticle();
-
-    return () => {
-      isMountedRef.current = false;
-      if (vditorRef.current && !(vditorRef.current as any).isDestroyed) {
-        try {
-          vditorRef.current.destroy();
-          vditorRef.current = null;
-        } catch (error) {
-          console.error('Failed to destroy Vditor:', error);
-        }
-      }
-    };
   }, [articleId]);
 
-  useEffect(() => {
-    if (
-      !isLoading &&
-      formData.content &&
-      editorRef.current &&
-      !editorInitialized &&
-      isMountedRef.current
-    ) {
-      const initEditor = () => {
-        if (!editorRef.current || !isMountedRef.current) return;
-
-        vditorRef.current = new Vditor(editorRef.current, {
-          mode: 'sv',
-          preview: {
-            mode: 'both',
-            theme: {
-              current: 'light',
-            },
-          },
-          cache: {
-            enable: false,
-          },
-          after: () => {
-            if (isMountedRef.current && vditorRef.current && formData.content) {
-              vditorRef.current.setValue(formData.content);
-              setEditorInitialized(true);
-            }
-          },
-        });
-      };
-
-      initEditor();
-    }
-  }, [isLoading, formData.content, editorInitialized]);
+  const handleEditorReady = (vditor: Vditor) => {
+    vditorRef.current = vditor;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -256,7 +258,9 @@ export default function EditArticlePage() {
 
             <div className="space-y-2">
               <Label htmlFor="content">内容 *</Label>
-              <div ref={editorRef} className="min-h-[400px] border rounded-md"></div>
+              {!isLoading && formData.content && (
+                <Editor key={articleId} content={formData.content} onReady={handleEditorReady} />
+              )}
             </div>
 
             <div className="flex justify-end gap-3">

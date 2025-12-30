@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { createArticle } from '../actions';
-import Vditor from 'vditor';
+import VditorEditor from '@/components/VditorEditor';
 import 'vditor/dist/index.css';
 
 interface NewArticleForm {
@@ -21,8 +21,6 @@ interface NewArticleForm {
 
 export default function NewArticlePage() {
   const router = useRouter();
-  const editorRef = useRef<HTMLDivElement>(null);
-  const vditorRef = useRef<Vditor | null>(null);
   const [formData, setFormData] = useState<NewArticleForm>({
     title: '',
     category: '',
@@ -32,34 +30,6 @@ export default function NewArticlePage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (editorRef.current) {
-      vditorRef.current = new Vditor(editorRef.current, {
-        mode: 'sv',
-        preview: {
-          mode: 'both',
-          theme: {
-            current: 'light',
-          },
-        },
-        cache: {
-          enable: false,
-        },
-      });
-    }
-
-    return () => {
-      if (vditorRef.current && !(vditorRef.current as any).isDestroyed) {
-        try {
-          vditorRef.current.destroy();
-          vditorRef.current = null;
-        } catch (error) {
-          console.error('Failed to destroy Vditor:', error);
-        }
-      }
-    };
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -84,13 +54,7 @@ export default function NewArticlePage() {
       return;
     }
 
-    if (!vditorRef.current) {
-      setError('编辑器初始化失败');
-      return;
-    }
-
-    const content = vditorRef.current.getValue();
-    if (!content.trim()) {
+    if (!formData.content.trim()) {
       setError('内容不能为空');
       return;
     }
@@ -101,7 +65,7 @@ export default function NewArticlePage() {
     try {
       await createArticle({
         ...formData,
-        content: content.trim(),
+        content: formData.content.trim(),
       });
 
       router.push('/admin/articles');
@@ -183,7 +147,13 @@ export default function NewArticlePage() {
 
             <div className="space-y-2">
               <Label htmlFor="content">内容 *</Label>
-              <div ref={editorRef} className="min-h-[400px] border rounded-md"></div>
+              <VditorEditor
+                value={formData.content}
+                onChange={(value) => setFormData((prev) => ({ ...prev, content: value }))}
+                mode="sv"
+                placeholder="请输入文章内容"
+                options={{ cache: { enable: false } }}
+              />
             </div>
 
             <div className="flex justify-end gap-3">

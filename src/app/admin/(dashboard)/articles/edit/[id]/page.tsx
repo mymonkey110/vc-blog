@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { getArticleById, updateArticle } from '../../actions';
-import Vditor from 'vditor';
-import { upload } from '@vercel/blob/client';
-import { showToast } from '@/components/Toast';
+import VditorEditor from '@/components/VditorEditor';
 import 'vditor/dist/index.css';
 
 interface EditArticleForm {
@@ -21,100 +19,10 @@ interface EditArticleForm {
   status: 'draft' | 'publish';
 }
 
-interface EditorProps {
-  content: string;
-  onReady: (vditor: Vditor) => void;
-}
-
-function Editor({ content, onReady }: EditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const vditorRef = useRef<Vditor | null>(null);
-  const isInitializedRef = useRef(false);
-
-  useEffect(() => {
-    if (editorRef.current) {
-      vditorRef.current = new Vditor(editorRef.current, {
-        mode: 'sv',
-        value: content,
-        preview: {
-          mode: 'both',
-          theme: {
-            current: 'light',
-          },
-        },
-        cache: {
-          enable: false,
-        },
-        upload: {
-          handler: async (files: File[]) => {
-            if (files.length === 0) {
-              return { errFiles: [], succMap: {} };
-            }
-
-            const file = files[0];
-            showToast('图片上传中...', 'info', 0);
-
-            try {
-              const ext = file.name.split('.').pop() || 'png';
-              const filename = `images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-              const blob = await upload(filename, file, {
-                access: 'public',
-                handleUploadUrl: '/admin/api/upload/auth',
-              });
-
-              showToast('图片上传成功', 'success', 2000);
-
-              return {
-                errFiles: [],
-                succMap: {
-                  [file.name]: blob.url,
-                },
-              };
-            } catch (error) {
-              console.error('Upload error:', error);
-              showToast('图片上传失败', 'error', 3000);
-              return {
-                errFiles: [file.name],
-                succMap: {},
-              };
-            }
-          },
-          filename: (name: string) => {
-            const ext = name.split('.').pop() || 'png';
-            return `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-          },
-          max: 5 * 1024 * 1024,
-        },
-        after: () => {
-          isInitializedRef.current = true;
-          if (vditorRef.current) {
-            onReady(vditorRef.current);
-          }
-        },
-      });
-    }
-
-    return () => {
-      if (vditorRef.current && isInitializedRef.current) {
-        try {
-          vditorRef.current.destroy();
-          vditorRef.current = null;
-        } catch (error) {
-          console.error('Failed to destroy Vditor:', error);
-        }
-      }
-    };
-  }, [content, onReady]);
-
-  return <div ref={editorRef} className="min-h-[400px] border rounded-md"></div>;
-}
-
 export default function EditArticlePage() {
   const router = useRouter();
   const params = useParams();
   const articleId = params.id as string;
-  const vditorRef = useRef<Vditor | null>(null);
   const [formData, setFormData] = useState<EditArticleForm>({
     title: '',
     category: '',
@@ -159,10 +67,6 @@ export default function EditArticlePage() {
     fetchArticle();
   }, [articleId]);
 
-  const handleEditorReady = (vditor: Vditor) => {
-    vditorRef.current = vditor;
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -179,13 +83,7 @@ export default function EditArticlePage() {
       return;
     }
 
-    if (!vditorRef.current) {
-      setError('编辑器初始化失败');
-      return;
-    }
-
-    const content = vditorRef.current.getValue();
-    if (!content.trim()) {
+    if (!formData.content.trim()) {
       setError('内容不能为空');
       return;
     }
@@ -196,7 +94,7 @@ export default function EditArticlePage() {
     try {
       await updateArticle(articleId, {
         ...formData,
-        content: content.trim(),
+        content: formData.content.trim(),
       });
 
       router.push('/admin/articles');
@@ -301,8 +199,14 @@ export default function EditArticlePage() {
 
             <div className="space-y-2">
               <Label htmlFor="content">内容 *</Label>
-              {!isLoading && formData.content && (
-                <Editor key={articleId} content={formData.content} onReady={handleEditorReady} />
+              {!isLoading && (
+                <VditorEditor
+                  value={formData.content}
+                  onChange={(value) => setFormData((prev) => ({ ...prev, content: value }))}
+                  mode="sv"
+                  placeholder="请输入文章内容"
+                  options={{ cache: { enable: false } }}
+                />
               )}
             </div>
 

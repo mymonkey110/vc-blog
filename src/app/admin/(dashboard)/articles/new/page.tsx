@@ -17,6 +17,7 @@ interface NewArticleForm {
   description?: string;
   content: string;
   status: 'draft' | 'publish';
+  coverPic?: string;
 }
 
 export default function NewArticlePage() {
@@ -27,6 +28,7 @@ export default function NewArticlePage() {
     description: '',
     content: '',
     status: 'publish',
+    coverPic: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +145,42 @@ export default function NewArticlePage() {
                 onChange={handleChange}
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="coverPic">封面图片</Label>
+              <Input
+                id="coverPic"
+                name="coverPic"
+                type="url"
+                placeholder="请输入封面图片URL (http:// 或 https://)"
+                value={formData.coverPic}
+                onChange={handleChange}
+                maxLength={2048}
+              />
+              <p className="text-xs text-stone-500">
+                请输入有效的图片URL，支持 http:// 或 https:// 协议，最多2048个字符
+              </p>
+              {formData.coverPic && (
+                <div className="mt-2">
+                  <p className="text-xs text-stone-600 mb-2">预览：</p>
+                  <div className="w-48 h-32 border border-stone-200 rounded overflow-hidden">
+                    <img
+                      src={formData.coverPic}
+                      alt="封面预览"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="w-full h-full bg-red-50 flex items-center justify-center text-red-500 text-xs">图片加载失败</div>';
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -16,6 +16,7 @@ model Article {
   category    String?  @db.VarChar(128)
   status      String   @default("publish") @db.VarChar(10)
   slug        String?  @default("") @db.VarChar(255)
+  coverPic    String?  @map("cover_pic") @db.VarChar(2048)
 
   @@map("article")
 }

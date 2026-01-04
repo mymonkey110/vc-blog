@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import prisma from '@/lib/db';
 import Pagination from '@/components/pagination';
+import { CoverImage } from '@/components/ui/CoverImage';
 import type { ArticleMeta } from '@/types/article';
 
 const formatUrlTitle = (slug: string): string => {
@@ -23,6 +23,7 @@ export default async function BlogList({ currentPage }: { currentPage: number })
       description: true,
       createdAt: true,
       slug: true,
+      coverPic: true,
     },
     orderBy: { createdAt: 'desc' },
     skip: offset,
@@ -35,9 +36,10 @@ export default async function BlogList({ currentPage }: { currentPage: number })
     excerpt: article.description || '',
     date: article.createdAt?.toISOString() || new Date().toISOString(),
     categories: [],
-    imageUrl: '',
+    imageUrl: article.coverPic || '',
     imageAlt: '',
     slug: article.slug || '',
+    coverPic: article.coverPic,
   }));
 
   return (
@@ -46,19 +48,19 @@ export default async function BlogList({ currentPage }: { currentPage: number })
         <h2 className="px-4 py-3 pt-5 title-1 leading-tight tracking-[-0.015em]">最新文章</h2>
 
         <div className="grid gap-8 p-4">
-          {articles.map((article) => (
-            <div key={article.id} className="flex flex-col sm:flex-row items-start gap-4 py-4">
-              <div className="flex flex-col gap-2 flex-1">
+          {articles.map((article, index) => (
+            <div key={article.id} className="flex flex-col sm:flex-row items-start gap-4 py-4 border-b border-gray-100 last:border-b-0">
+              <div className="flex flex-col gap-2 flex-1 min-w-0">
                 <h2 className="title-3 leading-tight">
                   <Link
                     href={`/article/${new Date(article.date).getUTCFullYear()}/${String(new Date(article.date).getUTCMonth() + 1).padStart(2, '0')}/${String(new Date(article.date).getUTCDate()).padStart(2, '0')}/${formatUrlTitle(article.slug)}`}
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-blue-600 transition-colors duration-200"
                   >
                     {article.title}
                   </Link>
                 </h2>
 
-                <p className="text-base font-body text-secondary-text leading-normal">
+                <p className="text-base font-body text-secondary-text leading-normal line-clamp-3">
                   {article.excerpt || '阅读更多...'}
                 </p>
 
@@ -83,18 +85,13 @@ export default async function BlogList({ currentPage }: { currentPage: number })
                 </div>
               </div>
 
-              <div className="flex-shrink-0 w-full sm:w-[200px] h-auto aspect-[3/2]">
-                <div className="w-full h-full bg-gray-200 rounded">
-                  {article.imageUrl && (
-                    <Image
-                      src={article.imageUrl}
-                      alt={article.imageAlt || article.title}
-                      fill
-                      className="object-cover rounded"
-                      priority
-                    />
-                  )}
-                </div>
+              <div className="flex-shrink-0 w-full sm:w-[200px] h-auto aspect-[3/2] order-first sm:order-last">
+                <CoverImage
+                  src={article.coverPic}
+                  alt={article.title}
+                  className="w-full h-full shadow-sm hover:shadow-md transition-shadow duration-200"
+                  priority={index < 3} // Priority loading for first 3 images
+                />
               </div>
             </div>
           ))}

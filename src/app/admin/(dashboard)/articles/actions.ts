@@ -53,6 +53,7 @@ export async function updateArticle(id: string, data: {
   description?: string
   content: string
   status?: 'draft' | 'publish'
+  coverPic?: string
 }) {
   try {
     const updatedArticle = await prisma.article.update({
@@ -64,7 +65,8 @@ export async function updateArticle(id: string, data: {
         category: data.category?.trim() || null,
         description: data.description?.trim() || null,
         content: data.content.trim(),
-        status: data.status || 'publish'
+        status: data.status || 'publish',
+        coverPic: data.coverPic?.trim() || null
       }
     })
     return updatedArticle
@@ -81,6 +83,7 @@ export async function createArticle(data: {
   description?: string
   content: string
   status?: 'draft' | 'publish'
+  coverPic?: string
 }) {
   try {
     const newArticle = await prisma.article.create({
@@ -89,7 +92,8 @@ export async function createArticle(data: {
         category: data.category?.trim() || null,
         description: data.description?.trim() || null,
         content: data.content.trim(),
-        status: data.status || 'publish'
+        status: data.status || 'publish',
+        coverPic: data.coverPic?.trim() || null
       }
     })
     return newArticle

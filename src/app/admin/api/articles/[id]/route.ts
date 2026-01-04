@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/actions/auth';
+import { validateAndSanitizeCoverImageUrl } from '@/utils/validation';
 
 interface ArticleData {
   title: string;
   category?: string;
   description?: string;
   content: string;
+  coverPic?: string;
 }
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -54,6 +56,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: '标题和内容不能为空' }, { status: 400 });
     }
 
+    // Validate and sanitize cover image URL
+    const sanitizedCoverPic = validateAndSanitizeCoverImageUrl(data.coverPic);
+    
+    // If coverPic was provided but is invalid, return error
+    if (data.coverPic && !sanitizedCoverPic) {
+      return NextResponse.json({ error: '封面图片URL格式无效' }, { status: 400 });
+    }
+
     const article = await prisma.article.update({
       where: {
         id: articleId,
@@ -63,6 +73,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         category: data.category?.trim() || null,
         description: data.description?.trim() || null,
         content: data.content.trim(),
+        coverPic: sanitizedCoverPic,
       },
     });
 

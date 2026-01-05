@@ -110,53 +110,128 @@
 }
 
 /* 代码块样式 - 增强可读性 */
-.markdown-content pre {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  border-radius: 8px;
-  padding: 1.5rem;
-  overflow-x: auto;
-  margin: 2rem 0;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  border: 1px solid #333;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* CSS 自定义属性用于代码块主题 */
+:root {
+  --code-block-bg: #1e1e1e;
+  --code-block-color: #d4d4d4;
+  --code-block-border: #333;
+  --code-block-border-radius: 8px;
+  --code-block-padding: 1.5rem;
+  --code-block-margin: 2rem 0;
+  --code-block-font-size: var(--font-size-sm);
+  --code-block-line-height: var(--line-height-normal);
+  --code-block-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.codeBlock {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  border-radius: 8px;
-  padding: 1.5rem;
+/* 代码块容器样式 - 适用于 SyntaxHighlighter 包装器 */
+.markdown-content [data-enhance-code-block="true"] {
+  margin: var(--code-block-margin);
+  border-radius: var(--code-block-border-radius);
+  overflow: hidden;
+  box-shadow: var(--code-block-shadow);
+  border: 1px solid var(--code-block-border);
+}
+
+/* SyntaxHighlighter 内部样式覆盖 */
+.markdown-content [data-enhance-code-block="true"] pre {
+  margin: 0 !important;
+  padding: var(--code-block-padding) !important;
+  background: var(--code-block-bg) !important;
+  /* DO NOT override color - let syntax highlighter handle token colors */
+  font-family: var(--font-family-mono) !important;
+  font-size: var(--code-block-font-size) !important;
+  line-height: var(--code-block-line-height) !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
   overflow-x: auto;
-  margin: 2rem 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 确保代码内容使用正确的字体，但不覆盖语法高亮颜色 */
+.markdown-content [data-enhance-code-block="true"] code {
+  font-family: var(--font-family-mono) !important;
+  font-size: inherit !important;
+  background: transparent !important;
+  /* DO NOT override color - let syntax highlighter handle token colors */
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 传统 pre 标签样式（作为后备） */
+.markdown-content pre {
+  background: var(--code-block-bg);
+  color: var(--code-block-color); /* Only for fallback pre elements */
+  border-radius: var(--code-block-border-radius);
+  padding: var(--code-block-padding);
+  overflow-x: auto;
+  margin: var(--code-block-margin);
   font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  border: 1px solid #333;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-size: var(--code-block-font-size);
+  line-height: var(--code-block-line-height);
+  border: 1px solid var(--code-block-border);
+  box-shadow: var(--code-block-shadow);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 代码块类样式（用于自定义组件） */
+.codeBlock {
+  background: var(--code-block-bg);
+  color: var(--code-block-color);
+  border-radius: var(--code-block-border-radius);
+  padding: var(--code-block-padding);
+  overflow-x: auto;
+  margin: var(--code-block-margin);
+  font-family: var(--font-family-mono);
+  font-size: var(--code-block-font-size);
+  line-height: var(--code-block-line-height);
+  border: 1px solid var(--code-block-border);
+  box-shadow: var(--code-block-shadow);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 内联代码样式 */
-.markdown-content code {
-  background: rgba(0, 0, 0, 0.06);
-  color: #d63384;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.875em;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
-  font-weight: var(--font-weight-medium);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+:root {
+  --inline-code-bg: rgba(0, 0, 0, 0.06);
+  --inline-code-color: #d63384;
+  --inline-code-border: rgba(0, 0, 0, 0.1);
+  --inline-code-padding: 0.2rem 0.4rem;
+  --inline-code-border-radius: 4px;
+  --inline-code-font-size: 0.875em;
 }
 
+.markdown-content code,
+.inline-code {
+  background: var(--inline-code-bg);
+  color: var(--inline-code-color);
+  padding: var(--inline-code-padding);
+  border-radius: var(--inline-code-border-radius);
+  font-size: var(--inline-code-font-size);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--inline-code-border);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 代码块内的 code 元素不应用内联样式 */
 .markdown-content pre code,
-.codeBlock code {
-  background: transparent;
-  color: inherit;
-  padding: 0;
-  border: none;
-  font-size: inherit;
+.codeBlock code,
+.markdown-content [data-enhance-code-block="true"] code {
+  background: transparent !important;
+  /* DO NOT override color for syntax-highlighted code */
+  padding: 0 !important;
+  border: none !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+}
+
+/* Only apply default color to fallback pre code elements */
+.markdown-content pre:not([data-enhance-code-block]) code {
+  color: inherit !important;
 }
 
 /* 列表样式 - 优化间距和可读性 */
@@ -398,14 +473,75 @@
   }
   
   .markdown-content h1 {
-    @apply text-2xl md:text-3xl;
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  @media (min-width: 768px) {
+    .markdown-content h1 {
+      font-size: 1.875rem; /* 30px */
+    }
   }
   
   .markdown-content h2 {
-    @apply text-xl md:text-2xl;
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  @media (min-width: 768px) {
+    .markdown-content h2 {
+      font-size: 1.5rem; /* 24px */
+    }
   }
   
   .markdown-content h3 {
-    @apply text-lg md:text-xl;
+    font-size: 1.125rem; /* 18px */
+  }
+  
+  @media (min-width: 768px) {
+    .markdown-content h3 {
+      font-size: 1.25rem; /* 20px */
+    }
+  }
+  
+  /* 移动设备代码块优化 */
+  :root {
+    --code-block-padding: 1rem;
+    --code-block-margin: 1.5rem 0;
+    --code-block-font-size: 0.8125rem; /* 13px */
+  }
+  
+  .markdown-content [data-enhance-code-block="true"] pre,
+  .markdown-content pre,
+  .codeBlock {
+    padding: var(--code-block-padding) !important;
+    margin: var(--code-block-margin) !important;
+    font-size: var(--code-block-font-size) !important;
+    /* 确保移动设备上的触摸滚动 */
+    -webkit-overflow-scrolling: touch;
+    /* 防止代码块破坏布局 */
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* 移动设备内联代码优化 */
+  .markdown-content code {
+    font-size: 0.8125em; /* 相对于移动设备基础字体大小 */
+    padding: 0.15rem 0.3rem;
+    word-break: break-all;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  :root {
+    --code-block-padding: 0.75rem;
+    --code-block-margin: 1rem 0;
+    --code-block-font-size: 0.75rem; /* 12px */
+  }
+  
+  .markdown-content [data-enhance-code-block="true"] pre,
+  .markdown-content pre,
+  .codeBlock {
+    border-radius: 6px;
   }
 }

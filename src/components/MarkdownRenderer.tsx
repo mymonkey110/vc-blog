@@ -26,18 +26,25 @@ const CustomImage = ({
 
 // 服务器端安全的 pre 组件，带有数据属性用于客户端增强
 const ServerPre = ({ children, className, ...props }: ComponentProps<'pre'>) => {
-  const match = /language-(\w+)/.exec(className || '');
-  const language = match ? match[1] : '';
+  // Extract language from the code element's className, not the pre element
+  let language = '';
+  let codeContent = '';
+  
+  if (children && typeof children === 'object' && 'props' in children) {
+    const codeElement = children as any;
+    const codeClassName = codeElement.props?.className || '';
+    const match = /language-(\w+)/.exec(codeClassName);
+    language = match ? match[1] : '';
+    codeContent = String(codeElement.props?.children || '').replace(/\n$/, '');
+  } else if (typeof children === 'string') {
+    // Direct string content - check if pre has language class
+    const match = /language-(\w+)/.exec(className || '');
+    language = match ? match[1] : '';
+    codeContent = children.replace(/\n$/, '');
+  }
 
-  if (
-    match &&
-    children &&
-    typeof children === 'object' &&
-    'props' in children &&
-    (children as any).props.children
-  ) {
-    const codeContent = String((children as any).props.children).replace(/\n$/, '');
-
+  // Use SyntaxHighlighter if we have a language and code content
+  if (language && codeContent) {
     return (
       <div className="relative group" data-enhance-code-block="true">
         <SyntaxHighlighter
@@ -45,8 +52,18 @@ const ServerPre = ({ children, className, ...props }: ComponentProps<'pre'>) => 
           style={vscDarkPlus}
           customStyle={{
             margin: 0,
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
+            padding: 0,
+            background: 'transparent',
+            fontSize: 'inherit',
+            fontFamily: 'inherit',
+            lineHeight: 'inherit',
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              lineHeight: 'inherit',
+            }
           }}
         >
           {codeContent}
@@ -55,6 +72,7 @@ const ServerPre = ({ children, className, ...props }: ComponentProps<'pre'>) => 
     );
   }
 
+  // Fallback to regular pre element
   return (
     <pre className={`${className || ''} relative group`} data-enhance-code-block="true" {...props}>
       {children}
@@ -86,10 +104,7 @@ const MarkdownRenderer = ({ content, className = '' }: MarkdownRendererProps) =>
                 {children}
               </code>
             ) : (
-              <code
-                className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm"
-                {...props}
-              >
+              <code className={styles['inline-code']} {...props}>
                 {children}
               </code>
             );

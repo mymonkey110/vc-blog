@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { getArticleById, updateArticle } from '../../actions';
 import VditorEditor from '@/components/VditorEditor';
+import CoverImageInput from '@/components/CoverImageInput';
 import 'vditor/dist/index.css';
 
 interface EditArticleForm {
@@ -202,38 +203,11 @@ export default function EditArticlePage() {
 
             <div className="space-y-2">
               <Label htmlFor="coverPic">封面图片</Label>
-              <Input
-                id="coverPic"
-                name="coverPic"
-                type="url"
-                placeholder="请输入封面图片URL (http:// 或 https://)"
-                value={formData.coverPic}
-                onChange={handleChange}
-                maxLength={2048}
+              <CoverImageInput
+                value={formData.coverPic || ''}
+                onChange={(url) => setFormData(prev => ({ ...prev, coverPic: url }))}
+                disabled={isSubmitting}
               />
-              <p className="text-xs text-stone-500">
-                请输入有效的图片URL，支持 http:// 或 https:// 协议，最多2048个字符
-              </p>
-              {formData.coverPic && (
-                <div className="mt-2">
-                  <p className="text-xs text-stone-600 mb-2">预览：</p>
-                  <div className="w-48 h-32 border border-stone-200 rounded overflow-hidden">
-                    <img
-                      src={formData.coverPic}
-                      alt="封面预览"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const parent = target.parentElement;
-                        if (parent) {
-                          parent.innerHTML = '<div class="w-full h-full bg-red-50 flex items-center justify-center text-red-500 text-xs">图片加载失败</div>';
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="space-y-2">

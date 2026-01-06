@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
+import { useEffect, useImperativeHandle, forwardRef, useRef } from 'react';
 import Vditor from 'vditor';
 import { upload } from '@vercel/blob/client';
 import { showToast } from './Toast'; // 确保路径正确

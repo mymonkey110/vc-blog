@@ -1,7 +1,7 @@
 import prisma from '@/lib/db';
 import { MetadataRoute } from 'next';
 
-const baseUrl = 'https://vc.michael-j.net';
+const baseUrl = process.env.NEXT_PUBLIC_DOMAIN;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 获取所有发布的文章

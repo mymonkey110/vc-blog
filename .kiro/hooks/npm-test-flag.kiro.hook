@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Add --watchAll=false to npm test",
+  "description": "Automatically adds the --watchAll=false flag when executing npm test command",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": ""
+  }
+}

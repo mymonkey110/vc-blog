@@ -9,11 +9,19 @@ describe('CoverImageInput', () => {
     mockOnChange.mockClear();
   });
 
-  it('renders both URL and upload mode buttons', () => {
+  it('renders URL and upload mode buttons', () => {
     render(<CoverImageInput value="" onChange={mockOnChange} />);
     
     expect(screen.getByText('URL链接')).toBeInTheDocument();
     expect(screen.getByText('上传文件')).toBeInTheDocument();
+  });
+
+  it('renders AI generation button when enabled', () => {
+    render(<CoverImageInput value="" onChange={mockOnChange} enableAIGeneration={true} />);
+    
+    expect(screen.getByText('URL链接')).toBeInTheDocument();
+    expect(screen.getByText('上传文件')).toBeInTheDocument();
+    expect(screen.getByText('AI生成')).toBeInTheDocument();
   });
 
   it('starts in URL mode by default', () => {
@@ -32,19 +40,21 @@ describe('CoverImageInput', () => {
     expect(screen.queryByPlaceholderText(/请输入封面图片URL/)).not.toBeInTheDocument();
   });
 
-  it('clears input when switching modes', () => {
+  it('preserves image when switching modes', () => {
     render(<CoverImageInput value="https://example.com/image.jpg" onChange={mockOnChange} />);
     
     fireEvent.click(screen.getByText('上传文件'));
     
-    expect(mockOnChange).toHaveBeenCalledWith('');
+    // Should not clear the value when switching modes (behavior changed)
+    expect(mockOnChange).not.toHaveBeenCalled();
   });
 
-  it('calls onChange when URL input changes', () => {
+  it('calls onChange when URL input is blurred', () => {
     render(<CoverImageInput value="" onChange={mockOnChange} />);
     
     const urlInput = screen.getByPlaceholderText(/请输入封面图片URL/);
     fireEvent.change(urlInput, { target: { value: 'https://example.com/test.jpg' } });
+    fireEvent.blur(urlInput);
     
     expect(mockOnChange).toHaveBeenCalledWith('https://example.com/test.jpg');
   });

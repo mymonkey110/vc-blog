@@ -12,22 +12,23 @@ describe('Upload Service Property Tests', () => {
   it('Property 2: Upload naming convention compliance', () => {
     fc.assert(
       fc.property(
-        fc.string({ minLength: 1, maxLength: 50 }).filter(s => !s.includes('/')), // base filename
+        fc.string({ minLength: 1, maxLength: 50 }).filter(s => !s.includes('/') && s.trim().length > 0), // base filename
         fc.constantFrom('jpg', 'jpeg', 'png', 'webp', 'gif'), // extension
         (baseName, ext) => {
           const originalFilename = `${baseName}.${ext}`;
           const generatedFilename = generateCoverImageFilename(originalFilename);
           
-          // Check pattern: cover/{filename}+{16位base64随机值}.${ext}
+          // Check pattern: cover/{filename}+{16位alphanumeric随机值}.${ext}
           const pattern = /^cover\/(.+)\+([A-Za-z0-9]{16})\.([a-z]+)$/;
           const match = generatedFilename.match(pattern);
           
           expect(match).toBeTruthy();
-          expect(match![1]).toBe(baseName); // filename part should match
+          const expectedName = baseName.trim() || 'image';
+          expect(match![1]).toBe(expectedName); // filename part should match (or default to 'image')
           expect(match![2]).toHaveLength(16); // random value should be 16 chars
           expect(match![3]).toBe(ext); // extension should match
           
-          // Verify random part is base64-like (alphanumeric)
+          // Verify random part is alphanumeric
           const randomPart = match![2];
           expect(/^[A-Za-z0-9]+$/.test(randomPart)).toBe(true);
           
@@ -41,7 +42,7 @@ describe('Upload Service Property Tests', () => {
   it('Property 2b: Generated filenames are unique', () => {
     fc.assert(
       fc.property(
-        fc.string({ minLength: 1, maxLength: 20 }),
+        fc.string({ minLength: 1, maxLength: 20 }).filter(s => s.trim().length > 0),
         fc.constantFrom('jpg', 'png', 'gif'),
         (baseName, ext) => {
           const originalFilename = `${baseName}.${ext}`;

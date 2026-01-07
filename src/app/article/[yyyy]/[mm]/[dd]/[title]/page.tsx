@@ -132,16 +132,16 @@ export default async function Page({
   const articleUrl = `${baseUrl}/article/${p.yyyy}/${p.mm}/${p.dd}/${p.title}`;
 
   return (
-    <main className="flex flex-1 justify-center px-4 py-12">
+    <main className="flex flex-1 justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <div className="max-w-3xl w-full">
-        <div className="mb-8">
-          <h1 className="title-1 mb-4 leading-tight">{article.title}</h1>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="title-1 mb-3 sm:mb-4 leading-tight">{article.title}</h1>
           <div className="text-sm font-ui text-secondary-text">{formattedDate}</div>
         </div>
 
         {article.description && (
           <div
-            className="mb-8 text-lg font-body text-secondary-text border-l-4 border-accent/20 pl-4 italic"
+            className="mb-6 sm:mb-8 text-base sm:text-lg font-body text-secondary-text border-l-4 border-accent/20 pl-3 sm:pl-4 italic"
             style={{
               fontFamily:
                 'SF Pro Text, Helvetica Neue, Helvetica, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, 微软雅黑, WenQuanYi Micro Hei, sans-serif',
@@ -153,14 +153,14 @@ export default async function Page({
           </div>
         )}
 
-        <div className="mb-12">
+        <div className="mb-8 sm:mb-12">
           <MarkdownRenderer content={article.content} />
         </div>
 
         <CCLicense articleUrl={articleUrl} />
 
-        <div className="mt-16 pt-8 border-t border-border">
-          <h3 className="title-3 mb-6">评论</h3>
+        <div className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-border">
+          <h3 className="title-3 mb-4 sm:mb-6">评论</h3>
           <Comment title={article.title} />
         </div>
       </div>

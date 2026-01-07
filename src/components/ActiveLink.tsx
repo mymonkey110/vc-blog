@@ -7,9 +7,10 @@ interface ActiveLinkProps {
   href: string
   children: React.ReactNode
   className?: string
+  onClick?: () => void
 }
 
-export default function ActiveLink({ href, children, className = '' }: ActiveLinkProps) {
+export default function ActiveLink({ href, children, className = '', onClick }: ActiveLinkProps) {
   const pathname = usePathname()
   
   const isActive = (href: string) => {
@@ -22,6 +23,7 @@ export default function ActiveLink({ href, children, className = '' }: ActiveLin
     <Link 
       href={href} 
       className={`text-sm font-ui leading-normal transition-colors ${isActive(href) ? 'text-blue-600' : 'hover:text-blue-600 text-primary-text'} ${className}`}
+      onClick={onClick}
     >
       {children}
     </Link>

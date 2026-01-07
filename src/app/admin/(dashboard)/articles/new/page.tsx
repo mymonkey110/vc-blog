@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { createArticle } from '../actions';
 import VditorEditor from '@/components/VditorEditor';
 import CoverImageInput from '@/components/CoverImageInput';
+import DescriptionGeneratorUI from '@/components/DescriptionGeneratorUI';
 import 'vditor/dist/index.css';
 
 interface NewArticleForm {
@@ -138,6 +139,14 @@ export default function NewArticlePage() {
 
             <div className="space-y-2">
               <Label htmlFor="description">描述</Label>
+              <DescriptionGeneratorUI
+                articleContent={formData.content}
+                currentDescription={formData.description}
+                onDescriptionGenerated={(description) => 
+                  setFormData(prev => ({ ...prev, description }))
+                }
+                disabled={isSubmitting}
+              />
               <Textarea
                 id="description"
                 name="description"
@@ -154,6 +163,12 @@ export default function NewArticlePage() {
                 value={formData.coverPic || ''}
                 onChange={(url) => setFormData(prev => ({ ...prev, coverPic: url }))}
                 disabled={isSubmitting}
+                enableAIGeneration={true}
+                articleContent={formData.content}
+                articleTitle={formData.title}
+                onAIGenerationStart={() => console.log('AI generation started')}
+                onAIGenerationComplete={(result) => console.log('AI generation completed:', result)}
+                onAIGenerationError={(error) => console.error('AI generation error:', error)}
               />
             </div>
 

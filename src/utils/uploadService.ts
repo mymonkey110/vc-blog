@@ -17,14 +17,22 @@ export interface UploadResult {
  */
 export function generateCoverImageFilename(originalFilename: string): string {
   const ext = originalFilename.split('.').pop() || 'png';
-  const nameWithoutExt = originalFilename.replace(/\.[^/.]+$/, '');
+  let nameWithoutExt = originalFilename.replace(/\.[^/.]+$/, '').trim();
   
-  // Generate 16-character base64 random value
-  const randomBytes = new Uint8Array(12); // 12 bytes = 16 base64 chars
+  // Handle edge cases: empty or whitespace-only names
+  if (!nameWithoutExt) {
+    nameWithoutExt = 'image';
+  }
+  
+  // Generate 16-character alphanumeric random value
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomValue = '';
+  const randomBytes = new Uint8Array(16);
   crypto.getRandomValues(randomBytes);
-  const randomValue = btoa(String.fromCharCode(...randomBytes))
-    .replace(/[+/]/g, '') // Remove + and / characters
-    .slice(0, 16); // Ensure exactly 16 characters
+  
+  for (let i = 0; i < 16; i++) {
+    randomValue += chars[randomBytes[i] % chars.length];
+  }
   
   return `cover/${nameWithoutExt}+${randomValue}.${ext}`;
 }

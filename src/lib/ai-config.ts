@@ -12,11 +12,11 @@ import { AIConfiguration, DEFAULT_AI_CONFIG, AIServiceError } from '@/types/ai'
  * Get AI configuration from environment variables
  */
 export function getAIConfig(): AIConfiguration {
-  const googleApiKey = process.env.GOOGLE_API_KEY
+  const googleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
 
   if (!googleApiKey) {
     throw new AIServiceError(
-      'Google API key not configured. Please set GOOGLE_API_KEY environment variable.',
+      'Google API key not configured. Please set GOOGLE_GENERATIVE_AI_API_KEY environment variable.',
       'MISSING_GOOGLE_KEY'
     )
   }

@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Wand2, RefreshCw, Check, X, Settings, Loader2 } from 'lucide-react'
-import { GenerationState, DescriptionResult } from '@/types/ai'
+import { GenerationState } from '@/types/ai'
 
 interface DescriptionGeneratorUIProps {
   articleContent: string
@@ -28,11 +28,13 @@ export default function DescriptionGeneratorUI({
     error: undefined,
     canRetry: false
   })
-  const [generatedResult, setGeneratedResult] = useState<DescriptionResult | null>(null)
+  const [generatedText, setGeneratedText] = useState('')
   const [showPromptEditor, setShowPromptEditor] = useState(false)
   const [customPrompt, setCustomPrompt] = useState('请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。')
   const [promptError, setPromptError] = useState<string | null>(null)
-  // Generate description
+  const [isStreaming, setIsStreaming] = useState(false)
+
+  // Generate description with streaming
   const handleGenerate = useCallback(async () => {
     if (!articleContent || articleContent.trim().length === 0) {
       setGenerationState({
@@ -48,9 +50,10 @@ export default function DescriptionGeneratorUI({
       error: undefined,
       canRetry: false
     })
+    setGeneratedText('')
+    setIsStreaming(true)
 
     try {
-      // Call API route instead of direct service call
       const response = await fetch('/admin/api/ai/generate-description', {
         method: 'POST',
         headers: {
@@ -60,21 +63,52 @@ export default function DescriptionGeneratorUI({
           content: articleContent,
           customPrompt: customPrompt
         }),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '生成描述失败');
+        const errorData = await response.json()
+        throw new Error(errorData.message || '生成描述失败')
       }
 
-      const result = await response.json();
-      
-      setGeneratedResult(result.data)
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let accumulatedText = ''
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          
+          if (done) break
+          
+          const chunk = decoder.decode(value, { stream: true })
+          const lines = chunk.split('\n')
+          
+          for (const line of lines) {
+            if (line.startsWith('0:')) {
+              // Parse the streaming data
+              try {
+                const jsonStr = line.substring(2)
+                const data = JSON.parse(jsonStr)
+                if (data && typeof data === 'string') {
+                  accumulatedText += data
+                  setGeneratedText(accumulatedText)
+                }
+              } catch (e) {
+                // Ignore parsing errors for partial chunks
+              }
+            }
+          }
+        }
+      }
+
+      setIsStreaming(false)
       setGenerationState({
         isGenerating: false,
         error: undefined,
         canRetry: false
       })
+
     } catch (error) {
       console.error('Description generation failed:', error)
       const errorMessage = error instanceof Error ? error.message : '生成描述失败，请重试'
@@ -82,8 +116,9 @@ export default function DescriptionGeneratorUI({
         error.message.includes('网络') || 
         error.message.includes('连接') ||
         error.message.includes('fetch')
-      );
+      )
 
+      setIsStreaming(false)
       setGenerationState({
         isGenerating: false,
         error: errorMessage,
@@ -94,15 +129,17 @@ export default function DescriptionGeneratorUI({
 
   // Accept generated description
   const handleAccept = useCallback(() => {
-    if (generatedResult) {
-      onDescriptionGenerated(generatedResult.description)
-      setGeneratedResult(null)
+    if (generatedText.trim()) {
+      // Limit to 50 characters as specified
+      const trimmedText = generatedText.trim().substring(0, 50)
+      onDescriptionGenerated(trimmedText)
+      setGeneratedText('')
     }
-  }, [generatedResult, onDescriptionGenerated])
+  }, [generatedText, onDescriptionGenerated])
 
   // Reject generated description
   const handleReject = useCallback(() => {
-    setGeneratedResult(null)
+    setGeneratedText('')
   }, [])
 
   // Handle prompt change
@@ -112,17 +149,17 @@ export default function DescriptionGeneratorUI({
     
     // Simple client-side validation
     if (!newPrompt.trim()) {
-      setPromptError('提示词不能为空');
+      setPromptError('提示词不能为空')
     } else if (newPrompt.length > 1000) {
-      setPromptError('提示词不能超过1000个字符');
+      setPromptError('提示词不能超过1000个字符')
     } else {
-      setPromptError(null);
+      setPromptError(null)
     }
   }, [])
 
   // Reset to default prompt
   const handleResetPrompt = useCallback(() => {
-    const defaultPrompt = '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。';
+    const defaultPrompt = '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。'
     setCustomPrompt(defaultPrompt)
     setPromptError(null)
   }, [])
@@ -192,7 +229,7 @@ export default function DescriptionGeneratorUI({
               {generationState.isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  生成中...
+                  {isStreaming ? '生成中...' : '准备中...'}
                 </>
               ) : (
                 <>
@@ -228,60 +265,65 @@ export default function DescriptionGeneratorUI({
               </div>
             )}
 
-            {/* Generated Result */}
-            {generatedResult && (
+            {/* Streaming Generated Result */}
+            {generatedText && (
               <div className="space-y-3 p-3 bg-green-50 border border-green-200 rounded-md">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <Label className="text-xs text-green-700">生成的描述：</Label>
-                    <p className="text-sm text-green-800 mt-1">
-                      {generatedResult.description}
+                    <Label className="text-xs text-green-700">
+                      {isStreaming ? '正在生成...' : '生成的描述：'}
+                    </Label>
+                    <p className="text-sm text-green-800 mt-1 min-h-[1.5rem]">
+                      {generatedText}
+                      {isStreaming && <span className="animate-pulse">|</span>}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-green-600">
-                      <span>字数：{generatedResult.wordCount}</span>
-                      {generatedResult.truncated && (
-                        <span className="text-amber-600">已截断至50字</span>
+                      <span>字数：{generatedText.length}</span>
+                      {generatedText.length > 50 && (
+                        <span className="text-amber-600">将截断至50字</span>
                       )}
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleReject}
-                    className="text-xs"
-                  >
-                    <X className="h-3 w-3 mr-1" />
-                    拒绝
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleGenerate}
-                    className="text-xs"
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    重新生成
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleAccept}
-                    className="text-xs bg-green-600 hover:bg-green-700"
-                  >
-                    <Check className="h-3 w-3 mr-1" />
-                    采用
-                  </Button>
-                </div>
+                {!isStreaming && (
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleReject}
+                      className="text-xs"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      拒绝
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleGenerate}
+                      className="text-xs"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      重新生成
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleAccept}
+                      className="text-xs bg-green-600 hover:bg-green-700"
+                    >
+                      <Check className="h-3 w-3 mr-1" />
+                      采用
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Current Description Display */}
-            {currentDescription && !generatedResult && (
+            {currentDescription && !generatedText && (
               <div className="p-3 bg-stone-50 rounded-md">
                 <Label className="text-xs text-stone-600">当前描述：</Label>
                 <p className="text-sm text-stone-800 mt-1">{currentDescription}</p>

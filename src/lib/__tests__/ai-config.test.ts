@@ -3,8 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { getAIConfig, isAIConfigured, getAvailableTextModels, getAvailableImageModels } from '../ai-config'
-import { AIServiceError } from '@/types/ai'
+import { isAIConfigured, getAvailableTextModels, validateApiKeys, getProviderInfo } from '../ai-config'
 
 describe('AI Configuration', () => {
   const originalEnv = process.env
@@ -19,79 +18,95 @@ describe('AI Configuration', () => {
     process.env = originalEnv
   })
 
-  describe('getAIConfig', () => {
-    it('should throw error when Google API key is missing', () => {
-      delete process.env.GOOGLE_API_KEY
-
-      expect(() => getAIConfig()).toThrow(AIServiceError)
-      expect(() => getAIConfig()).toThrow('Google API key not configured')
-    })
-
-    it('should return valid configuration when Google API key is present', () => {
-      process.env.GOOGLE_API_KEY = 'test-google-key'
-
-      const config = getAIConfig()
-
-      expect(config.textModel.apiKey).toBe('test-google-key')
-      expect(config.imageModel.apiKey).toBe('test-google-key')
-      expect(config.textModel.provider).toBe('google')
-      expect(config.imageModel.provider).toBe('google')
-      expect(config.textModel.modelId).toBe('gemini-1.5-flash')
-      expect(config.imageModel.modelId).toBe('gemini-2.5-flash-image')
-    })
-
-    it('should include default prompts and limits', () => {
-      process.env.GOOGLE_API_KEY = 'test-google-key'
-
-      const config = getAIConfig()
-
-      expect(config.prompts.defaultDescriptionPrompt).toContain('总结文章内容')
-      expect(config.prompts.defaultImagePrompt).toContain('封面图片')
-      expect(config.limits.maxDescriptionLength).toBe(50)
-      expect(config.limits.maxPromptLength).toBe(1000)
-      expect(config.limits.requestTimeout).toBe(30000)
-    })
-  })
-
   describe('isAIConfigured', () => {
-    it('should return false when Google API key is missing', () => {
-      delete process.env.GOOGLE_API_KEY
+    it('should return false when Cloudflare configuration is missing', async () => {
+      delete process.env.CLOUDFLARE_ACCOUNT_ID
+      delete process.env.CLOUDFLARE_GATEWAY_NAME
 
-      expect(isAIConfigured()).toBe(false)
+      const result = await isAIConfigured()
+      expect(result).toBe(false)
     })
 
-    it('should return true when Google API key is present', () => {
+    it('should return false when no provider API keys are configured', async () => {
+      process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
+      process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
+      delete process.env.GOOGLE_API_KEY
+      delete process.env.OPENAI_API_KEY
+      delete process.env.ANTHROPIC_API_KEY
+      delete process.env.DEEPSEEK_API_KEY
+
+      const result = await isAIConfigured()
+      expect(result).toBe(false)
+    })
+
+    it('should return true when properly configured', async () => {
+      process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
+      process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
       process.env.GOOGLE_API_KEY = 'test-google-key'
 
-      expect(isAIConfigured()).toBe(true)
+      const result = await isAIConfigured()
+      expect(result).toBe(true)
     })
   })
 
   describe('getAvailableTextModels', () => {
-    it('should return list of available Gemini text models', () => {
-      const models = getAvailableTextModels()
+    it('should return empty array when no providers configured', async () => {
+      delete process.env.GOOGLE_API_KEY
+      delete process.env.OPENAI_API_KEY
+      delete process.env.ANTHROPIC_API_KEY
+      delete process.env.DEEPSEEK_API_KEY
 
-      expect(models).toHaveLength(3)
+      const models = await getAvailableTextModels()
+      expect(models).toHaveLength(0)
+    })
+
+    it('should return Google model when configured', async () => {
+      process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
+      process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
+      process.env.GOOGLE_API_KEY = 'test-google-key'
+
+      const models = await getAvailableTextModels()
+      expect(models).toHaveLength(1)
       expect(models[0]).toEqual({
         id: 'gemini-1.5-flash',
-        name: 'Gemini 1.5 Flash',
+        name: 'gemini-1.5-flash (google via Cloudflare Gateway)',
         type: 'text',
         provider: 'google'
       })
     })
+
+    it('should return multiple models when multiple providers configured', async () => {
+      process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
+      process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
+      process.env.GOOGLE_API_KEY = 'test-google-key'
+      process.env.OPENAI_API_KEY = 'test-openai-key'
+
+      const models = await getAvailableTextModels()
+      expect(models).toHaveLength(2)
+      expect(models[0].provider).toBe('google')
+      expect(models[1].provider).toBe('openai')
+    })
   })
 
-  describe('getAvailableImageModels', () => {
-    it('should return list of available image models', () => {
-      const models = getAvailableImageModels()
+  describe('getProviderInfo', () => {
+    it('should return not configured when missing configuration', async () => {
+      delete process.env.CLOUDFLARE_ACCOUNT_ID
+      delete process.env.GOOGLE_API_KEY
 
-      expect(models).toHaveLength(1)
-      expect(models[0]).toEqual({
-        id: 'gemini-2.5-flash-image',
-        name: 'Nano Banana (Gemini 2.5 Flash Image)',
-        type: 'image',
-        provider: 'google'
-      })
+      const info = await getProviderInfo()
+      expect(info.name).toBe('Not Configured')
+      expect(info.isConfigured).toBe(false)
+    })
+
+    it('should return provider info when configured', async () => {
+      process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
+      process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
+      process.env.GOOGLE_API_KEY = 'test-google-key'
+
+      const info = await getProviderInfo()
+      expect(info.name).toContain('google via Cloudflare Gateway')
+      expect(info.baseUrl).toContain('gateway.ai.cloudflare.com')
+      expect(info.model).toBe('gemini-1.5-flash')
     })
   })
 })

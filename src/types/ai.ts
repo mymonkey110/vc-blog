@@ -4,6 +4,52 @@
  */
 
 export interface AIConfiguration {
+  // Primary AI provider configuration
+  apiKey: string
+  model: string
+  
+  // Cloudflare AI Gateway configuration
+  cloudflare?: {
+    accountId: string
+    gatewayName: string
+    apiKey: string
+  }
+  
+  // Backup providers (optional)
+  backupProviders?: {
+    openai?: { apiKey: string }
+    anthropic?: { apiKey: string }
+    deepseek?: { apiKey: string }
+  }
+  
+  // Gateway options
+  options?: {
+    cacheTtl?: number
+    maxRetries?: number
+    retryDelayMs?: number
+    metadata?: { [key: string]: any }
+  }
+  
+  // Legacy fields for backward compatibility
+  baseUrl?: string
+  headers?: { [key: string]: string }
+  
+  // Prompt configuration
+  prompts: {
+    defaultDescriptionPrompt: string
+    customPrompts: { [key: string]: string }
+  }
+  
+  // Service limits
+  limits: {
+    maxDescriptionLength: number
+    maxPromptLength: number
+    requestTimeout: number
+  }
+}
+
+// Legacy interface for backward compatibility
+export interface LegacyAIConfiguration {
   textModel: {
     provider: 'google'
     modelId: string
@@ -25,6 +71,14 @@ export interface AIConfiguration {
   }
 }
 
+export interface ProviderInfo {
+  name: string
+  baseUrl?: string
+  model: string
+  isConfigured: boolean
+  hasBackup?: boolean
+}
+
 export interface ModelInfo {
   id: string
   name: string
@@ -38,12 +92,14 @@ export interface GenerationState {
   error?: string
   canRetry: boolean
   abortController?: AbortController
+  currentModel?: string
 }
 
 export interface DescriptionResult {
   description: string
   wordCount: number
   truncated: boolean
+  model: string
 }
 
 export interface ValidationResult {
@@ -71,9 +127,15 @@ export interface ImageResult {
 
 export interface AIServiceManager {
   generateDescription(content: string, prompt?: string): Promise<string>
-  generateImage(prompt: string, options?: ImageGenerationOptions): Promise<string>
-  validateApiKeys(): Promise<boolean>
-  getAvailableModels(): Promise<ModelInfo[]>
+  validateConfiguration(): Promise<boolean>
+  getProviderInfo(): Promise<ProviderInfo>
+}
+
+export interface AIConfigurationManager {
+  loadConfiguration(): Promise<AIConfiguration>
+  saveConfiguration(config: AIConfiguration): Promise<void>
+  validateConfiguration(config: AIConfiguration): Promise<boolean>
+  getConfiguration(): AIConfiguration
 }
 
 export interface DescriptionGeneratorService {
@@ -114,10 +176,17 @@ export class AIValidationError extends Error {
 }
 
 // Default configuration values
-export const DEFAULT_AI_CONFIG: Partial<AIConfiguration> = {
+export const DEFAULT_AI_CONFIG: AIConfiguration = {
+  apiKey: '',
+  model: 'gemini-1.5-flash',
+  options: {
+    cacheTtl: 3600,
+    maxRetries: 3,
+    retryDelayMs: 1000
+  },
   prompts: {
     defaultDescriptionPrompt: '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。',
-    defaultImagePrompt: '为这篇文章生成一个专业、简洁的封面图片，风格现代，适合技术博客。'
+    customPrompts: {}
   },
   limits: {
     maxDescriptionLength: 50,

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This feature integrates AI capabilities into the existing article editing interface to enhance content creation efficiency. The system provides two main AI-powered features: intelligent description generation from article content and AI-generated cover images using Google's Nano Banana Flash model. The implementation leverages the Vercel AI SDK for unified model integration while maintaining the existing UI patterns and user experience.
+This feature integrates AI-powered intelligent description generation into the existing article editing interface to enhance content creation efficiency. The system provides automatic article summary generation from content using configurable OpenAI-compatible language models through Vercel AI SDK 6. The implementation maintains existing UI patterns while adding seamless AI capabilities that can be configured to work with different LLM providers without code changes.
 
 ## Architecture
 
@@ -12,70 +12,71 @@ The AI enhancement follows a modular architecture that extends the current artic
 graph TB
     subgraph "Frontend Layer"
         AE[Article Editor Pages]
-        CIC[CoverImageInput Component]
         DG[Description Generator UI]
-        IG[Image Generator UI]
     end
 
     subgraph "AI Service Layer"
         AIS[AI Service Manager]
         DGS[Description Generator Service]
-        IGS[Image Generator Service]
         PT[Prompt Template Manager]
+        AC[AI Configuration Manager]
+    end
+
+    subgraph "Configuration Layer"
+        CF[Configuration Files]
+        ENV[Environment Variables]
     end
 
     subgraph "External APIs"
-        AISDK[Vercel AI SDK]
-        LLM[OpenAI-Compatible LLM]
-        NBF[Nano Banana Flash]
+        AISDK[Vercel AI SDK 6]
+        OAI[OpenAI API]
+        ANT[Anthropic API]
+        DS[DeepSeek API]
+        OTHER[Other OpenAI-Compatible APIs]
     end
 
     AE --> DG
-    AE --> CIC
-    CIC --> IG
     DG --> DGS
-    IG --> IGS
     DGS --> AIS
-    IGS --> AIS
     AIS --> PT
+    AIS --> AC
+    AC --> CF
+    AC --> ENV
     AIS --> AISDK
-    AISDK --> LLM
-    AISDK --> NBF
+    AISDK --> OAI
+    AISDK --> ANT
+    AISDK --> DS
+    AISDK --> OTHER
 ```
 
 ## Components and Interfaces
 
 ### AI Service Manager
 
-Central service that coordinates AI operations and manages API configurations.
+Central service that coordinates AI operations and manages configurable provider connections.
 
 **Interface:**
 
 ```typescript
 interface AIServiceManager {
   generateDescription(content: string, prompt?: string): Promise<string>;
-  generateImage(prompt: string, options?: ImageGenerationOptions): Promise<string>;
-  validateApiKeys(): Promise<boolean>;
-  getAvailableModels(): Promise<ModelInfo[]>;
+  validateConfiguration(): Promise<boolean>;
+  getAvailableProviders(): Promise<ProviderInfo[]>;
+  switchProvider(providerId: string): Promise<void>;
 }
 
-interface ImageGenerationOptions {
-  aspectRatio?: string;
-  size?: string;
-  seed?: number;
-}
-
-interface ModelInfo {
+interface ProviderInfo {
   id: string;
   name: string;
-  type: 'text' | 'image';
-  provider: string;
+  baseUrl: string;
+  model: string;
+  isConfigured: boolean;
 }
 ```
 
 ### Description Generator Service
 
-Handles intelligent description generation from article content.
+Handles intelligent description generation from article content with configurable prompts.
 
 **Interface:**
 
@@ -91,6 +92,8 @@ interface DescriptionResult {
   description: string;
   wordCount: number;
   truncated: boolean;
+  provider: string;
+  model: string;
 }
 
 interface ValidationResult {
@@ -100,52 +103,28 @@ interface ValidationResult {
 }
 ```
 
-### Image Generator Service
+### AI Configuration Manager
 
-Manages AI-powered cover image generation using Nano Banana Flash.
+Manages provider configurations and settings persistence.
 
 **Interface:**
 
 ```typescript
-interface ImageGeneratorService {
-  generateImage(prompt: string, options?: ImageGenerationOptions): Promise<ImageResult>;
-  validateImagePrompt(prompt: string): ValidationResult;
-  getDefaultImagePrompt(): string;
-  setDefaultImagePrompt(prompt: string): void;
+interface AIConfigurationManager {
+  loadConfiguration(): Promise<AIConfiguration>;
+  saveConfiguration(config: AIConfiguration): Promise<void>;
+  validateProvider(config: ProviderConfig): Promise<boolean>;
+  getActiveProvider(): ProviderConfig;
+  setActiveProvider(providerId: string): Promise<void>;
 }
 
-interface ImageResult {
-  imageUrl: string;
-  base64Data?: string;
-  metadata: {
-    model: string;
-    prompt: string;
-    aspectRatio: string;
-    generationTime: number;
-  };
-}
-```
-
-### Enhanced CoverImageInput Component
-
-Extended version of the existing component with AI generation capability.
-
-**New Props:**
-
-```typescript
-interface CoverImageInputProps {
-  // Existing props...
-  value: string;
-  onChange: (url: string) => void;
-  disabled?: boolean;
-  className?: string;
-
-  // New AI-related props
-  enableAIGeneration?: boolean;
-  articleContent?: string;
-  onAIGenerationStart?: () => void;
-  onAIGenerationComplete?: (result: ImageResult) => void;
-  onAIGenerationError?: (error: string) => void;
+interface ProviderConfig {
+  id: string;
+  name: string;
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  enabled: boolean;
 }
 ```
 
@@ -155,26 +134,29 @@ interface CoverImageInputProps {
 
 ```typescript
 interface AIConfiguration {
-  textModel: {
-    provider: string;
-    modelId: string;
-    apiKey: string;
-    baseUrl?: string;
+  providers: {
+    [key: string]: ProviderConfig;
   };
-  imageModel: {
-    provider: 'google';
-    modelId: 'gemini-2.5-flash-image';
-    apiKey: string;
-  };
+  activeProvider: string;
   prompts: {
     defaultDescriptionPrompt: string;
-    defaultImagePrompt: string;
+    customPrompts: { [key: string]: string };
   };
   limits: {
     maxDescriptionLength: number;
     maxPromptLength: number;
     requestTimeout: number;
   };
+}
+
+interface ProviderConfig {
+  id: string;
+  name: string;
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  enabled: boolean;
+  headers?: { [key: string]: string };
 }
 ```
 
@@ -187,6 +169,7 @@ interface GenerationState {
   error?: string;
   canRetry: boolean;
   abortController?: AbortController;
+  currentProvider?: string;
 }
 ```
 
@@ -198,10 +181,10 @@ _A property is a characteristic or behavior that should hold true across all val
 
 After analyzing the prework, I identified several properties that can be consolidated:
 
-- Properties 1.2, 1.3, 2.4 all test prompt template usage and can be combined into a comprehensive prompt management property
-- Properties 2.2, 3.3 both test model configuration and can be combined
-- Properties 4.2, 4.3 both test UI state updates and can be combined
-- Properties 1.4 and 5.3 both relate to content quality validation
+- Properties 1.2, 1.3, 2.6 all test configuration management and can be combined into a comprehensive configuration property
+- Properties 2.2, 2.3 both test provider switching and can be combined
+- Properties 3.2, 3.3 both test UI state updates and can be combined
+- Properties 4.1, 4.2, 4.5 all relate to error handling and can be combined
 
 ### Core Properties
 
@@ -209,29 +192,29 @@ After analyzing the prework, I identified several properties that can be consoli
 _For any_ article content with sufficient text, generating a description should produce a non-empty summary that respects the configured length limits
 **Validates: Requirements 1.1, 1.4**
 
-**Property 2: Prompt Template Management**
-_For any_ valid prompt template change, subsequent AI operations should use the updated prompt immediately without requiring system restart
-**Validates: Requirements 1.2, 1.3, 2.4**
+**Property 2: Configuration Management**
+_For any_ valid configuration change (prompt templates, provider settings), the system should apply the new settings immediately without requiring restart
+**Validates: Requirements 1.2, 1.3, 2.6**
 
-**Property 3: Model Configuration Integrity**
-_For any_ AI operation, the system should use the correctly configured model (OpenAI-compatible for text, Nano Banana Flash for images) as specified in the environment configuration
-**Validates: Requirements 2.2, 3.2, 3.3**
+**Property 3: Provider Integration**
+_For any_ configured OpenAI-compatible provider, the system should successfully route API calls to the correct endpoint and use the specified model
+**Validates: Requirements 2.2, 2.3**
 
-**Property 4: Image Generation Completeness**
-_For any_ successful image generation request, the result should include a valid image URL and complete metadata including model, prompt, and generation parameters
-**Validates: Requirements 2.3, 2.5**
+**Property 4: Input Validation**
+_For any_ invalid input (empty content, invalid prompts, missing API keys), the system should provide appropriate error messages without exposing sensitive information
+**Validates: Requirements 1.5, 2.4, 4.4**
 
 **Property 5: UI State Synchronization**
 _For any_ AI operation state change (start, progress, complete, error), the user interface should reflect the current state accurately with appropriate visual feedback
-**Validates: Requirements 4.2, 4.3**
+**Validates: Requirements 3.2, 3.3**
 
-**Property 6: API Key Validation**
-_For any_ system initialization, the AI SDK should successfully authenticate with configured API keys or provide clear error messages without exposing sensitive information
-**Validates: Requirements 3.1**
+**Property 6: Configuration Loading**
+_For any_ system initialization, the configuration manager should successfully load provider settings from configuration files or provide clear error messages
+**Validates: Requirements 2.1**
 
-**Property 7: Content Quality Assurance**
-_For any_ generated content that doesn't meet quality standards, the system should provide regeneration options with different parameters
-**Validates: Requirements 5.3**
+**Property 7: Error Handling and Graceful Degradation**
+_For any_ service error (network issues, rate limits, service unavailability), the system should handle errors gracefully and maintain functionality where possible
+**Validates: Requirements 4.1, 4.2, 4.3, 4.5**
 
 ## Error Handling
 
@@ -300,9 +283,9 @@ The testing strategy employs both unit tests and property-based tests to ensure 
 **Testing Focus Areas:**
 
 - **Description Generation:** Content parsing, length validation, prompt handling
-- **Image Generation:** Model integration, result processing, error handling
+- **Provider Configuration:** API key handling, endpoint switching, model selection
 - **UI Integration:** State management, loading indicators, error display
-- **Configuration Management:** API key handling, model switching, prompt updates
+- **Configuration Management:** Hot reloading, validation, persistence
 - **Error Scenarios:** Network failures, invalid inputs, service unavailability
 
 The combination ensures that unit tests catch concrete bugs while property tests verify general correctness across the input space.

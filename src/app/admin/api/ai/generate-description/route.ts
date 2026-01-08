@@ -5,8 +5,7 @@
 
 import { NextRequest } from 'next/server'
 import { streamText } from 'ai'
-import { getTextModel } from '@/lib/ai-config'
-import { isAIConfigured } from '@/lib/ai-config'
+import { getTextModel, isAIConfigured } from '@/lib/ai-config'
 
 interface GenerateDescriptionRequest {
   content: string
@@ -16,7 +15,7 @@ interface GenerateDescriptionRequest {
 export async function POST(request: NextRequest) {
   try {
     // Check if AI services are configured
-    if (!isAIConfigured()) {
+    if (!(await isAIConfigured())) {
       return new Response(
         JSON.stringify({ 
           error: 'AI服务未配置',
@@ -77,8 +76,8 @@ export async function POST(request: NextRequest) {
     const defaultPrompt = customPrompt || '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。'
     const fullPrompt = `${defaultPrompt}\n\n文章内容：\n${content.substring(0, 2000)}`
 
-    // Get the text model
-    const model = getTextModel()
+    // Get the text model from active provider
+    const model = await getTextModel()
 
     // Stream the response
     const result = await streamText({
@@ -103,6 +102,20 @@ export async function POST(request: NextRequest) {
         }),
         { 
           status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Handle configuration errors
+    if (error instanceof Error && error.message.includes('provider')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'AI服务配置错误',
+          message: 'AI服务提供商配置有误，请检查设置'
+        }),
+        { 
+          status: 503,
           headers: { 'Content-Type': 'application/json' }
         }
       )

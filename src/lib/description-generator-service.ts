@@ -84,7 +84,7 @@ export class DescriptionGeneratorServiceImpl implements DescriptionGeneratorServ
         aiProgressTracker.updateProgress(progressId, 30, '正在生成描述...');
       }
 
-      const textModel = getTextModel()
+      const textModel = await getTextModel()
       
       const result = await generateText({
         model: textModel,
@@ -125,7 +125,8 @@ export class DescriptionGeneratorServiceImpl implements DescriptionGeneratorServ
       const descriptionResult: DescriptionResult = {
         description,
         wordCount,
-        truncated
+        truncated,
+        model: 'cloudflare-gateway'
       };
 
       // Cache the result

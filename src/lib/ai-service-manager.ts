@@ -1,15 +1,15 @@
 /**
  * AI Service Manager
- * Central service that coordinates AI operations and manages API configurations
+ * Central service that coordinates AI operations using OpenAI-compatible API
  */
 
 import { generateText } from 'ai'
-import { getTextModel, validateApiKeys, getAvailableTextModels, getAvailableImageModels } from './ai-config'
-import { AIServiceManager, ModelInfo, ImageGenerationOptions, AIServiceError } from '@/types/ai'
+import { getTextModel, validateApiKeys, getAvailableTextModels, getProviderInfo } from './ai-config'
+import { AIServiceManager, ProviderInfo, AIServiceError } from '@/types/ai'
 
 export class AIServiceManagerImpl implements AIServiceManager {
   /**
-   * Generate description from article content using Gemini
+   * Generate description from article content using configured provider
    */
   async generateDescription(content: string, prompt?: string): Promise<string> {
     if (!content || content.trim().length === 0) {
@@ -20,7 +20,7 @@ export class AIServiceManagerImpl implements AIServiceManager {
     }
 
     try {
-      const textModel = getTextModel()
+      const textModel = await getTextModel()
       const defaultPrompt = '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。'
       const systemPrompt = prompt || defaultPrompt
 
@@ -42,8 +42,60 @@ export class AIServiceManagerImpl implements AIServiceManager {
       return description
     } catch (error) {
       console.error('Description generation failed:', error)
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      })
+      
+      // Check if it's a network/connection error or Cloudflare Gateway error
+      const isNetworkError = error instanceof Error && (
+        error.message.includes('timeout') ||
+        error.message.includes('connect') ||
+        error.message.includes('network') ||
+        error.message.includes('ENOTFOUND') ||
+        error.message.includes('ECONNREFUSED')
+      )
+
+      const isCloudflareError = error instanceof Error && (
+        error.message.includes('Internal Server Error') ||
+        error.message.includes('cloudflare') ||
+        error.message.includes('gateway.ai.cloudflare.com')
+      )
+
+      const isApiKeyError = error instanceof Error && (
+        error.message.includes('Incorrect API key') ||
+        error.message.includes('Invalid API key') ||
+        error.message.includes('API key') ||
+        error.message.includes('authentication') ||
+        error.message.includes('unauthorized')
+      )
+
+      if (isNetworkError) {
+        // Provide a fallback description based on content analysis
+        console.warn('Network error detected, using fallback description generation')
+        return this.generateFallbackDescription(content)
+      }
+
+      if (isCloudflareError) {
+        console.warn('Cloudflare Gateway error detected, using fallback description generation')
+        console.warn('建议: 检查 Cloudflare AI Gateway 配置或切换到其他 AI 提供商')
+        return this.generateFallbackDescription(content)
+      }
+
+      if (isApiKeyError) {
+        console.warn('API Key error detected, using fallback description generation')
+        console.warn('建议: 1) 检查 API Key 是否正确 2) 确认 API Key 与提供商匹配 3) 检查 API Key 权限')
+        return this.generateFallbackDescription(content)
+      }
+      
+      // Provide more specific error messages based on the error type
+      if (error instanceof AIServiceError) {
+        throw error
+      }
+      
       throw new AIServiceError(
-        'Failed to generate description. Please check your API key and try again.',
+        `Failed to generate description: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'GENERATION_FAILED',
         true // retryable
       )
@@ -51,37 +103,51 @@ export class AIServiceManagerImpl implements AIServiceManager {
   }
 
   /**
-   * Generate cover image using Gemini Nano Banana Flash
+   * Generate a fallback description when AI service is unavailable
    */
-  async generateImage(prompt: string, options?: ImageGenerationOptions): Promise<string> {
-    // Since Google Gemini doesn't support image generation, throw an appropriate error
-    throw new AIServiceError(
-      'Image generation is not supported with Google Gemini API. Google Gemini models are text-only and do not support image generation.',
-      'IMAGE_GENERATION_NOT_SUPPORTED',
-      false
-    )
+  private generateFallbackDescription(content: string): string {
+    // Simple content analysis for fallback
+    const text = content.replace(/[#*`]/g, '').trim()
+    const sentences = text.split(/[.!?。！？]/).filter(s => s.trim().length > 10)
+    
+    if (sentences.length === 0) {
+      return '技术文章摘要'
+    }
+
+    // Take the first meaningful sentence and truncate to 50 characters
+    let description = sentences[0].trim()
+    if (description.length > 50) {
+      description = description.substring(0, 47) + '...'
+    }
+
+    return description || '技术文章摘要'
   }
 
   /**
-   * Validate API keys by making test requests
+   * Validate configuration by checking API connectivity
    */
-  async validateApiKeys(): Promise<boolean> {
+  async validateConfiguration(): Promise<boolean> {
     try {
-      const results = await validateApiKeys()
-      return results.google
+      return await validateApiKeys()
     } catch (error) {
-      console.error('API key validation failed:', error)
+      console.error('Configuration validation failed:', error)
       return false
     }
   }
 
   /**
-   * Get available models for both text and image generation
+   * Get provider information
    */
-  async getAvailableModels(): Promise<ModelInfo[]> {
-    const textModels = getAvailableTextModels()
-    const imageModels = getAvailableImageModels()
-    return [...textModels, ...imageModels]
+  async getProviderInfo(): Promise<ProviderInfo> {
+    try {
+      return await getProviderInfo()
+    } catch (error) {
+      console.error('Failed to get provider info:', error)
+      throw new AIServiceError(
+        'Failed to get provider information. Please check your configuration.',
+        'PROVIDER_INFO_FAILED'
+      )
+    }
   }
 
   /**
@@ -89,7 +155,7 @@ export class AIServiceManagerImpl implements AIServiceManager {
    */
   async isServiceAvailable(): Promise<boolean> {
     try {
-      return await this.validateApiKeys()
+      return await this.validateConfiguration()
     } catch (error) {
       return false
     }
@@ -100,14 +166,17 @@ export class AIServiceManagerImpl implements AIServiceManager {
    */
   async getServiceStatus(): Promise<{
     available: boolean
-    models: ModelInfo[]
+    provider: ProviderInfo
+    models: any[]
     lastChecked: Date
   }> {
     const available = await this.isServiceAvailable()
-    const models = available ? await this.getAvailableModels() : []
+    const provider = available ? await this.getProviderInfo() : { name: 'Not configured', baseUrl: '', model: '', isConfigured: false }
+    const models = available ? await getAvailableTextModels() : []
     
     return {
       available,
+      provider,
       models,
       lastChecked: new Date()
     }

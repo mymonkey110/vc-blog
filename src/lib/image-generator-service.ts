@@ -1,9 +1,8 @@
 /**
  * Image Generator Service
- * Manages AI-powered cover image generation using Nano Banana Flash
+ * Manages AI-powered cover image generation (currently disabled)
  */
 
-import { getImageModel } from './ai-config'
 import { ImageGeneratorService, ImageResult, ImageGenerationOptions, ValidationResult, AIServiceError, AIValidationError } from '@/types/ai'
 
 export class ImageGeneratorServiceImpl implements ImageGeneratorService {
@@ -11,12 +10,12 @@ export class ImageGeneratorServiceImpl implements ImageGeneratorService {
   private maxPromptLength = 1000
 
   /**
-   * Generate cover image using Gemini Nano Banana Flash
+   * Generate cover image (currently not supported)
    */
   async generateImage(prompt: string, options?: ImageGenerationOptions): Promise<ImageResult> {
-    // Since Google Gemini doesn't support image generation, return an error with helpful message
+    // Image generation is not supported in the current configuration
     throw new AIServiceError(
-      'Image generation is not supported with Google Gemini API. Google Gemini models are text-only and do not support image generation. To enable image generation, you would need to configure an image generation provider like OpenAI DALL-E, Stability AI, or similar services.',
+      'Image generation is not supported in the current AI configuration. This feature focuses on text-based description generation only.',
       'IMAGE_GENERATION_NOT_SUPPORTED',
       false
     )
@@ -117,7 +116,7 @@ export class ImageGeneratorServiceImpl implements ImageGeneratorService {
   }
 
   /**
-   * Generate image with article context
+   * Generate image with article context (currently not supported)
    */
   async generateImageWithContext(
     articleTitle: string, 
@@ -125,9 +124,9 @@ export class ImageGeneratorServiceImpl implements ImageGeneratorService {
     customPrompt?: string,
     options?: ImageGenerationOptions
   ): Promise<ImageResult> {
-    // Since Google Gemini doesn't support image generation, return the same error
+    // Image generation is not supported in the current configuration
     throw new AIServiceError(
-      'Image generation is not supported with Google Gemini API. Google Gemini models are text-only and do not support image generation. To enable image generation, you would need to configure an image generation provider like OpenAI DALL-E, Stability AI, or similar services.',
+      'Image generation is not supported in the current AI configuration. This feature focuses on text-based description generation only.',
       'IMAGE_GENERATION_NOT_SUPPORTED',
       false
     )

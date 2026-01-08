@@ -12,9 +12,9 @@ export async function proxy(request: NextRequest) {
     isLoggedIn = await verifySession(token);
   }
 
-  console.log(
-    `中间件调试 - URL: ${request.nextUrl.pathname}, 已登录: ${isLoggedIn}, token: ${token}`,
-  );
+  // console.log(
+  //   `中间件调试 - URL: ${request.nextUrl.pathname}, 已登录: ${isLoggedIn}, token: ${token}`,
+  // );
 
   // 如果用户在登录页面且已登录，重定向到后台首页
   if (isLoggedIn && request.nextUrl.pathname === '/admin/login') {
@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
       request.nextUrl.pathname !== '/admin/login') ||
       request.nextUrl.pathname.startsWith('/api/articles'))
   ) {
-    console.log(`中间件: 用户未登录且访问受保护路径，URL: ${request.nextUrl.pathname}`);
+    console.warn(`中间件: 用户未登录且访问受保护路径，URL: ${request.nextUrl.pathname}`);
 
     if (isApiRequest || request.nextUrl.pathname.startsWith('/api')) {
       // API请求返回JSON响应

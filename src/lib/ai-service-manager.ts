@@ -34,6 +34,7 @@ export class AIServiceManagerImpl implements AIServiceManager {
 
       let description = result.text.trim()
       
+      console.info(`ai description:${description}`)
       // Ensure description doesn't exceed 50 characters
       if (description.length > 50) {
         description = description.substring(0, 47) + '...'

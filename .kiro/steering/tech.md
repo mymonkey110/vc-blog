@@ -93,6 +93,7 @@ npx prisma migrate   # Run database migrations
 - **Entity Fields**: camelCase (e.g., `createdAt`, `categoryName`)
 - **Database Schema**: snake_case mapping (e.g., `created_at`, `category_name`)
 - **Files/Functions**: Follow ordinary conventions (camelCase for functions, kebab-case for files)
+- **API URL PATH**: camelCase (e.g., `/admim/api/generateDescription`)
 
 ## SSG Requirements
 

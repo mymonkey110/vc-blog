@@ -82,21 +82,25 @@ export default function DescriptionGeneratorUI({
           if (done) break
           
           const chunk = decoder.decode(value, { stream: true })
-          const lines = chunk.split('\n')
           
+          // Handle Vercel AI SDK streaming format
+          const lines = chunk.split('\n')
           for (const line of lines) {
-            if (line.startsWith('0:')) {
-              // Parse the streaming data
+            if (line.startsWith('0:"') && line.endsWith('"')) {
               try {
-                const jsonStr = line.substring(2)
-                const data = JSON.parse(jsonStr)
-                if (data && typeof data === 'string') {
-                  accumulatedText += data
-                  setGeneratedText(accumulatedText)
-                }
+                // Extract text and parse as JSON to handle escaping
+                const jsonStr = line.slice(2) // Remove '0:' -> "text"
+                const text = JSON.parse(jsonStr) // Parse "text" -> text
+                accumulatedText += text
+                setGeneratedText(accumulatedText)
               } catch (e) {
                 // Ignore parsing errors for partial chunks
+                console.warn('Failed to parse streaming chunk:', line, e)
               }
+            } else if (line.trim() && !line.startsWith('0:')) {
+              // Handle plain text streaming
+              accumulatedText += line
+              setGeneratedText(accumulatedText)
             }
           }
         }
@@ -133,7 +137,7 @@ export default function DescriptionGeneratorUI({
       // Limit to 50 characters as specified
       const trimmedText = generatedText.trim().substring(0, 50)
       onDescriptionGenerated(trimmedText)
-      setGeneratedText('')
+      setGeneratedText('') // Clear the generated text after accepting
     }
   }, [generatedText, onDescriptionGenerated])
 

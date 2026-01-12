@@ -78,6 +78,11 @@
     "typescript": "5.5.3",
     "vitest": "^4.0.16"
   },
+  "overrides": {
+    "@openrouter/ai-sdk-provider": {
+      "ai": "^6.0.17"
+    }
+  },
   "type": "module",
   "private": true
 }

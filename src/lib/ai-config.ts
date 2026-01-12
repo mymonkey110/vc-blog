@@ -16,7 +16,7 @@ export async function getTextModel() {
   const gateway = process.env.CLOUDFLARE_GATEWAY_NAME
   const cfToken = process.env.CLOUDFLARE_API_KEY
   const apiKey = process.env.AI_API_KEY
-  const model = process.env.AI_MODEL || 'google/gemini-1.5-flash'
+  const model = process.env.AI_MODEL!
 
   if (!accountId) {
     throw new AIServiceError(

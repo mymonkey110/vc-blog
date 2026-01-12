@@ -7,8 +7,6 @@ import { Label } from '@/components/ui/label'
 import { 
   Wand2, 
   RefreshCw, 
-  Check, 
-  X, 
   Settings, 
   Loader2, 
   RotateCcw,
@@ -34,10 +32,9 @@ interface InlineAIState {
   isGenerating: boolean
   showPromptEditor: boolean
   customPrompt: string
-  streamingText: string
   error?: string
   canReset: boolean
-  showGeneratedOptions: boolean
+  isAIGenerated: boolean
 }
 
 export default function InlineAIDescriptionInput({
@@ -57,10 +54,9 @@ export default function InlineAIDescriptionInput({
     isGenerating: false,
     showPromptEditor: false,
     customPrompt: '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。',
-    streamingText: '',
     error: undefined,
     canReset: Boolean(originalValue && originalValue !== value),
-    showGeneratedOptions: false
+    isAIGenerated: false
   })
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -96,8 +92,7 @@ export default function InlineAIDescriptionInput({
       ...prev,
       isGenerating: true,
       error: undefined,
-      streamingText: '',
-      showGeneratedOptions: false
+      isAIGenerated: false
     }))
 
     try {
@@ -118,7 +113,7 @@ export default function InlineAIDescriptionInput({
         throw new Error(errorData.message || '生成描述失败')
       }
 
-      // Handle AI SDK 6 native SSE streaming
+      // Handle AI SDK 6 data stream protocol with Server-Sent Events
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
       let accumulatedText = ''
@@ -131,37 +126,44 @@ export default function InlineAIDescriptionInput({
           
           const chunk = decoder.decode(value, { stream: true })
           
-          // Parse AI SDK 6 stream format
+          // Parse Server-Sent Events format
           const lines = chunk.split('\n')
           for (const line of lines) {
-            if (line.startsWith('0:')) {
-              try {
-                // AI SDK 6 format: 0:"text chunk"
-                const jsonStr = line.slice(2) // Remove '0:'
-                const text = JSON.parse(jsonStr) // Parse the JSON string
-                accumulatedText += text
-                setState(prev => ({
-                  ...prev,
-                  streamingText: accumulatedText
-                }))
-              } catch (e) {
-                console.warn('Failed to parse AI SDK chunk:', line, e)
+            // Skip empty lines
+            if (!line.trim()) continue
+            
+            // Handle SSE data lines
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6) // Remove 'data: ' prefix
+              
+              // Skip [DONE] termination signal
+              if (jsonStr.trim() === '[DONE]') {
+                continue
               }
-            } else if (line.startsWith('d:')) {
+              
               try {
-                // AI SDK 6 data format: d:{"type":"text-delta","textDelta":"chunk"}
-                const jsonStr = line.slice(2) // Remove 'd:'
                 const data = JSON.parse(jsonStr)
-                if (data.type === 'text-delta' && data.textDelta) {
-                  accumulatedText += data.textDelta
+                // Handle AI SDK 6 data stream protocol
+                if (data.type === 'text-delta' && data.delta) {
+                  // Text delta part - incremental text content
+                  accumulatedText += data.delta
+                  // Update the main value with full content (no 50 char limit during streaming)
+                  onChange(accumulatedText)
                   setState(prev => ({
                     ...prev,
-                    streamingText: accumulatedText
+                    isAIGenerated: true
                   }))
                 }
               } catch (e) {
-                console.warn('Failed to parse AI SDK data chunk:', line, e)
+                console.warn('Failed to parse SSE data:', jsonStr, e)
               }
+            } else if (line.startsWith('event: ') || line.startsWith('id: ')) {
+              // Skip SSE metadata lines
+              continue
+            } else if (line.trim() === '[DONE]') {
+              // Handle direct [DONE] signal
+              console.log('Stream completed')
+              break
             }
           }
         }
@@ -169,8 +171,7 @@ export default function InlineAIDescriptionInput({
 
       setState(prev => ({
         ...prev,
-        isGenerating: false,
-        showGeneratedOptions: true
+        isGenerating: false
       }))
 
     } catch (error) {
@@ -185,36 +186,12 @@ export default function InlineAIDescriptionInput({
         ...prev,
         isGenerating: false,
         error: errorMessage,
-        streamingText: ''
+        isAIGenerated: false
       }))
     } finally {
       abortControllerRef.current = null
     }
   }, [articleContent, state.customPrompt])
-
-  // Accept generated description
-  const handleAccept = useCallback(() => {
-    if (state.streamingText.trim()) {
-      // Limit to 50 characters as specified
-      const trimmedText = state.streamingText.trim().substring(0, 50)
-      onChange(trimmedText)
-      setState(prev => ({
-        ...prev,
-        streamingText: '',
-        showGeneratedOptions: false,
-        canReset: Boolean(originalValue && originalValue !== trimmedText)
-      }))
-    }
-  }, [state.streamingText, onChange, originalValue])
-
-  // Reject generated description
-  const handleReject = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      streamingText: '',
-      showGeneratedOptions: false
-    }))
-  }, [])
 
   // Reset to original value
   const handleReset = useCallback(() => {
@@ -223,12 +200,21 @@ export default function InlineAIDescriptionInput({
       setState(prev => ({
         ...prev,
         canReset: false,
-        streamingText: '',
-        showGeneratedOptions: false,
+        isAIGenerated: false,
         error: undefined
       }))
     }
   }, [originalValue, onChange])
+
+  // Handle manual text change
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    onChange(newValue)
+    setState(prev => ({
+      ...prev,
+      isAIGenerated: false // Reset AI generated flag when manually editing
+    }))
+  }, [onChange])
 
   // Handle prompt change
   const handlePromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -256,26 +242,51 @@ export default function InlineAIDescriptionInput({
     setState(prev => ({
       ...prev,
       isGenerating: false,
-      streamingText: '',
-      showGeneratedOptions: false
+      isAIGenerated: false
     }))
   }, [])
 
   const hasContent = articleContent && articleContent.trim().length > 0
   const canGenerate = hasContent && !state.isGenerating && !disabled
-  const displayValue = state.isGenerating && state.streamingText 
-    ? state.streamingText 
-    : value
+  const currentLength = value.length
 
   return (
     <div className={`space-y-2 ${className}`}>
       {/* Label and Action Buttons */}
       <div className="flex items-center justify-between">
-        <Label htmlFor={id} className="text-sm font-medium">
-          {label}
-        </Label>
+        <div className="flex items-center gap-2">
+          <Label htmlFor={id} className="text-sm font-medium">
+            {label}
+          </Label>
+          {/* Character Count */}
+          <span className="text-xs text-stone-500">
+            {currentLength}字
+          </span>
+        </div>
         <div className="flex items-center gap-1">
-          {/* Reset Button */}
+          {/* Reset Button - always show if there's content */}
+          {value && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onChange('')
+                setState(prev => ({
+                  ...prev,
+                  isAIGenerated: false,
+                  error: undefined
+                }))
+              }}
+              disabled={disabled || state.isGenerating}
+              className="h-7 px-2 text-xs text-stone-500 hover:text-stone-700"
+              title="清空内容"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </Button>
+          )}
+
+          {/* Reset to Original Button - only show if originalValue exists and differs */}
           {state.canReset && (
             <Button
               type="button"
@@ -287,6 +298,7 @@ export default function InlineAIDescriptionInput({
               title="重置到原始值"
             >
               <RotateCcw className="h-3 w-3" />
+              原始
             </Button>
           )}
           
@@ -331,7 +343,7 @@ export default function InlineAIDescriptionInput({
 
       {/* Prompt Editor */}
       {state.showPromptEditor && (
-        <div className="p-3 bg-stone-50 rounded-md border space-y-2">
+        <div className="p-3 bg-white rounded-md border space-y-2">
           <Label htmlFor="custom-prompt" className="text-xs font-medium">
             自定义提示词
           </Label>
@@ -365,13 +377,17 @@ export default function InlineAIDescriptionInput({
           ref={textareaRef}
           id={id}
           name={name}
-          value={displayValue}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={handleTextChange}
           placeholder={placeholder}
           rows={rows}
           disabled={disabled || state.isGenerating}
-          className={`resize-none ${state.isGenerating ? 'bg-blue-50' : ''} ${
-            state.streamingText ? 'text-blue-700' : ''
+          className={`resize-none transition-all duration-200 ${
+            state.isGenerating ? 'bg-blue-50' : ''
+          } ${
+            state.isAIGenerated 
+              ? 'border-green-400 shadow-sm shadow-green-100 bg-green-50/30' 
+              : ''
           }`}
         />
         
@@ -380,60 +396,12 @@ export default function InlineAIDescriptionInput({
           <div className="absolute bottom-2 right-2 flex items-center gap-1 text-xs text-blue-600">
             <Loader2 className="h-3 w-3 animate-spin" />
             生成中...
-            {state.streamingText && (
-              <span className="text-blue-500">
-                ({state.streamingText.length}/50)
-              </span>
-            )}
+            <span className="text-blue-500">
+              {currentLength}字
+            </span>
           </div>
         )}
       </div>
-
-      {/* Generated Content Actions */}
-      {state.showGeneratedOptions && state.streamingText && (
-        <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-md">
-          <div className="flex-1">
-            <div className="text-xs text-green-700 mb-1">
-              生成的描述 ({state.streamingText.length}/50字)
-            </div>
-            <div className="text-sm text-green-800 font-medium">
-              {state.streamingText.substring(0, 50)}
-              {state.streamingText.length > 50 && (
-                <span className="text-amber-600 text-xs ml-1">(将截断)</span>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-1 ml-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleReject}
-              className="h-7 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleGenerate}
-              className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
-              <RefreshCw className="h-3 w-3" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleAccept}
-              className="h-7 px-2 text-xs bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Check className="h-3 w-3 mr-1" />
-              采用
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Error Display */}
       {state.error && (

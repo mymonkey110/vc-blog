@@ -70,7 +70,7 @@ export default function DescriptionGeneratorUI({
         throw new Error(errorData.message || '生成描述失败')
       }
 
-      // Handle streaming response
+      // Handle AI SDK 6 data stream protocol with Server-Sent Events
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
       let accumulatedText = ''
@@ -83,24 +83,39 @@ export default function DescriptionGeneratorUI({
           
           const chunk = decoder.decode(value, { stream: true })
           
-          // Handle Vercel AI SDK streaming format
+          // Parse Server-Sent Events format
           const lines = chunk.split('\n')
           for (const line of lines) {
-            if (line.startsWith('0:"') && line.endsWith('"')) {
-              try {
-                // Extract text and parse as JSON to handle escaping
-                const jsonStr = line.slice(2) // Remove '0:' -> "text"
-                const text = JSON.parse(jsonStr) // Parse "text" -> text
-                accumulatedText += text
-                setGeneratedText(accumulatedText)
-              } catch (e) {
-                // Ignore parsing errors for partial chunks
-                console.warn('Failed to parse streaming chunk:', line, e)
+            // Skip empty lines
+            if (!line.trim()) continue
+            
+            // Handle SSE data lines
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6) // Remove 'data: ' prefix
+              
+              // Skip [DONE] termination signal
+              if (jsonStr.trim() === '[DONE]') {
+                continue
               }
-            } else if (line.trim() && !line.startsWith('0:')) {
-              // Handle plain text streaming
-              accumulatedText += line
-              setGeneratedText(accumulatedText)
+              
+              try {
+                const data = JSON.parse(jsonStr)
+                // Handle AI SDK 6 data stream protocol
+                if (data.type === 'text-delta' && data.delta) {
+                  // Text delta part - incremental text content
+                  accumulatedText += data.delta
+                  setGeneratedText(accumulatedText)
+                }
+              } catch (e) {
+                console.warn('Failed to parse SSE data:', jsonStr, e)
+              }
+            } else if (line.startsWith('event: ') || line.startsWith('id: ')) {
+              // Skip SSE metadata lines
+              continue
+            } else if (line.trim() === '[DONE]') {
+              // Handle direct [DONE] signal
+              console.log('Stream completed')
+              break
             }
           }
         }

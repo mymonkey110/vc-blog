@@ -27,30 +27,32 @@ This feature enhances the article editing and creation interface with AI-powered
 4. WHEN the generated description exceeds 50 characters, THE AI_Description_Generator SHALL truncate or regenerate to meet the length requirement
 5. WHEN the article content is empty or insufficient, THE AI_Description_Generator SHALL return an appropriate error message
 
-### Requirement 2: Configurable AI Provider Integration
+### Requirement 2: Server-Sent Events Streaming Integration
 
-**User Story:** As a system administrator, I want to configure different OpenAI-compatible AI providers through configuration files, so that I can switch between different LLM services without code changes.
+**User Story:** As a content creator, I want to see AI-generated descriptions appear in real-time as they are being generated, so that I can get immediate feedback and feel the system is responsive.
 
 #### Acceptance Criteria
 
 1. WHEN the system initializes, THE AI_Configuration SHALL read provider settings from configuration files including API key, base URL, and model name
-2. WHEN making API calls, THE AI_SDK SHALL use the configured OpenAI-compatible provider endpoint
+2. WHEN making API calls, THE AI_SDK SHALL use Server-Sent Events (text/event-stream) format for real-time streaming responses
 3. WHEN switching providers, THE System SHALL support different OpenAI-compatible services (OpenAI, Anthropic, DeepSeek, etc.) through configuration only
 4. WHEN API keys are missing or invalid, THE System SHALL provide clear error messages without exposing sensitive information
 5. WHEN API rate limits are exceeded, THE System SHALL handle errors gracefully and inform the user
 6. WHEN configuration is updated, THE System SHALL apply new settings without requiring code deployment
+7. WHEN streaming responses, THE System SHALL send properly formatted SSE events with data chunks for real-time display
 
-### Requirement 3: User Interface Integration
+### Requirement 3: Inline User Interface Integration
 
-**User Story:** As a content creator, I want AI description generation seamlessly integrated into the existing editing interface, so that I can access it without disrupting my workflow.
+**User Story:** As a content creator, I want AI description generation embedded directly into the description input field, so that I can access it without disrupting my workflow or taking up additional screen space.
 
 #### Acceptance Criteria
 
-1. WHEN viewing the article editing page, THE Article_Editor SHALL display an AI generation button for description generation
-2. WHEN AI operations are in progress, THE Article_Editor SHALL show appropriate loading states with progress indicators
-3. WHEN AI operations complete, THE Article_Editor SHALL update the description field with generated content
-4. WHEN users want to customize prompts, THE Article_Editor SHALL provide inline editing capabilities for prompt templates
-5. WHEN generated content is available, THE Article_Editor SHALL allow users to accept, reject, or regenerate the content
+1. WHEN viewing the article editing page, THE Article_Editor SHALL display an "智能生成" icon button inline with the description textarea
+2. WHEN the AI generation button is clicked, THE Article_Editor SHALL show a custom prompt input option and generate description using Server-Sent Events streaming
+3. WHEN AI operations are in progress, THE Article_Editor SHALL show streaming text updates directly in the description field with loading indicators
+4. WHEN users want to customize prompts, THE Article_Editor SHALL provide an inline prompt editor that appears on demand
+5. WHEN generated content is streaming, THE Article_Editor SHALL display the text in real-time and provide accept/reject/regenerate options
+6. WHEN users want to reset, THE Article_Editor SHALL provide a reset button to restore the original description value
 
 ### Requirement 4: Error Handling and Validation
 

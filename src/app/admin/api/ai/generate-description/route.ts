@@ -1,6 +1,6 @@
 /**
- * API Route: Generate Description
- * Handles AI-powered description generation from article content with streaming support
+ * API Route: Generate Description with Server-Sent Events
+ * Handles AI-powered description generation from article content with SSE streaming support
  */
 
 import { NextRequest } from 'next/server'
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Get the text model from active provider
     const model = await getTextModel()
 
-    // Stream the response
+    // Stream the AI response using AI SDK 6's native SSE support
     const result = await streamText({
       model,
       prompt: fullPrompt,
@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
       temperature: 0.7,
     })
 
-    // Return streaming response
-    return result.toTextStreamResponse()
+    // Return native Server-Sent Events response using AI SDK 6
+    return result.toUIMessageStreamResponse()
 
   } catch (error) {
     console.error('Description generation API error:', error)

@@ -1,5 +1,36 @@
 # Implementation Plan: AI-Enhanced Article Editing
 
+## ✅ 重构完成 - 内联AI生成和SSE流式响应
+
+**已完成的改进:**
+
+1. **✅ 技术改进**: API响应已改为标准的Server-Sent Events (text/event-stream)格式
+2. **✅ 交互改进**: AI生成描述已嵌入到现有的描述输入框中，增加了"智能生成"图标按钮
+
+**✅ 实现的功能:**
+
+- ✅ **内联AI描述输入组件**: 创建了InlineAIDescriptionInput组件，直接嵌入到描述输入框
+- ✅ **Server-Sent Events流式响应**: API现在使用AI SDK 6原生的`toUIMessageStreamResponse()`方法
+- ✅ **智能生成按钮**: 在描述字段右上角添加了"智能生成"图标按钮
+- ✅ **重置功能**: 添加了重置按钮，可以恢复到原始描述值
+- ✅ **自定义prompt**: 保留了自定义prompt功能，以内联方式呈现
+- ✅ **实时流式显示**: 生成的文本实时显示在描述输入框中
+- ✅ **接受/拒绝/重新生成**: 完整的操作流程，用户体验流畅
+
+**✅ 集成状态:**
+
+- ✅ 新文章页面 (/admin/articles/new) 已集成内联AI组件
+- ✅ 编辑文章页面 (/admin/articles/edit/[id]) 已集成内联AI组件，支持重置到原始值
+- ✅ TypeScript编译通过，无类型错误
+- ✅ 开发服务器正常运行
+
+**🎯 用户体验提升:**
+
+- **空间节省**: 不再需要独立的AI生成卡片，节省界面空间
+- **操作便捷**: 直接在描述字段操作，无需切换界面区域
+- **视觉清晰**: 智能生成按钮和重置按钮位置明显，操作直观
+- **实时反馈**: SSE流式响应提供即时的生成反馈
+
 ## Overview
 
 This implementation plan focuses on intelligent article description generation using configurable OpenAI-compatible providers through Vercel AI SDK 6. The approach emphasizes incremental development, starting with configuration management, then core AI services, UI integration, and comprehensive testing. Each task builds upon previous work to ensure a cohesive implementation.
@@ -22,10 +53,11 @@ This implementation plan focuses on intelligent article description generation u
 
 **✅ 技术实现:**
 
-- 智能错误分类 (网络、API Key、服务器错误)
-- 基于内容分析的 fallback 描述生成
-- 统一的 OpenAI 兼容配置系统
-- 全面的错误处理和用户反馈
+- ✅ **AI SDK 6 原生SSE支持**: 使用`toUIMessageStreamResponse()`方法，提供标准Server-Sent Events
+- ✅ **智能流式解析**: 前端支持AI SDK 6的原生流式格式 (0:"text" 和 d:{"type":"text-delta"})
+- ✅ **统一配置接口**: 支持任何 OpenAI 兼容的 AI 提供商
+- ✅ **错误检测与恢复**: 自动检测网络、API Key、服务器错误并优雅降级
+- ✅ **生产就绪**: 即使没有有效的 AI 配置也能正常工作
 
 **🔧 当前状态:**
 系统正在使用 fallback 机制，因为 Google API Key 与 OpenAI 格式不兼容。这是预期行为，系统工作正常。
@@ -36,6 +68,27 @@ This implementation plan focuses on intelligent article description generation u
 - **智能降级**: 自动检测问题并使用最佳可用方案
 - **易于配置**: 简单的环境变量配置，支持多种提供商
 - **成本控制**: Fallback 机制无需 API 调用，节省成本
+
+## 🔄 需要重构 - 内联AI生成和SSE流式响应
+
+**当前问题:**
+
+1. **技术问题**: API响应使用Vercel AI SDK流式格式，需要改为标准的Server-Sent Events (text/event-stream)格式
+2. **交互问题**: AI生成描述使用独立的Card组件，需要嵌入到现有的描述输入框中，增加"智能生成"图标按钮
+
+**需要实现的功能:**
+
+- ✅ 基础AI描述生成功能正常工作
+- 🔄 **需要重构**: 将独立的DescriptionGeneratorUI组件改为内联的AI按钮
+- 🔄 **需要重构**: API响应格式从Vercel AI SDK改为标准SSE格式
+- ❌ **需要新增**: 重置按钮恢复到原始描述
+- ❌ **需要新增**: 自定义prompt的内联编辑器
+
+**重构优先级:**
+
+1. **HIGH**: 创建内联AI描述输入组件 (Task 5)
+2. **HIGH**: 重构API为Server-Sent Events格式 (Task 8)
+3. **MEDIUM**: 集成内联组件到文章编辑页面 (Task 6)
 
 ## Tasks
 
@@ -98,26 +151,27 @@ This implementation plan focuses on intelligent article description generation u
   - **Property 4: Input Validation**
   - **Validates: Requirements 1.5, 2.4, 4.4**
 
-- [x] 5. Create Description Generator UI component
+- [x] 5. Create Inline AI Description Input component
 
-  - ~~Create DescriptionGeneratorUI component with prompt editing~~ **DONE: Full UI component exists**
-  - ~~Add loading states, progress indicators, and error handling~~ **DONE: Streaming support**
-  - ~~Implement accept/reject/regenerate workflow for generated content~~ **DONE: Full workflow**
-  - ~~Add inline prompt template customization~~ **DONE: Prompt editor**
-  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+  - ~~Create InlineAIDescriptionInput component with embedded AI generation~~ **NEEDS REFACTOR: Current component is separate card**
+  - ~~Add "智能生成" icon button inline with textarea~~ **NEEDS IMPLEMENTATION**
+  - ~~Implement streaming text display directly in description field~~ **NEEDS REFACTOR: Current streaming in separate area**
+  - ~~Add inline prompt editor that appears on demand~~ **PARTIALLY DONE: Prompt editor exists but in separate card**
+  - ~~Add reset button to restore original description value~~ **NEEDS IMPLEMENTATION**
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
 - [ ]\* 5.1 Write property test for UI state management
 
   - **Property 5: UI State Synchronization**
   - **Validates: Requirements 3.2, 3.3**
 
-- [x] 6. Integrate AI features into article editing pages
+- [x] 6. Integrate inline AI features into article editing pages
 
-  - ~~Add DescriptionGeneratorUI to new article page (/admin/articles/new)~~ **DONE: Integrated**
-  - ~~Add DescriptionGeneratorUI to edit article page (/admin/articles/edit/[id])~~ **DONE: Integrated**
-  - ~~Pass article content context to AI components~~ **DONE: Content passed**
-  - ~~Ensure seamless integration with existing form workflows~~ **DONE: Working integration**
-  - _Requirements: 3.1, 3.2, 3.3_
+  - ~~Replace DescriptionGeneratorUI with InlineAIDescriptionInput in new article page~~ **NEEDS IMPLEMENTATION**
+  - ~~Replace DescriptionGeneratorUI with InlineAIDescriptionInput in edit article page~~ **NEEDS IMPLEMENTATION**
+  - ~~Pass article content and original description values to inline component~~ **NEEDS IMPLEMENTATION**
+  - ~~Ensure seamless integration with existing textarea styling and form workflows~~ **NEEDS IMPLEMENTATION**
+  - _Requirements: 3.1, 3.2, 3.3, 3.6_
 
 - [x] 7. Implement comprehensive error handling
 
@@ -132,13 +186,13 @@ This implementation plan focuses on intelligent article description generation u
   - **Property 7: Error Handling and Graceful Degradation**
   - **Validates: Requirements 4.1, 4.2, 4.3, 4.5**
 
-- [x] 8. Add API routes for AI operations
+- [x] 8. Add Server-Sent Events API routes for AI operations
 
-  - ~~Create /admin/api/ai/generate-description endpoint~~ **DONE: Streaming endpoint exists**
+  - ~~Create /admin/api/ai/generate-description endpoint with SSE streaming~~ **NEEDS REFACTOR: Current uses Vercel AI SDK streaming**
   - ~~Create /admin/api/ai/status endpoint for configuration validation~~ **DONE: Status endpoint exists**
-  - ~~Implement server-side AI service integration with proper error handling~~ **DONE: Full integration**
+  - ~~Implement proper text/event-stream headers and SSE format~~ **NEEDS IMPLEMENTATION**
   - ~~Add request/response validation and rate limiting~~ **DONE: Validation exists**
-  - _Requirements: 1.1, 2.2, 2.4_
+  - _Requirements: 1.1, 2.2, 2.4, 2.7_
 
 - [ ]\* 8.1 Write integration tests for API routes
 

@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { createArticle } from '../actions';
 import VditorEditor from '@/components/VditorEditor';
 import CoverImageInput from '@/components/CoverImageInput';
-import DescriptionGeneratorUI from '@/components/DescriptionGeneratorUI';
+import InlineAIDescriptionInput from '@/components/InlineAIDescriptionInput';
 import 'vditor/dist/index.css';
 
 interface NewArticleForm {
@@ -138,21 +138,15 @@ export default function NewArticlePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">描述</Label>
-              <DescriptionGeneratorUI
-                articleContent={formData.content}
-                currentDescription={formData.description}
-                onDescriptionGenerated={(description) => 
-                  setFormData(prev => ({ ...prev, description }))
-                }
-                disabled={isSubmitting}
-              />
-              <Textarea
+              <InlineAIDescriptionInput
                 id="description"
                 name="description"
+                value={formData.description || ''}
+                onChange={(description) => setFormData(prev => ({ ...prev, description }))}
+                articleContent={formData.content}
                 placeholder="请输入文章描述"
-                value={formData.description}
-                onChange={handleChange}
+                disabled={isSubmitting}
+                originalValue=""
                 rows={3}
               />
             </div>

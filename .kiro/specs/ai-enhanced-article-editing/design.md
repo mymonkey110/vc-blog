@@ -53,13 +53,13 @@ graph TB
 
 ### AI Service Manager
 
-Central service that coordinates AI operations and manages configurable provider connections.
+Central service that coordinates AI operations and manages configurable provider connections with Server-Sent Events streaming.
 
 **Interface:**
 
 ```typescript
 interface AIServiceManager {
-  generateDescription(content: string, prompt?: string): Promise<string>;
+  generateDescriptionStream(content: string, prompt?: string): Promise<ReadableStream>;
   validateConfiguration(): Promise<boolean>;
   getAvailableProviders(): Promise<ProviderInfo[]>;
   switchProvider(providerId: string): Promise<void>;
@@ -74,22 +74,22 @@ interface ProviderInfo {
 
 ### Description Generator Service
 
-Handles intelligent description generation from article content with configurable prompts.
+Handles intelligent description generation from article content with Server-Sent Events streaming and configurable prompts.
 
 **Interface:**
 
 ```typescript
 interface DescriptionGeneratorService {
-  generateDescription(content: string, customPrompt?: string): Promise<DescriptionResult>;
+  generateDescriptionStream(content: string, customPrompt?: string): Promise<ReadableStream>;
   validatePrompt(prompt: string): ValidationResult;
   getDefaultPrompt(): string;
   setDefaultPrompt(prompt: string): void;
 }
 
-interface DescriptionResult {
-  description: string;
-  wordCount: number;
-  truncated: boolean;
+interface StreamingDescriptionResult {
+  chunk: string;
+  isComplete: boolean;
+  totalLength: number;
   provider: string;
   model: string;
 }
@@ -98,6 +98,32 @@ interface ValidationResult {
   isValid: boolean;
   error?: string;
   suggestions?: string[];
+}
+```
+
+### Inline AI Description Input
+
+Embedded UI component that integrates AI generation directly into description textarea fields.
+
+**Interface:**
+
+```typescript
+interface InlineAIDescriptionInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  articleContent: string;
+  placeholder?: string;
+  disabled?: boolean;
+  originalValue?: string; // For reset functionality
+}
+
+interface InlineAIState {
+  isGenerating: boolean;
+  showPromptEditor: boolean;
+  customPrompt: string;
+  streamingText: string;
+  error?: string;
+  canReset: boolean;
 }
 ```
 
@@ -163,11 +189,20 @@ interface ProviderConfig {
 ```typescript
 interface GenerationState {
   isGenerating: boolean;
+  streamingText: string;
   progress?: number;
   error?: string;
   canRetry: boolean;
+  canReset: boolean;
   abortController?: AbortController;
   currentProvider?: string;
+  originalValue?: string; // For reset functionality
+}
+
+interface SSEStreamEvent {
+  event: 'data' | 'error' | 'complete';
+  data: string;
+  id?: string;
 }
 ```
 

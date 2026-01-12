@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getArticleById, updateArticle } from '../../actions';
 import VditorEditor from '@/components/VditorEditor';
 import CoverImageInput from '@/components/CoverImageInput';
-import DescriptionGeneratorUI from '@/components/DescriptionGeneratorUI';
+import InlineAIDescriptionInput from '@/components/InlineAIDescriptionInput';
 import 'vditor/dist/index.css';
 
 interface EditArticleForm {
@@ -37,6 +37,7 @@ export default function EditArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [originalDescription, setOriginalDescription] = useState<string>('');
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -50,10 +51,12 @@ export default function EditArticlePage() {
         const article = await getArticleById(articleId);
         console.log('article', article);
         if (article) {
+          const description = article.description || '';
+          setOriginalDescription(description);
           setFormData({
             title: article.title,
             category: article.category || '',
-            description: article.description || '',
+            description: description,
             content: article.content,
             status: article.status as 'draft' | 'publish',
             coverPic: article.coverPic || '',
@@ -191,21 +194,15 @@ export default function EditArticlePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">描述</Label>
-              <DescriptionGeneratorUI
-                articleContent={formData.content}
-                currentDescription={formData.description}
-                onDescriptionGenerated={(description) => 
-                  setFormData(prev => ({ ...prev, description }))
-                }
-                disabled={isSubmitting}
-              />
-              <Textarea
+              <InlineAIDescriptionInput
                 id="description"
                 name="description"
+                value={formData.description || ''}
+                onChange={(description) => setFormData(prev => ({ ...prev, description }))}
+                articleContent={formData.content}
                 placeholder="请输入文章描述"
-                value={formData.description}
-                onChange={handleChange}
+                disabled={isSubmitting}
+                originalValue={originalDescription}
                 rows={3}
               />
             </div>

@@ -6,8 +6,8 @@ export async function GET() {
   const feed = new RSS({
     title: '修行路上的码农——Michael.J',
     description: '欢迎来到我的技术博客，主要分享我对代码、技术、团队和生活的理解',
-    feed_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/rss.xml`,
-    site_url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    feed_url: `${process.env.NEXT_PUBLIC_DOMAIN}/rss.xml`,
+    site_url: process.env.NEXT_PUBLIC_DOMAIN!,
     language: 'zh-CN',
     pubDate: new Date(),
   })
@@ -22,7 +22,6 @@ export async function GET() {
       slug: true,
     },
     orderBy: { createdAt: 'desc' },
-    take: 20,
   })
 
   articles.forEach((article) => {
@@ -35,7 +34,7 @@ export async function GET() {
     feed.item({
       title: article.title,
       description: article.description || article.content.substring(0, 200) + '...',
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/article/${year}/${month}/${day}/${slug}`,
+      url: `${process.env.NEXT_PUBLIC_DOMAIN}/article/${year}/${month}/${day}/${slug}`,
       date: date,
     })
   })

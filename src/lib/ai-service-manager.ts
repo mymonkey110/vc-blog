@@ -172,7 +172,7 @@ export class AIServiceManagerImpl implements AIServiceManager {
     lastChecked: Date
   }> {
     const available = await this.isServiceAvailable()
-    const provider = available ? await this.getProviderInfo() : { name: 'Not configured', baseUrl: '', model: '', isConfigured: false }
+    const provider = available ? await this.getProviderInfo() : { baseUrl: '', model: '', isConfigured: false }
     const models = available ? await getAvailableTextModels() : []
     
     return {

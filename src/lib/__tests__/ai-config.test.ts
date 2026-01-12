@@ -91,22 +91,23 @@ describe('AI Configuration', () => {
   describe('getProviderInfo', () => {
     it('should return not configured when missing configuration', async () => {
       delete process.env.CLOUDFLARE_ACCOUNT_ID
-      delete process.env.GOOGLE_API_KEY
+      delete process.env.AI_API_KEY
 
       const info = await getProviderInfo()
-      expect(info.name).toBe('Not Configured')
       expect(info.isConfigured).toBe(false)
+      expect(info.model).toBe('unknown')
     })
 
     it('should return provider info when configured', async () => {
       process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account'
       process.env.CLOUDFLARE_GATEWAY_NAME = 'test-gateway'
-      process.env.GOOGLE_API_KEY = 'test-google-key'
+      process.env.CLOUDFLARE_API_KEY = 'test-cf-key'
+      process.env.AI_API_KEY = 'test-ai-key'
+      process.env.AI_MODEL = 'google/gemini-1.5-flash'
 
       const info = await getProviderInfo()
-      expect(info.name).toContain('google via Cloudflare Gateway')
       expect(info.baseUrl).toContain('gateway.ai.cloudflare.com')
-      expect(info.model).toBe('gemini-1.5-flash')
+      expect(info.model).toBe('google/gemini-1.5-flash')
     })
   })
 })

@@ -72,11 +72,9 @@ export interface LegacyAIConfiguration {
 }
 
 export interface ProviderInfo {
-  name: string
   baseUrl?: string
   model: string
   isConfigured: boolean
-  hasBackup?: boolean
 }
 
 export interface ModelInfo {

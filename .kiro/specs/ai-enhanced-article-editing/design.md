@@ -66,9 +66,7 @@ interface AIServiceManager {
 }
 
 interface ProviderInfo {
-  id: string;
-  name: string;
-  baseUrl: string;
+  baseUrl?: string;
   model: string;
   isConfigured: boolean;
 }

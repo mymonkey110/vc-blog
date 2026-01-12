@@ -141,19 +141,15 @@ export async function getProviderInfo() {
     const isConfigured = await validateApiKeys()
     
     return {
-      name: `${model} (Cloudflare Unified)`,
       baseUrl: `https://gateway.ai.cloudflare.com/v1/${accountId}/${gateway}`,
-      model: model,
-      isConfigured,
-      hasBackup: false
+      model: model || 'unknown',
+      isConfigured
     }
   } catch (error) {
     return {
-      name: 'Not Configured',
       baseUrl: undefined,
       model: 'unknown',
-      isConfigured: false,
-      hasBackup: false
+      isConfigured: false
     }
   }
 }

@@ -1,22 +1,26 @@
 import '@testing-library/jest-dom';
 import React from 'react';
+import { vi } from 'vitest';
 
 // Mock CSS modules
-const mockCSSModule = new Proxy({}, {
-  get: (target, prop) => {
-    if (typeof prop === 'string') {
-      return prop;
-    }
-    return undefined;
-  }
-});
+const mockCSSModule = new Proxy(
+  {},
+  {
+    get: (target, prop) => {
+      if (typeof prop === 'string') {
+        return prop;
+      }
+      return undefined;
+    },
+  },
+);
 
 // Mock CSS module imports
 vi.mock('@/styles/markdown.module.css', () => ({
   default: mockCSSModule,
   'markdown-content': 'markdown-content',
   'inline-code': 'inline-code',
-  'codeBlock': 'codeBlock',
+  codeBlock: 'codeBlock',
 }));
 
 // Mock react-syntax-highlighter
@@ -29,9 +33,9 @@ vi.mock('react-syntax-highlighter', () => ({
         'data-testid': 'syntax-highlighter',
         'data-language': language,
         style: customStyle,
-        ...otherProps
+        ...otherProps,
       },
-      React.createElement('code', { style: codeTagProps?.style }, children)
+      React.createElement('code', { style: codeTagProps?.style }, children),
     );
   },
 }));

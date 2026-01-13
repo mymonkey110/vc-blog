@@ -10,13 +10,13 @@ import { validateFile } from '@/utils/fileValidation';
 import { uploadCoverImage } from '@/utils/uploadService';
 import { validateUrl } from '@/utils/urlValidation';
 import { GenerationState, ImageResult } from '@/types/ai';
+import { buildPromptFromArticle, validateImagePrompt } from '@/lib/image-generator-service';
 
 interface CoverImageInputProps {
   value: string;
   onChange: (url: string) => void;
   disabled?: boolean;
   className?: string;
-  // AI generation props
   enableAIGeneration?: boolean;
   articleContent?: string;
   articleTitle?: string;
@@ -61,48 +61,49 @@ export default function CoverImageInput({
   const [urlInputValue, setUrlInputValue] = useState(value || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AI generation state
   const [aiGenerationState, setAiGenerationState] = useState<GenerationState>({
     isGenerating: false,
     error: undefined,
-    canRetry: false
+    canRetry: false,
   });
   const [aiPrompt, setAiPrompt] = useState('');
   const [showAiPromptEditor, setShowAiPromptEditor] = useState(false);
-  const [customAiPrompt, setCustomAiPrompt] = useState('根据文章内容生成一个现代简洁的封面图片，风格专业，适合技术博客。');
+  const [customAiPrompt, setCustomAiPrompt] = useState(
+    '请根据文章摘要生成一张封面图，风格：科技；色系：柔和，暖色，文章摘要：',
+  );
   const [aiPromptError, setAiPromptError] = useState<string | null>(null);
   const [generatedImageResult, setGeneratedImageResult] = useState<ImageResult | null>(null);
+  const [isConvertingToWebp, setIsConvertingToWebp] = useState(false);
+  const [isUploadingToBlob, setIsUploadingToBlob] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Sync URL input value with prop value
   useEffect(() => {
     setUrlInputValue(value || '');
   }, [value]);
 
-  // Handle mode switching without clearing the image
-  const handleModeSwitch = useCallback((newMode: InputMode) => {
-    if (newMode !== mode) {
-      setMode(newMode);
-      // Sync URL input with current value when switching to URL mode
-      if (newMode === 'url') {
-        setUrlInputValue(value || '');
+  const handleModeSwitch = useCallback(
+    (newMode: InputMode) => {
+      if (newMode !== mode) {
+        setMode(newMode);
+        if (newMode === 'url') {
+          setUrlInputValue(value || '');
+        }
+        setUploadState({
+          isUploading: false,
+          progress: 0,
+          error: null,
+          abortController: undefined,
+          canRetry: false,
+        });
       }
-      // Don't clear the value when switching modes - keep the image
-      setUploadState({
-        isUploading: false,
-        progress: 0,
-        error: null,
-        abortController: undefined,
-        canRetry: false,
-      });
-    }
-  }, [mode, value]);
+    },
+    [mode, value],
+  );
 
-  // Handle URL input change
   const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
     setUrlInputValue(newUrl);
-    
-    // Validate URL format
+
     const validation = validateUrl(newUrl);
     if (!validation.isValid) {
       setUrlError(validation.error || 'URL格式无效');
@@ -111,20 +112,16 @@ export default function CoverImageInput({
     }
   }, []);
 
-  // Handle URL input blur (when user finishes editing)
   const handleUrlBlur = useCallback(() => {
-    // Update the actual value when user finishes editing
     onChange(urlInputValue);
   }, [urlInputValue, onChange]);
 
-  // Handle file selection
   const handleFileSelect = useCallback(() => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   }, []);
 
-  // Handle file input change
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -132,94 +129,91 @@ export default function CoverImageInput({
     }
   }, []);
 
-  // Handle file upload logic
-  const handleFileUpload = useCallback(async (file: File) => {
-    // Store file for potential retry
-    setLastUploadFile(file);
-    
-    // Validate file
-    const validation = validateFile(file);
-    if (!validation.isValid) {
-      setUploadState(prev => ({
-        ...prev,
-        error: validation.error || '文件验证失败',
-        canRetry: false
-      }));
-      return;
-    }
+  const handleFileUpload = useCallback(
+    async (file: File) => {
+      setLastUploadFile(file);
 
-    // Create abort controller for cancellation
-    const abortController = new AbortController();
+      const validation = validateFile(file);
+      if (!validation.isValid) {
+        setUploadState((prev) => ({
+          ...prev,
+          error: validation.error || '文件验证失败',
+          canRetry: false,
+        }));
+        return;
+      }
 
-    // Start upload
-    setUploadState({
-      isUploading: true,
-      progress: 0,
-      error: null,
-      abortController,
-      canRetry: false
-    });
+      const abortController = new AbortController();
 
-    try {
-      const result = await uploadCoverImage({
-        file,
-        onProgress: (progress) => {
-          setUploadState(prev => ({
-            ...prev,
-            progress
-          }));
-        },
-        onError: (error) => {
-          setUploadState(prev => ({
-            ...prev,
-            error: error.message
-          }));
-        }
-      });
-
-      // Upload successful
-      onChange(result.url);
       setUploadState({
-        isUploading: false,
-        progress: 100,
+        isUploading: true,
+        progress: 0,
         error: null,
-        abortController: undefined,
-        canRetry: false
+        abortController,
+        canRetry: false,
       });
 
-    } catch (error) {
-      if (abortController.signal.aborted) {
+      try {
+        const result = await uploadCoverImage({
+          file,
+          onProgress: (progress) => {
+            setUploadState((prev) => ({
+              ...prev,
+              progress,
+            }));
+          },
+          onError: (error) => {
+            setUploadState((prev) => ({
+              ...prev,
+              error: error.message,
+            }));
+          },
+        });
+
+        onChange(result.url);
         setUploadState({
           isUploading: false,
-          progress: 0,
+          progress: 100,
           error: null,
           abortController: undefined,
-          canRetry: false
+          canRetry: false,
         });
-      } else {
-        const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
-        const isNetworkError = errorMessage.includes('网络') || errorMessage.includes('连接') || 
-                              errorMessage.includes('timeout') || errorMessage.includes('fetch');
-        
-        setUploadState({
-          isUploading: false,
-          progress: 0,
-          error: errorMessage,
-          abortController: undefined,
-          canRetry: isNetworkError
-        });
-      }
-    }
-  }, [onChange]);
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          setUploadState({
+            isUploading: false,
+            progress: 0,
+            error: null,
+            abortController: undefined,
+            canRetry: false,
+          });
+        } else {
+          const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+          const isNetworkError =
+            errorMessage.includes('网络') ||
+            errorMessage.includes('连接') ||
+            errorMessage.includes('timeout') ||
+            errorMessage.includes('fetch');
 
-  // Handle retry upload
+          setUploadState({
+            isUploading: false,
+            progress: 0,
+            error: errorMessage,
+            abortController: undefined,
+            canRetry: isNetworkError,
+          });
+        }
+      }
+    },
+    [onChange],
+  );
+
   const handleRetryUpload = useCallback(() => {
     if (lastUploadFile) {
       handleFileUpload(lastUploadFile);
     }
   }, [lastUploadFile, handleFileUpload]);
 
-  // Handle upload cancellation
   const handleCancelUpload = useCallback(() => {
     if (uploadState.abortController) {
       uploadState.abortController.abort();
@@ -228,19 +222,21 @@ export default function CoverImageInput({
         progress: 0,
         error: null,
         abortController: undefined,
-        canRetry: false
+        canRetry: false,
       });
     }
   }, [uploadState.abortController]);
 
-  // Drag and drop handlers
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled && mode === 'upload') {
-      setIsDragOver(true);
-    }
-  }, [disabled, mode]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!disabled && mode === 'upload') {
+        setIsDragOver(true);
+      }
+    },
+    [disabled, mode],
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -248,93 +244,147 @@ export default function CoverImageInput({
     setIsDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
 
-    if (disabled || mode !== 'upload') return;
+      if (disabled || mode !== 'upload') return;
 
-    const files = Array.from(e.dataTransfer.files);
-    const imageFile = files.find(file => file.type.startsWith('image/'));
-    
-    if (imageFile) {
-      handleFileUpload(imageFile);
-    } else {
-      setUploadState(prev => ({
-        ...prev,
-        error: '请拖拽图片文件'
-      }));
-    }
-  }, [disabled, mode, handleFileUpload]);
+      const files = Array.from(e.dataTransfer.files);
+      const imageFile = files.find((file) => file.type.startsWith('image/'));
 
-  // AI generation handlers
+      if (imageFile) {
+        handleFileUpload(imageFile);
+      } else {
+        setUploadState((prev) => ({
+          ...prev,
+          error: '请拖拽图片文件',
+        }));
+      }
+    },
+    [disabled, mode, handleFileUpload],
+  );
+
+  const convertJpegToWebp = useCallback(async (jpegBlob: Blob): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      img.onerror = () => {
+        URL.revokeObjectURL(jpegUrl);
+        reject(new Error('Failed to load image'));
+      };
+
+      const jpegUrl = URL.createObjectURL(jpegBlob);
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(
+          (webpBlob) => {
+            URL.revokeObjectURL(jpegUrl);
+            if (webpBlob) {
+              resolve(webpBlob);
+            } else {
+              reject(new Error('Failed to convert to WebP'));
+            }
+          },
+          'image/webp',
+          0.85,
+        );
+      };
+
+      img.src = jpegUrl;
+    });
+  }, []);
+
+  const generateWebpFilename = useCallback((): string => {
+    const now = new Date();
+    const datetime = now.toISOString().slice(0, 19).replace(/[T:]/g, '-');
+    return `ai-${datetime}.webp`;
+  }, []);
+
   const handleAiGenerate = useCallback(async () => {
-    if (!aiPrompt.trim()) {
-      setAiGenerationState({
-        isGenerating: false,
-        error: '请输入图片描述',
-        canRetry: false
-      });
-      return;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    const finalPrompt = buildPromptFromArticle(articleTitle, articleContent, customAiPrompt);
 
     setAiGenerationState({
       isGenerating: true,
       error: undefined,
-      canRetry: false
+      canRetry: false,
     });
 
     onAIGenerationStart?.();
 
     try {
-      // Call API route instead of direct service call
       const response = await fetch('/admin/api/ai/generate-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: articleTitle,
-          content: articleContent,
-          prompt: aiPrompt,
-          customPrompt: customAiPrompt,
-          options: { aspectRatio: '16:9' }
+          prompt: finalPrompt,
+          options: {},
         }),
+        signal: abortController.signal,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'AI图片生成失败');
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '图片生成失败');
       }
 
-      const result = await response.json();
-      setGeneratedImageResult(result.data);
+      setGeneratedImageResult(data.data);
       setAiGenerationState({
         isGenerating: false,
         error: undefined,
-        canRetry: false
+        canRetry: false,
       });
 
-      onAIGenerationComplete?.(result);
+      onAIGenerationComplete?.(data.data);
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
       console.error('AI image generation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'AI生成失败，请重试';
-      const canRetry = error instanceof Error && (
-        error.message.includes('网络') || 
-        error.message.includes('连接') ||
-        error.message.includes('quota')
-      );
 
       setAiGenerationState({
         isGenerating: false,
         error: errorMessage,
-        canRetry
+        canRetry: true,
       });
 
       onAIGenerationError?.(errorMessage);
+    } finally {
+      abortControllerRef.current = null;
     }
-  }, [aiPrompt, articleTitle, articleContent, onAIGenerationStart, onAIGenerationComplete, onAIGenerationError]);
+  }, [
+    articleTitle,
+    articleContent,
+    customAiPrompt,
+    onAIGenerationStart,
+    onAIGenerationComplete,
+    onAIGenerationError,
+  ]);
 
   const handleAiPromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newPrompt = e.target.value;
@@ -344,8 +394,7 @@ export default function CoverImageInput({
   const handleCustomAiPromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newPrompt = e.target.value;
     setCustomAiPrompt(newPrompt);
-    
-    // Simple client-side validation
+
     if (!newPrompt.trim()) {
       setAiPromptError('提示词不能为空');
     } else if (newPrompt.length > 1000) {
@@ -355,26 +404,57 @@ export default function CoverImageInput({
     }
   }, []);
 
-  const handleAcceptAiImage = useCallback(() => {
-    if (generatedImageResult) {
-      onChange(generatedImageResult.imageUrl);
+  const handleResetAiPrompt = useCallback(() => {
+    const defaultPrompt = '请根据文章摘要生成一张封面图，风格：科技；色系：柔和，暖色，文章摘要：';
+    setCustomAiPrompt(defaultPrompt);
+    setAiPromptError(null);
+  }, []);
+
+  const handleAcceptAiImage = useCallback(async () => {
+    if (!generatedImageResult) return;
+
+    setIsConvertingToWebp(true);
+    setIsUploadingToBlob(true);
+
+    try {
+      const response = await fetch(generatedImageResult.imageUrl);
+      const jpegBlob = await response.blob();
+
+      const webpBlob = await convertJpegToWebp(jpegBlob);
+      const filename = generateWebpFilename();
+      const webpFile = new File([webpBlob], filename, { type: 'image/webp' });
+
+      const uploadResult = await uploadCoverImage({
+        file: webpFile,
+        onProgress: (progress) => {
+          console.log(`Upload progress: ${progress}%`);
+        },
+        onError: (error) => {
+          console.error('Upload error:', error);
+        },
+      });
+
+      onChange(uploadResult.url);
       setGeneratedImageResult(null);
+    } catch (error) {
+      console.error('Failed to upload generated image:', error);
+      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      setAiGenerationState((prev) => ({
+        ...prev,
+        error: errorMessage,
+      }));
+    } finally {
+      setIsConvertingToWebp(false);
+      setIsUploadingToBlob(false);
     }
-  }, [generatedImageResult, onChange]);
+  }, [generatedImageResult, onChange, convertJpegToWebp, generateWebpFilename]);
 
   const handleRejectAiImage = useCallback(() => {
     setGeneratedImageResult(null);
   }, []);
 
-  const handleResetAiPrompt = useCallback(() => {
-    const defaultPrompt = '根据文章内容生成一个现代简洁的封面图片，风格专业，适合技术博客。';
-    setCustomAiPrompt(defaultPrompt);
-    setAiPromptError(null);
-  }, []);
-
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Mode Selection */}
       <div className="flex space-x-2">
         <Button
           type="button"
@@ -413,7 +493,6 @@ export default function CoverImageInput({
         )}
       </div>
 
-      {/* URL Input Mode */}
       {mode === 'url' && (
         <div className="space-y-2">
           <Input
@@ -429,36 +508,27 @@ export default function CoverImageInput({
           <p className="text-xs text-stone-500">
             请输入有效的图片URL，支持 http:// 或 https:// 协议，最多2048个字符
           </p>
-          {urlError && (
-            <p className="text-xs text-red-600">{urlError}</p>
-          )}
+          {urlError && <p className="text-xs text-red-600">{urlError}</p>}
         </div>
       )}
 
-      {/* File Upload Mode */}
       {mode === 'upload' && (
         <div className="space-y-2">
-          <div 
+          <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              isDragOver 
-                ? 'border-stone-400 bg-stone-50' 
-                : 'border-stone-200'
-            } ${
-              uploadState.isUploading ? 'opacity-50 pointer-events-none' : ''
-            }`}
+              isDragOver ? 'border-stone-400 bg-stone-50' : 'border-stone-200'
+            } ${uploadState.isUploading ? 'opacity-50 pointer-events-none' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <Upload className={`h-8 w-8 mx-auto mb-2 ${
-              isDragOver ? 'text-stone-600' : 'text-stone-400'
-            }`} />
+            <Upload
+              className={`h-8 w-8 mx-auto mb-2 ${isDragOver ? 'text-stone-600' : 'text-stone-400'}`}
+            />
             <p className="text-sm text-stone-600 mb-2">
               {isDragOver ? '释放文件开始上传' : '点击选择图片或拖拽图片到此处'}
             </p>
-            <p className="text-xs text-stone-500 mb-4">
-              支持 JPG、PNG、WebP、GIF 格式，最大 5MB
-            </p>
+            <p className="text-xs text-stone-500 mb-4">支持 JPG、PNG、WebP、GIF 格式，最大 5MB</p>
             <Button
               type="button"
               variant="outline"
@@ -468,8 +538,7 @@ export default function CoverImageInput({
               {uploadState.isUploading ? '上传中...' : '选择文件'}
             </Button>
           </div>
-          
-          {/* Hidden file input */}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -479,7 +548,6 @@ export default function CoverImageInput({
             disabled={disabled}
           />
 
-          {/* Upload Progress */}
           {uploadState.isUploading && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -506,7 +574,6 @@ export default function CoverImageInput({
             </div>
           )}
 
-          {/* Upload Error */}
           {uploadState.error && (
             <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-md">
               <div className="flex-1">
@@ -533,7 +600,9 @@ export default function CoverImageInput({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setUploadState(prev => ({ ...prev, error: null, canRetry: false }))}
+                  onClick={() =>
+                    setUploadState((prev) => ({ ...prev, error: null, canRetry: false }))
+                  }
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -543,54 +612,130 @@ export default function CoverImageInput({
         </div>
       )}
 
-      {/* AI Generation Mode */}
       {mode === 'ai' && enableAIGeneration && (
         <div className="space-y-4">
-          {/* Image Generation Not Supported Notice */}
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-amber-800">AI图片生成暂不可用</h3>
-                <p className="mt-1 text-sm text-amber-700">
-                  Google Gemini API 目前不支持图片生成功能。Gemini 模型仅支持文本生成。
-                </p>
-                <p className="mt-2 text-xs text-amber-600">
-                  如需启用AI图片生成，请配置支持图片生成的服务提供商（如 OpenAI DALL-E、Stability AI 等）。
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Disabled UI */}
-          <div className="space-y-2 opacity-50">
-            <Label htmlFor="ai-prompt">图片描述（暂不可用）</Label>
+          <div className="space-y-2">
+            <Label htmlFor="ai-prompt">AI 提示词（可选）</Label>
             <Textarea
               id="ai-prompt"
-              placeholder="AI图片生成功能暂不可用"
-              value=""
-              disabled={true}
+              value={customAiPrompt}
+              onChange={handleCustomAiPromptChange}
+              placeholder="留空则使用默认提示词：请根据文章摘要生成一张封面图，风格：科技；色系：柔和，暖色，文章摘要："
               rows={3}
+              className="text-sm resize-none"
+              disabled={aiGenerationState.isGenerating || isUploadingToBlob}
             />
+            <div className="flex justify-between">
+              <p className="text-xs text-stone-500">{customAiPrompt.length}/1000 字符</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleResetAiPrompt}
+                disabled={aiGenerationState.isGenerating || isUploadingToBlob}
+                className="text-xs h-6"
+              >
+                重置默认
+              </Button>
+            </div>
           </div>
 
           <Button
             type="button"
-            disabled={true}
-            className="w-full"
-            variant="outline"
+            onClick={handleAiGenerate}
+            disabled={aiGenerationState.isGenerating || isUploadingToBlob}
+            className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            <Wand2 className="h-4 w-4 mr-2" />
-            AI图片生成（暂不可用）
+            {aiGenerationState.isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                生成中...
+              </>
+            ) : (
+              <>
+                <Wand2 className="h-4 w-4 mr-2" />
+                生成封面图
+              </>
+            )}
           </Button>
+
+          {generatedImageResult && (
+            <div className="space-y-3">
+              <div className="p-4 border rounded-lg bg-green-50">
+                <p className="text-sm font-medium text-green-800 mb-3">
+                  ✓ 图片已生成（{generatedImageResult.metadata.aspectRatio}）
+                </p>
+
+                <div className="w-48 h-32 rounded-lg overflow-hidden bg-white mb-3 mx-auto border border-stone-200">
+                  <img
+                    src={generatedImageResult.imageUrl}
+                    alt="AI生成的封面预览"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRejectAiImage}
+                    disabled={isUploadingToBlob}
+                    className="flex-1"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    重新生成
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleAcceptAiImage}
+                    disabled={isUploadingToBlob}
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                  >
+                    {isUploadingToBlob ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        上传中...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        确认使用
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {aiGenerationState.error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-red-700">{aiGenerationState.error}</p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAiGenerate}
+                  className="text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  重试
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!aiGenerationState.isGenerating && !generatedImageResult && !aiGenerationState.error && (
+            <p className="text-xs text-stone-500">
+              💡 提示：Pollinations API 每次请求间隔至少 5 秒
+            </p>
+          )}
         </div>
       )}
 
-      {/* Image Preview */}
       {value && (
         <div className="mt-4">
           <p className="text-xs text-stone-600 mb-2">预览：</p>
@@ -604,7 +749,8 @@ export default function CoverImageInput({
                 target.style.display = 'none';
                 const parent = target.parentElement;
                 if (parent) {
-                  parent.innerHTML = '<div class="w-full h-full bg-red-50 flex items-center justify-center text-red-500 text-xs">图片加载失败</div>';
+                  parent.innerHTML =
+                    '<div class="w-full h-full bg-red-50 flex items-center justify-center text-red-500 text-xs">图片加载失败</div>';
                 }
               }}
             />

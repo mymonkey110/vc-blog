@@ -1,17 +1,15 @@
-import { createAdminMetadata } from "@/utils/metadata"
-import Menu from '@/components/Menu'
+import { createAdminMetadata } from '@/utils/metadata';
+import AdminHeader from '@/components/AdminHeader';
+import Footer from '@/components/Footer';
 
-export const metadata = createAdminMetadata('管理后台', '博客管理后台仪表盘')
+export const metadata = createAdminMetadata('管理后台', '博客管理后台');
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-stone-50 text-stone-900">
-      <div className="flex flex-1">
-        <Menu />
-        <main className="flex flex-1 flex-col p-6">
-          {children}
-        </main>
-      </div>
+    <div className="min-h-screen flex flex-col bg-stone-50">
+      <AdminHeader />
+      <main className="flex-1 p-6">{children}</main>
+      <Footer />
     </div>
-  )
+  );
 }

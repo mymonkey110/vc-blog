@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from './ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Home } from 'lucide-react';
 
 export default function AdminHeader() {
   const pathname = usePathname();
@@ -21,6 +21,15 @@ export default function AdminHeader() {
               </Button>
             </Link>
           )}
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className="text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              查看首页
+            </Button>
+          </Link>
           <form action="/api/auth/logout" method="POST">
             <Button
               variant="ghost"

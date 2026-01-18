@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { generateImageFromPollinationsServer } from '@/lib/image-generator-service';
+import { verifySession } from '@/actions/auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30; // 30 seconds timeout for AI generation
@@ -8,6 +10,14 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds between retries
 
 export async function POST(request: NextRequest) {
+  // Authentication check
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_token')?.value;
+
+  if (!token || !(await verifySession(token))) {
+    return NextResponse.json({ success: false, message: 'authenticate failed' }, { status: 403 });
+  }
+
   const startTime = Date.now();
   let attempt = 0;
   let lastError: Error | null = null;

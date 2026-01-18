@@ -3,15 +3,25 @@
  * Provides information about AI service availability and configuration
  */
 
-import { NextResponse } from 'next/server'
-import { aiServiceManager } from '@/lib/ai-service-manager'
-import { isAIConfigured, getAvailableTextModels } from '@/lib/ai-config'
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { aiServiceManager } from '@/lib/ai-service-manager';
+import { isAIConfigured, getAvailableTextModels } from '@/lib/ai-config';
+import { verifySession } from '@/actions/auth';
 
 export async function GET() {
+  // Authentication check
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_token')?.value;
+
+  if (!token || !(await verifySession(token))) {
+    return NextResponse.json({ success: false, message: 'authenticate failed' }, { status: 403 });
+  }
+
   try {
     // Check basic configuration
-    const isConfigured = await isAIConfigured()
-    
+    const isConfigured = await isAIConfigured();
+
     if (!isConfigured) {
       return NextResponse.json({
         success: false,
@@ -20,25 +30,25 @@ export async function GET() {
         message: 'AI服务未配置，请设置 AI_API_KEY、AI_BASE_URL 和 AI_MODEL 环境变量',
         provider: null,
         models: [],
-        checkedAt: new Date().toISOString()
-      })
+        checkedAt: new Date().toISOString(),
+      });
     }
 
     // Check service availability
-    const available = await aiServiceManager.isServiceAvailable()
-    
+    const available = await aiServiceManager.isServiceAvailable();
+
     // Get provider info and models
-    let providerInfo: any = null
-    let models: any[] = []
-    let detailedStatus: any = null
+    let providerInfo: any = null;
+    let models: any[] = [];
+    let detailedStatus: any = null;
 
     if (available) {
       try {
-        providerInfo = await aiServiceManager.getProviderInfo()
-        models = await getAvailableTextModels()
-        detailedStatus = await aiServiceManager.getServiceStatus()
+        providerInfo = await aiServiceManager.getProviderInfo();
+        models = await getAvailableTextModels();
+        detailedStatus = await aiServiceManager.getServiceStatus();
       } catch (error) {
-        console.warn('Failed to get detailed service status:', error)
+        console.warn('Failed to get detailed service status:', error);
       }
     }
 
@@ -52,54 +62,56 @@ export async function GET() {
       limits: {
         description: {
           maxLength: 50,
-          maxPromptLength: 1000
-        }
+          maxPromptLength: 1000,
+        },
       },
       detailedStatus,
-      checkedAt: new Date().toISOString()
-    })
-
+      checkedAt: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error('AI status check failed:', error)
-    
-    return NextResponse.json({
-      success: false,
-      configured: false,
-      available: false,
-      message: '无法检查AI服务状态',
-      error: error instanceof Error ? error.message : '未知错误',
-      checkedAt: new Date().toISOString()
-    }, { status: 500 })
+    console.error('AI status check failed:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        configured: false,
+        available: false,
+        message: '无法检查AI服务状态',
+        error: error instanceof Error ? error.message : '未知错误',
+        checkedAt: new Date().toISOString(),
+      },
+      { status: 500 },
+    );
   }
 }
 
 // Handle unsupported methods
 export async function POST() {
   return NextResponse.json(
-    { 
+    {
       error: '方法不支持',
-      message: '此端点仅支持GET请求'
+      message: '此端点仅支持GET请求',
     },
-    { status: 405 }
-  )
+    { status: 405 },
+  );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { 
+    {
       error: '方法不支持',
-      message: '此端点仅支持GET请求'
+      message: '此端点仅支持GET请求',
     },
-    { status: 405 }
-  )
+    { status: 405 },
+  );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { 
+    {
       error: '方法不支持',
-      message: '此端点仅支持GET请求'
+      message: '此端点仅支持GET请求',
     },
-    { status: 405 }
-  )
+    { status: 405 },
+  );
 }

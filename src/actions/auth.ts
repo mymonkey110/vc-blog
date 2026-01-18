@@ -34,7 +34,7 @@ export async function login(password: string) {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    redirect('/admin');
+    redirect('/admin/articles');
   } else {
     return { success: false, message: '密码错误，请重新输入' };
   }

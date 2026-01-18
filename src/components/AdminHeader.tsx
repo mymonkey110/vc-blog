@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Plus, Home } from 'lucide-react';
+import { logout } from '@/actions/auth';
 
 export default function AdminHeader() {
   const pathname = usePathname();
@@ -30,7 +31,7 @@ export default function AdminHeader() {
               查看首页
             </Button>
           </Link>
-          <form action="/api/auth/logout" method="POST">
+          <form action={logout}>
             <Button
               variant="ghost"
               size="icon"

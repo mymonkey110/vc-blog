@@ -1,29 +1,35 @@
-'use client'
-import React, { useState } from 'react'
-import { login } from '@/actions/auth'
+'use client';
+import React, { useState } from 'react';
+import { login } from '@/actions/auth';
 
 export default function AdminLogin() {
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
     try {
-      const result = await login(password)
+      const result = await login(password);
       if (result && !result.success) {
-        setError(result.message)
-        console.error('Login error:', result.message)
+        setError(result.message);
+        console.error('Login error:', result.message);
       }
     } catch (err) {
-      setError(typeof err === 'string' ? err : err instanceof Error ? err.message : '登录失败，请重试')
+      // Next.js redirect throws a special error, ignore it
+      if (err instanceof Error && err.message === 'NEXT_REDIRECT') {
+        return;
+      }
+      setError(
+        typeof err === 'string' ? err : err instanceof Error ? err.message : '登录失败，请重试',
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -42,22 +48,53 @@ export default function AdminLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-text hover:text-accent focus:outline-none" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? '隐藏密码' : '显示密码'}>
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-text hover:text-accent focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.744 1.143L3.707 2.293zM14 10a4 4 0 11-8 0 4 4 0 018 0zm-4-2a2 2 0 11-4 0 2 2 0 014 0zm-6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.744 1.143L3.707 2.293zM14 10a4 4 0 11-8 0 4 4 0 018 0zm-4-2a2 2 0 11-4 0 2 2 0 014 0zm-6 4a2 2 0 100-4 2 2 0 000 4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 )}
               </button>
             </div>
             {error && <p className="text-red-500 text-sm font-ui">{error}</p>}
           </div>
-          <button type="submit" className={`w-full py-3 bg-accent text-primary-text font-bold rounded-lg transition-all duration-200 font-ui ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'}`} disabled={isLoading}>
+          <button
+            type="submit"
+            className={`w-full py-3 bg-accent text-primary-text font-bold rounded-lg transition-all duration-200 font-ui ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'}`}
+            disabled={isLoading}
+          >
             {isLoading ? '登录中...' : '登录'}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }
-

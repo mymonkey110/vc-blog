@@ -1,13 +1,13 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Article } from '@/types/article';
 import 'vditor/dist/index.css';
 import VditorEditor from '@/components/VditorEditor';
 
-export default async function ArticleEditor({ params }: { params: Promise<{ id: string }> }) {
+export default function ArticleEditor({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const id = (await params).id;
+  const { id } = use(params);
   const [article, setArticle] = useState<Article>({
     id: id === 'new' ? `draft-${Date.now()}` : id || `draft-${Date.now()}`,
     title: '',

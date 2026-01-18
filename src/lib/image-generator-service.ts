@@ -15,12 +15,14 @@ const DEFAULT_MODEL = 'flux';
  */
 function buildPollinationsUrl(
   prompt: string,
-  width: number = DEFAULT_WIDTH,
-  height: number = DEFAULT_HEIGHT,
+  width?: number,
+  height?: number,
   model: string = DEFAULT_MODEL,
 ): string {
+  const finalWidth = width ?? DEFAULT_WIDTH;
+  const finalHeight = height ?? DEFAULT_HEIGHT;
   const encodedPrompt = encodeURIComponent(prompt);
-  return `${POLLINATIONS_API_URL}/${encodedPrompt}?width=${width}&height=${height}&model=${model}`;
+  return `${POLLINATIONS_API_URL}/${encodedPrompt}?width=${finalWidth}&height=${finalHeight}&model=${model}`;
 }
 
 /**
@@ -31,8 +33,8 @@ export async function generateImageFromPollinations(
   options?: ImageGenerationOptions & { signal?: AbortSignal },
 ): Promise<ImageResult> {
   const startTime = Date.now();
-  const width = options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH;
-  const height = options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT;
+  const width = options?.width ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH);
+  const height = options?.height ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT);
 
   const apiUrl = buildPollinationsUrl(prompt, width, height);
 
@@ -69,8 +71,8 @@ export async function generateImageFromPollinationsServer(
   options?: ImageGenerationOptions & { timeout?: number },
 ): Promise<ImageResult> {
   const startTime = Date.now();
-  const width = options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH;
-  const height = options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT;
+  const width = options?.width ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH);
+  const height = options?.height ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT);
   const timeout = options?.timeout || 30000;
 
   const apiUrl = buildPollinationsUrl(prompt, width, height);

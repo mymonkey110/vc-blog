@@ -15,10 +15,12 @@ interface Props {
   onChangeMode?: (mode: EditorMode) => void;
   placeholder?: string;
   options?: any;
+  className?: string; // Add optional className prop
+  height?: number; // Add optional height prop
 }
 
 const VditorEditor = forwardRef<any, Props>(function VditorEditor(
-  { value, onChange, mode, onChangeMode, placeholder, options },
+  { value, onChange, mode, onChangeMode, placeholder, options, className, height },
   ref,
 ) {
   // 生成唯一ID，避免多实例冲突
@@ -63,6 +65,7 @@ const VditorEditor = forwardRef<any, Props>(function VditorEditor(
       },
 
       // 6. 上传配置
+      height: height || 500, // Use height prop or default
       upload: {
         accept: 'image/*',
         multiple: false,
@@ -160,7 +163,7 @@ const VditorEditor = forwardRef<any, Props>(function VditorEditor(
     }
   }, [mode]);
 
-  return <div id={idRef.current} className="vditor-container" />;
+  return <div id={idRef.current} className={`vditor-container ${className || ''}`} />;
 });
 
 export default VditorEditor;

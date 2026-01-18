@@ -69,7 +69,7 @@ export default function CoverImageInput({
   const [aiPrompt, setAiPrompt] = useState('');
   const [showAiPromptEditor, setShowAiPromptEditor] = useState(false);
   const [customAiPrompt, setCustomAiPrompt] = useState(
-    '请根据文章摘要生成一张封面图，风格：科技；色系：柔和，暖色，文章摘要：',
+    '请在此处填入生成封面图的提示词，包括内容，风格，大小等',
   );
   const [aiPromptError, setAiPromptError] = useState<string | null>(null);
   const [generatedImageResult, setGeneratedImageResult] = useState<ImageResult | null>(null);
@@ -405,7 +405,7 @@ export default function CoverImageInput({
   }, []);
 
   const handleResetAiPrompt = useCallback(() => {
-    const defaultPrompt = '请根据文章摘要生成一张封面图，风格：科技；色系：柔和，暖色，文章摘要：';
+    const defaultPrompt = '请在此处填入生成封面图的提示词，包括内容，风格，大小等';
     setCustomAiPrompt(defaultPrompt);
     setAiPromptError(null);
   }, []);

@@ -76,6 +76,7 @@ export default function CoverImageInput({
   const [isConvertingToWebp, setIsConvertingToWebp] = useState(false);
   const [isUploadingToBlob, setIsUploadingToBlob] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   useEffect(() => {
     setUrlInputValue(value || '');
@@ -739,11 +740,15 @@ export default function CoverImageInput({
       {value && (
         <div className="mt-4">
           <p className="text-xs text-stone-600 mb-2">预览：</p>
-          <div className="w-48 h-32 border border-stone-200 rounded overflow-hidden">
+          <div
+            className="w-48 h-32 border border-stone-200 rounded overflow-hidden cursor-zoom-in relative group"
+            onClick={() => setIsZoomed(true)}
+            title="点击放大预览"
+          >
             <img
               src={value}
               alt="封面预览"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
@@ -755,6 +760,31 @@ export default function CoverImageInput({
               }}
             />
           </div>
+
+          {/* Zoom Modal */}
+          {isZoomed && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-in fade-in duration-200"
+              onClick={() => setIsZoomed(false)}
+            >
+              <div className="relative max-w-full max-h-full" onClick={(e) => e.stopPropagation()}>
+                <img
+                  src={value}
+                  alt="封面大图预览"
+                  className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute -top-12 right-0 text-white hover:bg-white/20 rounded-full"
+                  onClick={() => setIsZoomed(false)}
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

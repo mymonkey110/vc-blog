@@ -6,12 +6,11 @@
 import { ImageResult, ImageGenerationOptions, ValidationResult } from '@/types/ai';
 
 const POLLINATIONS_API_URL = 'https://image.pollinations.ai/prompt';
-const DEFAULT_WIDTH = 200;
-const DEFAULT_HEIGHT = 133;
 const DEFAULT_MODEL = 'flux';
 
 /**
  * Build Pollinations API URL
+ * Only adds width/height parameters if explicitly provided
  */
 function buildPollinationsUrl(
   prompt: string,
@@ -19,10 +18,15 @@ function buildPollinationsUrl(
   height?: number,
   model: string = DEFAULT_MODEL,
 ): string {
-  const finalWidth = width ?? DEFAULT_WIDTH;
-  const finalHeight = height ?? DEFAULT_HEIGHT;
   const encodedPrompt = encodeURIComponent(prompt);
-  return `${POLLINATIONS_API_URL}/${encodedPrompt}?width=${finalWidth}&height=${finalHeight}&model=${model}`;
+  let url = `${POLLINATIONS_API_URL}/${encodedPrompt}?model=${model}`;
+
+  // Only add dimensions if explicitly provided
+  if (width && height) {
+    url += `&width=${width}&height=${height}`;
+  }
+
+  return url;
 }
 
 /**
@@ -33,8 +37,9 @@ export async function generateImageFromPollinations(
   options?: ImageGenerationOptions & { signal?: AbortSignal },
 ): Promise<ImageResult> {
   const startTime = Date.now();
-  const width = options?.width ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH);
-  const height = options?.height ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT);
+  // Only use dimensions if explicitly provided in options
+  const width = options?.width;
+  const height = options?.height;
 
   const apiUrl = buildPollinationsUrl(prompt, width, height);
 
@@ -56,7 +61,7 @@ export async function generateImageFromPollinations(
     metadata: {
       model: DEFAULT_MODEL,
       prompt,
-      aspectRatio: `${width}:${height}`,
+      aspectRatio: width && height ? `${width}:${height}` : 'default',
       generationTime: Date.now() - startTime,
     },
   };
@@ -71,8 +76,9 @@ export async function generateImageFromPollinationsServer(
   options?: ImageGenerationOptions & { timeout?: number },
 ): Promise<ImageResult> {
   const startTime = Date.now();
-  const width = options?.width ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_WIDTH);
-  const height = options?.height ?? (options?.aspectRatio === '1:1' ? 133 : DEFAULT_HEIGHT);
+  // Only use dimensions if explicitly provided in options
+  const width = options?.width;
+  const height = options?.height;
   const timeout = options?.timeout || 30000;
 
   const apiUrl = buildPollinationsUrl(prompt, width, height);
@@ -107,7 +113,7 @@ export async function generateImageFromPollinationsServer(
       metadata: {
         model: DEFAULT_MODEL,
         prompt,
-        aspectRatio: `${width}:${height}`,
+        aspectRatio: width && height ? `${width}:${height}` : 'default',
         generationTime: Date.now() - startTime,
       },
     };
@@ -218,9 +224,5 @@ export function getLimits() {
   return {
     maxPromptLength: 1000,
     supportedAspectRatios: getSupportedAspectRatios(),
-    defaultDimensions: {
-      width: DEFAULT_WIDTH,
-      height: DEFAULT_HEIGHT,
-    },
   };
 }

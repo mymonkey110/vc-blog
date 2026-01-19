@@ -1,19 +1,31 @@
 'use client';
+
 import React, { useState } from 'react';
 import { login } from '@/actions/auth';
+import { Turnstile } from '@/components/Turnstile';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState('');
+
+  const sitekey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!turnstileToken) {
+      setError('请完成人机验证');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     try {
-      const result = await login(password);
+      const result = await login(password, turnstileToken);
       if (result && !result.success) {
         setError(result.message);
         console.error('Login error:', result.message);
@@ -86,10 +98,34 @@ export default function AdminLogin() {
             </div>
             {error && <p className="text-red-500 text-sm font-ui">{error}</p>}
           </div>
+
+          {/* Cloudflare Turnstile Widget */}
+          <div className="space-y-2">
+            {turnstileError && <p className="text-red-500 text-sm font-ui">{turnstileError}</p>}
+            <Turnstile
+              sitekey={sitekey}
+              action="login"
+              theme="light"
+              onVerify={(token) => {
+                setTurnstileToken(token);
+                setError('');
+                setTurnstileError('');
+              }}
+              onError={(errorCode) => {
+                setTurnstileToken(null);
+                setTurnstileError(`验证码错误: ${errorCode}`);
+              }}
+              onExpire={() => {
+                setTurnstileToken(null);
+                setTurnstileError('验证码已过期，请刷新');
+              }}
+            />
+          </div>
+
           <button
             type="submit"
-            className={`w-full py-3 bg-accent text-primary-text font-bold rounded-lg transition-all duration-200 font-ui ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'}`}
-            disabled={isLoading}
+            className={`w-full py-3 bg-accent text-primary-text font-bold rounded-lg transition-all duration-200 font-ui ${isLoading || !turnstileToken ? 'opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'}`}
+            disabled={isLoading || !turnstileToken}
           >
             {isLoading ? '登录中...' : '登录'}
           </button>

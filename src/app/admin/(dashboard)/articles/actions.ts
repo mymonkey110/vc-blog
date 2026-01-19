@@ -1,9 +1,22 @@
 'use server';
 
 import prisma from '@/lib/db';
+import { cookies } from 'next/headers';
+import { verifySession } from '@/actions/auth';
+
+// Helper function to verify authentication for Server Actions
+async function requireAuth() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_token')?.value;
+
+  if (!token || !(await verifySession(token))) {
+    throw new Error('未授权访问');
+  }
+}
 
 // 获取文章列表
 export async function getArticles(pageNumber: number = 1, pageSize: number = 10) {
+  await requireAuth();
   try {
     const skip = (pageNumber - 1) * pageSize;
 
@@ -33,6 +46,7 @@ export async function getArticles(pageNumber: number = 1, pageSize: number = 10)
 
 // 根据ID获取文章
 export async function getArticleById(id: string) {
+  await requireAuth();
   try {
     const article = await prisma.article.findUnique({
       where: {
@@ -58,6 +72,7 @@ export async function updateArticle(
     coverPic?: string;
   },
 ) {
+  await requireAuth();
   try {
     const updatedArticle = await prisma.article.update({
       where: {
@@ -88,6 +103,7 @@ export async function createArticle(data: {
   status?: 'draft' | 'publish';
   coverPic?: string;
 }) {
+  await requireAuth();
   try {
     const newArticle = await prisma.article.create({
       data: {
@@ -108,6 +124,7 @@ export async function createArticle(data: {
 
 // 删除文章
 export async function deleteArticle(id: string) {
+  await requireAuth();
   try {
     await prisma.article.delete({
       where: {

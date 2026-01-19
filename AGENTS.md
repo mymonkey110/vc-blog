@@ -90,7 +90,11 @@ For complex components, split tests into focused files:
 - **Constants**: camelCase (`pageSize`) or UPPER_CASE for truly global constants
 - **Interfaces/Types**: PascalCase (`ArticleData`, `GenerationState`)
 - **Database Models**: PascalCase (`Article`)
-- **API Routes**: Use lowercase with hyphens for route paths
+- **Entity Fields**: camelCase (e.g., `createdAt`, `categoryName`)
+- **Database Schema**: snake_case mapping (e.g., `created_at`, `category_name`)
+- **API Routes**: camelCase (e.g., `/admim/api/generateDescription`)
+- **Files/Functions**: Follow ordinary conventions (default camelCast)
+- **API URL PATH**: camelCase (e.g., `/admim/api/generateDescription`)
 
 ### React Components
 

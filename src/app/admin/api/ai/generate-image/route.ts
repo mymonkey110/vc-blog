@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { generateImageFromPollinationsServer } from '@/lib/image-generator-service';
 import { verifySession } from '@/actions/auth';
+import { validateTurnstile } from '@/lib/turnstile';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30; // 30 seconds timeout for AI generation
@@ -9,7 +10,36 @@ export const maxDuration = 30; // 30 seconds timeout for AI generation
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds between retries
 
+interface GenerateImageRequest {
+  prompt: string;
+  options?: object;
+  cfTurnstileResponse?: string;
+}
+
 export async function POST(request: NextRequest) {
+  // Turnstile token validation for bot detection
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.error('TURNSTILE_SECRET_KEY environment variable is not set');
+    return NextResponse.json({ success: false, message: '服务器配置错误' }, { status: 500 });
+  }
+
+  // Get Turnstile token from request body
+  const body = await request.json();
+  const { cfTurnstileResponse } = body as GenerateImageRequest;
+
+  if (!cfTurnstileResponse) {
+    console.warn('Turnstile: No token provided');
+    return NextResponse.json({ success: false, message: '请完成人机验证' }, { status: 400 });
+  }
+
+  const validation = await validateTurnstile(cfTurnstileResponse, secret);
+
+  if (!validation.success) {
+    console.warn('Turnstile validation failed:', validation.error);
+    return NextResponse.json({ success: false, message: '人机验证失败' }, { status: 403 });
+  }
+
   // Authentication check
   const cookieStore = await cookies();
   const token = cookieStore.get('admin_token')?.value;
@@ -23,8 +53,7 @@ export async function POST(request: NextRequest) {
   let lastError: Error | null = null;
 
   try {
-    const body = await request.json();
-    const { prompt, options } = body;
+    const { prompt, options } = body as GenerateImageRequest;
 
     // Validate request
     if (!prompt || typeof prompt !== 'string') {

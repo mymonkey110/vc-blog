@@ -218,10 +218,10 @@ NEXT_PUBLIC_DOMAIN=https://your-domain.com
 
 ```bash
 # Turnstile 站点密钥（公开，用于前端）
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACNdpkYUJuBCDDBc
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key_here
 
 # Turnstile 密钥（保密，用于后端验证）
-TURNSTILE_SECRET_KEY=0x4AAAAAACNdpk_pV1jpkwAryr5NAfGYs6o
+TURNSTILE_SECRET_KEY=your_turnstile_secret_key_here
 ```
 
 **Cloudflare Turnstile 配置步骤：**
@@ -256,8 +256,8 @@ NEXT_PUBLIC_DISQUS_SHORTNAME=your_shortname
 NEXT_PUBLIC_DOMAIN=https://your-domain.com
 
 # === 验证码配置 ===
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=0x4AAAAAACNdpkYUJuBCDDBc
-TURNSTILE_SECRET_KEY=0x4AAAAAACNdpk_pV1jpkwAryr5NAfGYs6o
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key_here
+TURNSTILE_SECRET_KEY=your_turnstile_secret_key_here
 ```
 
 ### 9. 部署步骤

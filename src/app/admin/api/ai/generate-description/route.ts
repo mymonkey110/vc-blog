@@ -8,13 +8,38 @@ import { cookies } from 'next/headers';
 import { streamText } from 'ai';
 import { getTextModel, isAIConfigured } from '@/lib/ai-config';
 import { verifySession } from '@/actions/auth';
+import { validateTurnstile } from '@/lib/turnstile';
 
 interface GenerateDescriptionRequest {
   content: string;
   customPrompt?: string;
+  cfTurnstileResponse?: string;
 }
 
 export async function POST(request: NextRequest) {
+  // Turnstile token validation for bot detection
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.error('TURNSTILE_SECRET_KEY environment variable is not set');
+    return NextResponse.json({ success: false, message: '服务器配置错误' }, { status: 500 });
+  }
+
+  // Get Turnstile token from request body
+  const body = await request.json();
+  const { cfTurnstileResponse } = body as GenerateDescriptionRequest;
+
+  if (!cfTurnstileResponse) {
+    console.warn('Turnstile: No token provided');
+    return NextResponse.json({ success: false, message: '请完成人机验证' }, { status: 400 });
+  }
+
+  const validation = await validateTurnstile(cfTurnstileResponse, secret);
+
+  if (!validation.success) {
+    console.warn('Turnstile validation failed:', validation.error);
+    return NextResponse.json({ success: false, message: '人机验证失败' }, { status: 403 });
+  }
+
   // Authentication check
   const cookieStore = await cookies();
   const token = cookieStore.get('admin_token')?.value;
@@ -38,9 +63,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
-    const body: GenerateDescriptionRequest = await request.json();
-    const { content, customPrompt } = body;
+    // Parse request body (already parsed above)
+    const { content, customPrompt } = body as GenerateDescriptionRequest;
 
     // Validate request
     if (!content || typeof content !== 'string') {

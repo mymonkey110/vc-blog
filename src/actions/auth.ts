@@ -3,8 +3,28 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SignJWT, jwtVerify } from 'jose';
+import { validateTurnstile } from '@/lib/turnstile';
 
-export async function login(password: string) {
+export async function login(password: string, turnstileToken?: string) {
+  // Turnstile token validation for bot detection
+  if (!turnstileToken) {
+    console.warn('Turnstile token not provided');
+    return { success: false, message: '请完成人机验证' };
+  }
+
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.error('TURNSTILE_SECRET_KEY environment variable is not set');
+    return { success: false, message: '服务器配置错误' };
+  }
+
+  const validation = await validateTurnstile(turnstileToken, secret);
+
+  if (!validation.success) {
+    console.warn('Turnstile validation failed:', validation.error);
+    return { success: false, message: '人机验证失败' };
+  }
+
   const adminPassword = process.env.VC_ADMIN_PASSWORD;
 
   if (!adminPassword) {

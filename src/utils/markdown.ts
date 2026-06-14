@@ -85,6 +85,9 @@ export const getArticleById = async (id: string): Promise<ArticleWithContent> =>
   // 序列化MDX内容
   const mdxSource = await serialize(matterResult.content, {
     // 可以在这里添加自定义组件和插件
+    parseFrontmatter: true,
+    blockJS: false,           // Allow JS expressions like {frontmatter.title} for trusted author content
+    blockDangerousJS: true,   // Block eval, Function, process for security
   });
   
   // 确保title字段正确提取，如果没有title或title为Untitled，则尝试从文件名提取

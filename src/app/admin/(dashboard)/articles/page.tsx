@@ -54,7 +54,7 @@ export default function ArticlesPage() {
     <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
       {/* Header Area */}
       <header className="px-8 py-12 max-w-7xl mx-auto border-b border-stone-100">
-        <div className="flex justify-between items-end">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-6xl font-serif tracking-tight mb-2 text-stone-900">Articles.</h1>
             <p className="text-stone-500 font-light text-lg tracking-wide uppercase">

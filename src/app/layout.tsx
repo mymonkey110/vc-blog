@@ -20,9 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <head>
-        {/* 字体预加载 - 优化性能 */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
       </head>
       <GoogleTagManager gtmId="GTM-NHDX7Q36" />
       <body className="min-h-screen flex flex-col">{children}</body>

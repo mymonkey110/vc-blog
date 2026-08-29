@@ -51,7 +51,7 @@ const CustomImage = ({
 
   // 生产环境或本地图片使用 Next.js Image
   return (
-    <div className={`relative w-full my-8 ${className}`}>
+    <span className={`relative w-full my-8 ${className}`}>
       <Image
         src={imageUrl}
         alt={alt || ''}
@@ -61,7 +61,7 @@ const CustomImage = ({
         style={{ width: '100%', height: 'auto' }}
         className="rounded shadow-sm"
       />
-    </div>
+    </span>
   );
 };
 

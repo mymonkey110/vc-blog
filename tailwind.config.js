@@ -74,7 +74,6 @@ export default {
 				'sans-serif'
 			],
 			article: [
-				'LXGW WenKai Screen',
 				'SF Pro Text',
 				'Helvetica Neue',
 				'Helvetica',

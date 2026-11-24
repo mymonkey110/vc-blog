@@ -4,7 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { GoogleTagManager } from '@next/third-parties/google';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_DOMAIN || ''),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_DOMAIN || 'https://michael-j.net'),
   title: '修行码农',
   description: '代码❤技术❤生活',
   icons: {
@@ -19,12 +19,12 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <head>
-      </head>
-      <GoogleTagManager gtmId="GTM-NHDX7Q36" />
-      <body className="min-h-screen flex flex-col">{children}</body>
-      <Analytics />
-      <SpeedInsights />
+      <body className="min-h-screen flex flex-col">
+        <GoogleTagManager gtmId="GTM-NHDX7Q36" />
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

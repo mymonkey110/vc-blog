@@ -1,290 +1,91 @@
-/* 优化字体加载 - 使用系统字体栈提升性能 */
-/* 移除外部字体依赖，使用系统字体栈 */
+/* 全局样式文件 — 修行码农（温润纸质技术刊物风格） */
 
-/* 霞鹜文楷字体变量定义 */
-:root {
-  --font-family-article: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
-}
-
-/* 全局样式文件 */
-
-/* 导入Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 自定义变量 - 优化阅读体验 */
-:root {
-  --font-serif: 'Noto Serif SC', serif;
-  --primary-text-color: #1a1a1a;
-  --secondary-text-color: #666666;
-  --accent-color: #007bff;
-  --background-color: #ffffff;
-  --surface-color: #f8f9fa;
-  --border-color: #e9ecef;
-  
-  /* 字体系统变量 - 优化系统字体栈 */
-  --font-family-heading: 'Georgia', 'Times New Roman', '宋体', 'SimSun', '华文宋体', 'STSong', serif;
-  --font-family-body: 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'WenQuanYi Micro Hei', sans-serif;
-  --font-family-article: Georgia, Cambria, "Times New Roman", Times, "Songti SC", "华文宋体", STSong, "SimSun", "宋体", sans-serif;
-  --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', 'Courier New', monospace;
-  --font-family-ui: 'SF Pro Display', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', system-ui, -apple-system, sans-serif;
-  
-  /* 字体大小系统 - 基于黄金比例 */
-  --font-size-xs: 0.75rem;     /* 12px */
-  --font-size-sm: 0.875rem;    /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --font-size-4xl: 2.25rem;   /* 36px */
-  --font-size-5xl: 3rem;      /* 48px */
-  
-  /* 行高系统 - 优化阅读节奏 */
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-  
-  /* 字重系统 */
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --font-weight-extrabold: 800;
-  --font-weight-black: 900;
-  
-  /* 字间距系统 */
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
-  --letter-spacing-wider: 0.05em;
-  --letter-spacing-widest: 0.1em;
-}
-
-/* 基础样式重置与优化 */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-body {
-  font-family: var(--font-family-body);
-  color: var(--primary-text-color);
-  background-color: var(--background-color);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--letter-spacing-normal);
-}
-
-/* 优化文本渲染 */
-body, p, span, div {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-/* 导入字体图标 */
-.material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-}
-
-/* 自定义工具类 - 增强排版系统 */
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  .content-auto {
-    content-visibility: auto;
-  }
-  
-  /* 字体族工具类 */
-  .font-heading {
-    font-family: var(--font-family-heading);
-  }
-  .font-body {
-    font-family: var(--font-family-body);
-  }
-  .font-article {
-    font-family: var(--font-family-article);
-  }
-  .font-mono {
-    font-family: var(--font-family-mono);
-  }
-  .font-ui {
-    font-family: var(--font-family-ui);
-  }
-  
-  /* 字重工具类 */
-  .font-light {
-    font-weight: var(--font-weight-light);
-  }
-  .font-medium {
-    font-weight: var(--font-weight-medium);
-  }
-  .font-semibold {
-    font-weight: var(--font-weight-semibold);
-  }
-  .font-extrabold {
-    font-weight: var(--font-weight-extrabold);
-  }
-  
-  /* 字间距工具类 */
-  .tracking-tight {
-    letter-spacing: var(--letter-spacing-tight);
-  }
-  .tracking-wide {
-    letter-spacing: var(--letter-spacing-wide);
-  }
-  .tracking-wider {
-    letter-spacing: var(--letter-spacing-wider);
-  }
-  .tracking-widest {
-    letter-spacing: var(--letter-spacing-widest);
-  }
-  
-  /* 行高工具类 */
-  .leading-tight {
-    line-height: var(--line-height-tight);
-  }
-  .leading-relaxed {
-    line-height: var(--line-height-relaxed);
-  }
-  
-  /* 文本渲染优化 */
-  .text-sharp {
-    -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: unset;
-    text-rendering: geometricPrecision;
-  }
-  
-  .text-smooth {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-  
-  /* 阅读优化 */
-  .reading-optimized {
-    max-width: 65ch;
-    line-height: var(--line-height-relaxed);
-    text-align: justify;
-    text-justify: inter-character;
-  }
-  
-  /* 标题系统 */
-  .title-1 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-5xl);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-    letter-spacing: var(--letter-spacing-tight);
-  }
-  
-  .title-2 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-4xl);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-    letter-spacing: var(--letter-spacing-tight);
-  }
-  
-  .title-3 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-3xl);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--line-height-tight);
-    letter-spacing: var(--letter-spacing-normal);
-  }
-  
-  .title-4 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--line-height-normal);
-    letter-spacing: var(--letter-spacing-normal);
-  }
-  
-  .title-5 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-normal);
-    letter-spacing: var(--letter-spacing-normal);
-  }
-  
-  .title-6 {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-normal);
-    letter-spacing: var(--letter-spacing-normal);
-  }
-}
-
-/* 文章详情页特定样式 */
-p strong {
-  font-weight: 700;
-}
-
-/* 按钮样式 */
-.btn-primary {
-  background-color: var(--accent-color);
-  color: var(--primary-text-color);
-  font-weight: 700;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #d39217;
-}
-
-/* 导入Font */
-
-
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    /* 温润纸质刊物核心色板（与 shadcn/ui 变量统一） */
+    --background: 36 33% 97%; /* #FAF8F5 象牙纸底色 */
+    --foreground: 212 18% 14%; /* #1E242B 深炭墨色 */
+    --card: 40 38% 98%; /* #FDFBF7 柔和纸面卡片 */
+    --card-foreground: 212 18% 14%;
+    --popover: 40 38% 98%;
+    --popover-foreground: 212 18% 14%;
+    --primary: 212 18% 14%;
+    --primary-foreground: 36 33% 97%;
+    --secondary: 39 27% 93%; /* #F2EFE9 暖石浅底 */
+    --secondary-foreground: 212 18% 14%;
+    --muted: 39 27% 93%;
+    --muted-foreground: 38 7% 33%; /* #5A564F 暖石次级墨色（≥7:1 对比度） */
+    --accent: 39 27% 93%; /* shadcn 悬停表面色 */
+    --accent-foreground: 212 18% 14%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 37 22% 87%; /* #E5DFD5 暖纸分割线 */
+    --input: 37 22% 87%;
+    --ring: 208 60% 30%; /* #1E4E79 钢笔靛蓝焦点环 */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* 博客语义色变量（兼容 markdown.module.css 与前台页面） */
+    --background-color: #faf8f5;
+    --surface-color: #f2efe9;
+    --border-color: #e5dfd5;
+    --primary-text-color: #1e242b;
+    --secondary-text-color: #5a564f;
+    --link-color: #1e4e79;
+    --link-hover-color: #133654;
+    --accent-color: #1e4e79;
+
+    /* 字体系统变量 — 系统优先，避免 Windows 粗锯齿 SimSun */
+    --font-family-heading: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', Georgia,
+      Cambria, 'Times New Roman', serif;
+    --font-family-body: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-family-article: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', Georgia,
+      Cambria, 'Times New Roman', serif;
+    --font-family-mono: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --font-family-ui: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+      system-ui, -apple-system, sans-serif;
+
+    /* 字号标尺 */
+    --font-size-xs: 0.75rem; /* 12px */
+    --font-size-sm: 0.875rem; /* 14px */
+    --font-size-base: 1rem; /* 16px */
+    --font-size-lg: 1.125rem; /* 18px */
+    --font-size-xl: 1.25rem; /* 20px */
+    --font-size-2xl: 1.5rem; /* 24px */
+    --font-size-3xl: 1.875rem; /* 30px */
+    --font-size-4xl: 2.25rem; /* 36px */
+    --font-size-5xl: 2.75rem; /* 44px */
+
+    /* 行高与字重系统 */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.8;
+
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+
+    /* 字间距系统 */
+    --letter-spacing-tight: -0.02em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.025em;
+    --letter-spacing-wider: 0.05em;
+    --letter-spacing-widest: 0.08em;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -311,35 +112,139 @@ p strong {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-
-
-@layer base {
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scrollbar-color: #d2c9bc transparent;
+  }
+
   body {
-    @apply bg-background text-foreground;
-
-    /* 1. 温暖舒适的象牙白/纸张底色（告别刺眼纯白） */
-    background-color: #FAF8F5;
-
-    /* 2. 柔和的深炭灰字色 */
-    color: #2c3e50;
-
-    /* 3. 你的纯系统衬线字体栈（零下载，瞬间渲染） */
-    font-family: Georgia, Cambria, "Times New Roman", Times,
-    "Songti SC", "华文宋体", STSong,
-    "SimSun", "宋体", serif;
+    background-color: var(--background-color);
+    color: var(--primary-text-color);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-normal);
+    caret-color: var(--link-color);
   }
 
-  /* 优化正文长文阅读排版 */
-  p, article {
-    line-height: 1.85;            /* 舒适的大行高 */
-    letter-spacing: 0.02em;       /* 微调字间距 */
-    text-align: justify;          /* 中文两端对齐 */
-    text-justify: inter-ideograph;
+  ::selection {
+    background-color: rgba(30, 78, 121, 0.16);
+    color: var(--primary-text-color);
   }
+
+  a,
+  button,
+  [tabindex] {
+    text-underline-offset: 0.22em;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .content-auto {
+    content-visibility: auto;
+  }
+
+  /* 字体族工具类 */
+  .font-heading {
+    font-family: var(--font-family-heading);
+  }
+  .font-body {
+    font-family: var(--font-family-body);
+  }
+  .font-article {
+    font-family: var(--font-family-article);
+  }
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+  .font-ui {
+    font-family: var(--font-family-ui);
+  }
+
+  /* 阅读容器优化 */
+  .reading-optimized {
+    max-width: 68ch;
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* 响应式刊物标题系统 */
+  .title-1 {
+    font-family: var(--font-family-heading);
+    font-size: clamp(1.75rem, 1.35rem + 1.5vw, 2.375rem);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--primary-text-color);
+    text-wrap: balance;
+  }
+
+  .title-2 {
+    font-family: var(--font-family-heading);
+    font-size: clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--primary-text-color);
+    text-wrap: balance;
+  }
+
+  .title-3 {
+    font-family: var(--font-family-heading);
+    font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.5rem);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--primary-text-color);
+    text-wrap: balance;
+  }
+
+  .title-4 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.4;
+    color: var(--primary-text-color);
+  }
+
+  .title-5 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.45;
+    color: var(--primary-text-color);
+  }
+
+  .title-6 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--primary-text-color);
+  }
+}
+
+p strong {
+  font-weight: 700;
 }

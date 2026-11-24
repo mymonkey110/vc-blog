@@ -1,290 +1,73 @@
-# AGENTS.md - Agent Guidelines for vc-blog
+# AGENTS.md — vc-blog
 
-## Project Overview
+Next.js 16 (App Router) + React 19 + TypeScript blog with Prisma 7 (`@prisma/adapter-pg` / PostgreSQL), Tailwind CSS + Radix/shadcn UI, Vercel Blob uploads, Cloudflare AI Gateway / Turnstile, and Vitest.
 
-Next.js 16 blog application with TypeScript, Prisma ORM, and PostgreSQL. Uses React 19, App Router, Tailwind CSS, Radix UI components, and Vitest for testing.
+Read `GLOSSARY.md` for canonical domain terminology (and legacy vs. active surfaces) and `docs/adr/` for architectural decisions before making structural changes.
 
-**CRITICAL: SSG (Static Site Generation) is paramount for blog frontend performance and visitor experience. All frontend blog pages MUST be statically generated.**
-
-## Essential Commands
-
-### Development
+## Commands
 
 ```bash
-npm run dev           # Start development server
-npm run build         # Build for production (includes prisma generate)
-npm run start         # Start production server
+npm run dev           # Development server
+npm run build         # prisma generate && next build
+npm run start         # Production server
+npm run lint          # ESLint (next/core-web-vitals)
+npm run test          # Vitest watch mode
+npm run test:run      # Run all tests once
+npm test -- src/lib/__tests__/ai-config.test.ts   # Single test file
+npm test -- -t "test name"                        # Filter by test name
 ```
 
-### Code Quality
+## Non-Negotiable Architecture Rules
 
-```bash
-npm run lint          # Run ESLint (always run before committing)
-```
+1. **Full SSG for Blog Frontend (`src/app/(pages)/`)** — See `docs/adr/0001-ssg-for-blog-frontend.md`.
+   - Static pages (`/`, `/categories`, `/about`): export `dynamic = 'force-static'`.
+   - Dynamic routes (`/page/[page]`, `/article/[yyyy]/[mm]/[dd]/[title]`, `/categories/[name]`): MUST export `generateStaticParams()`.
+   - NEVER use `dynamic = 'force-dynamic'` or `revalidate` (no ISR) on public blog pages.
+   - Next.js 16: always `await params` in dynamic pages and `generateMetadata`.
+2. **Hexo URL & Disqus Compatibility** — See `docs/adr/0002-hexo-url-and-disqus-compatibility.md`.
+   - Canonical article URLs are `/article/<YYYY>/<MM>/<DD>/<slug>` computed in **UTC** from `Article.createdAt`. Preserve `next.config.js` redirects and `Comment.tsx` Disqus identifiers.
+3. **Admin Auth & Testing Boundaries** — See `docs/adr/0003-admin-auth-and-turnstile-protection.md`.
+   - `/admin` is protected by `src/proxy.ts` and re-verified via `admin_token` JWT inside every Server Action and `/admin/api/**` route; login & AI generation endpoints also enforce Cloudflare Turnstile.
+   - **Never** create auth-bypass routes or test backdoors. For manual `/admin` UI testing, use Chrome MCP and ask the user for login credentials when needed.
+4. **Database & Media** — See `docs/adr/0004-database-markdown-and-media-storage.md` and `docs/adr/0005-ai-content-assistance-architecture.md`.
+   - Always import the Prisma 7 singleton from `@/lib/db` (client generated to `src/generated/prisma`).
+   - Use `Article.status` values `'publish'` / `'draft'` (never `'published'`).
 
-### Testing
-
-```bash
-npm run test          # Run tests in watch mode
-npm run test:run      # Run tests once
-```
-
-### Running Single Tests
-
-```bash
-# Run specific test file
-npm test -- src/lib/__tests__/ai-config.test.ts
-
-# Run tests matching a pattern
-npm test -- ai-config
-
-# Run specific test by name
-npm test -- -t "should return false when Cloudflare configuration is missing"
-```
-
-### Test File Organization
-
-For complex components, split tests into focused files:
-
-- `behavior.test.tsx` - Component behavior and state management
-- `integration.test.tsx` - Integration with other components/services
-- `error.test.tsx` - Error handling and edge cases
-- `property.test.tsx` - Property-based tests with fast-check
-- `dragdrop.test.tsx` - Drag and drop functionality
-
-## Code Style Guidelines
-
-### Formatting (Prettier)
-
-- **Quotes**: Single quotes (`'`)
-- **Trailing commas**: Enabled everywhere
-- **Indentation**: 2 spaces
-- **Semicolons**: Required
-- **Line width**: 100 characters
-
-### TypeScript
-
-- Strict mode enabled
-- Use `import type { ... }` for type-only imports
-- Always define interfaces for component props and API data
-- Use `const` with explicit types when inference isn't clear
-
-### Imports
-
-- External imports first, then internal `@/` imports
-- Sort groups alphabetically
-- Use `@/` alias for src directory
-- Example:
-  ```typescript
-  import React from 'react';
-  import { NextResponse } from 'next/server';
-  import prisma from '@/lib/db';
-  import { validateUrl } from '@/utils/urlValidation';
-  import type { ArticleData } from '@/types/article';
-  ```
-
-### Naming Conventions
-
-- **Components**: PascalCase (`BlogList`, `CoverImageInput`)
-- **Utilities/Functions**: camelCase (`isValidUrl`, `cn`)
-- **Constants**: camelCase (`pageSize`) or UPPER_CASE for truly global constants
-- **Interfaces/Types**: PascalCase (`ArticleData`, `GenerationState`)
-- **Database Models**: PascalCase (`Article`)
-- **Entity Fields**: camelCase (e.g., `createdAt`, `categoryName`)
-- **Database Schema**: snake_case mapping (e.g., `created_at`, `category_name`)
-- **API Routes**: camelCase (e.g., `/admim/api/generateDescription`)
-- **Files/Functions**: Follow ordinary conventions (default camelCast)
-- **API URL PATH**: camelCase (e.g., `/admim/api/generateDescription`)
-
-### React Components
-
-- Client components: Add `'use client';` at top
-- Server components: Default (no directive needed)
-- Props interfaces defined above component
-- Use `cn()` utility from `@/lib/utils` for Tailwind classes
-- Use Radix UI + shadcn/ui pattern for UI components
-
-### Error Handling
-
-- Wrap async code in try-catch blocks
-- Use `NextResponse.json()` for API responses with appropriate status codes:
-  - 200: Success
-  - 201: Created
-  - 400: Bad request (validation errors)
-  - 403: Unauthorized
-  - 500: Server error
-- Log errors with `console.error()` for debugging
-- User-facing error messages in Chinese when appropriate
-
-### API Routes (App Router)
-
-- Verify authentication using cookies from `next/headers`
-- Validate user input before database operations
-- Sanitize data (trim strings, validate URLs)
-- Return consistent JSON response format: `{ success: boolean, ...data }` or `{ error: string }`
-
-### Database (Prisma)
-
-- Run `prisma generate` before building (included in build script)
-- Use `@default()` for database-level defaults
-- Use `@map()` for snake_case column names in PostgreSQL
-- Models use PascalCase
-- Use `await` for all Prisma operations
-
-### Testing (Vitest)
-
-- Environment: jsdom (configured in vitest.config.ts)
-- Place test files in `__tests__` directories alongside source files or in `src/test/`
-- Global test utilities in `src/test/setup.ts`
-- Use `describe()` and `it()` for test organization
-- Property-based tests use fast-check for complex validation logic
-- File naming: `*.test.ts` or `*.test.tsx`
-- Use `beforeEach`/`afterEach` for setup/teardown
-- Mock external dependencies in setup.ts (CSS modules, react-syntax-highlighter, etc.)
-- Multiple test files per component are acceptable (e.g., behavior.test.tsx, integration.test.tsx, property.test.ts)
-
-### Linting (ESLint)
-
-- Config extends `next/core-web-vitals`
-- Rule `react/react-in-jsx-scope` is disabled (not needed in React 17+ with new JSX transform)
-- Always run `npm run lint` before committing
-
-### Admin Backend Testing Rules
-
-- **Authentication required**: `/admin` routes require authentication, do not create test pages that bypass auth
-- **For manual testing**: When authentication blocks automated testing, use chrome mcp to interact with the admin UI
-- **Test coordination**: Provide clear test steps for manual execution when chrome mcp is needed
-- **Password handling**: User will provide login credentials when chrome mcp requires authentication
-- **Do not**: Create dedicated test routes or pages to circumvent authorization
-
-### File Structure
+## Repository Layout
 
 ```
+prisma/schema.prisma   # Single PostgreSQL model: Article (table: article)
 src/
-├── app/              # Next.js App Router pages and API routes
-├── components/       # React components (UI, business logic)
-├── lib/             # Core utilities, services, database
-├── types/           # TypeScript type definitions
-├── utils/           # Helper functions
-└── test/            # Global test utilities
+├── proxy.ts           # Next.js 16 request proxy guarding /admin*
+├── actions/           # Auth Server Actions (login/logout/verifySession)
+├── app/(pages)/       # Public SSG blog pages
+├── app/admin/         # Authenticated CMS UI, Server Actions, and /admin/api/*
+├── components/        # UI (Radix/shadcn in ui/) and business components
+├── lib/               # Prisma singleton, AI Gateway/Pollinations, Turnstile, cn()
+├── types/             # TypeScript interfaces
+├── utils/             # Slug, uploadService, URL/file validation, metadata
+└── test/              # Vitest global setup (setup.ts) and markdown tests
 ```
 
-## SSG (Static Site Generation) - CRITICAL ARCHITECTURE PRINCIPLE
+## Conventions
 
-**Static Site Generation is NON-NEGOTIABLE for all blog frontend pages.**
-
-### Why SSG is Mandatory
-
-Blog pages (article list, article detail, categories, etc.) are read-only content that:
-
-- Does not change frequently
-- Benefits from pre-rendering at build time
-- Must load instantly for best visitor experience
-- Improves SEO and Core Web Vitals
-
-### SSG Implementation Patterns
-
-#### 1. Static Pages (Home, About, Categories, Tags)
-
-```typescript
-// Force static generation
-export const dynamic = 'force-static'
-
-export default async function Page() {
-  // Server component - data fetched at build time
-  const articles = await prisma.article.findMany(...)
-  return <BlogList articles={articles} />
-}
-```
-
-#### 2. Dynamic Routes (Article Detail Pages)
-
-**USE `generateStaticParams()` for ALL dynamic routes:**
-
-```typescript
-// Generate all static pages at build time
-export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({
-    select: { title: true, createdAt: true, slug: true },
-  });
-
-  return articles.flatMap((article) => {
-    if (!article.createdAt || !article.slug) return [];
-    const d = new Date(article.createdAt);
-    const yyyy = d.getUTCFullYear().toString();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    return [{ yyyy, mm, dd, title: article.slug }];
-  });
-}
-
-// Dynamic metadata generation
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>;
-}): Promise<Metadata> {
-  const p = await params;
-  // Fetch article and generate metadata
-  const article = await prisma.article.findUnique({ ... })
-  return { title: article.title, description: article.description }
-}
-
-export default async function ArticlePage({
-  params,
-}: {
-  params: Promise<{ yyyy: string; mm: string; dd: string; title: string }>;
-}) {
-  const p = await params;
-  // Fetch and render article (all at build time)
-  const article = await prisma.article.findUnique({ ... })
-  return <ArticleContent article={article} />
-}
-```
-
-#### 3. SSG Rules Checklist
-
-For EVERY blog frontend page:
-
-- [ ] **Static pages**: Add `export const dynamic = 'force-static'`
-- [ ] **Dynamic routes**: MUST use `generateStaticParams()` to pre-generate ALL possible paths
-- [ ] **NO ISR (Incremental Static Regeneration)**: Full SSG required for blog content
-- [ ] **NO `revalidate` export**: Blog pages should be fully static, rebuild on content changes
-- [ ] **Server components**: Default (no 'use client'), fetch data directly
-- [ ] **Await params**: Next.js 16 requires `const p = await params`
-- [ ] **Next.js build output**: Check `next build` shows static pages being generated
-
-### Anti-Patterns (NEVER DO)
-
-❌ **Dynamic rendering for blog content**:
-
-```typescript
-// WRONG - This defeats SSG purpose
-export const dynamic = 'force-dynamic';
-```
-
-❌ **Missing `generateStaticParams()` on dynamic routes**:
-
-```typescript
-// WRONG - This will cause dynamic rendering at request time
-// Must pre-generate all paths at build time
-export default async function ArticlePage({ params }) {
-  // Directly fetching without generateStaticParams
-}
-```
-
-❌ **Using `export const revalidate` for blog pages**:
-
-```typescript
-// WRONG - Blog content should be fully static
-// Rebuild on content changes instead
-export const revalidate = 3600;
-```
+- **Formatting & Linting**: Follow `.prettierrc` (single quotes, trailing commas, 2 spaces, semicolons, 100-col width) and `.eslintrc.json`.
+- **Imports & Types**: Use `@/` path alias, `import type` for type-only imports, external imports before internal imports, and `cn()` from `@/lib/utils` for Tailwind class merging.
+- **API Routes**: Place admin endpoints under `src/app/admin/api/` using kebab-case paths (e.g. `/admin/api/ai/generate-description`), verify `admin_token` via `cookies()`, validate/sanitize inputs, return `{ success: boolean, ... }` or `{ error: string }` with standard HTTP status codes (`200`/`201`/`400`/`403`/`500`), and use Chinese for user-facing error messages.
+- **Testing**: Vitest with `jsdom` (`vitest.config.ts`, `src/test/setup.ts`). Co-locate tests in `__tests__/` or `src/test/`. Split complex component tests into focused files (`behavior`, `integration`, `error`, `property` with `fast-check`, `dragdrop`).
 
 ## Before Submitting Work
 
-1. Run `npm run lint` and fix all issues
-2. Run `npm run test:run` to ensure all tests pass
-3. Follow the code style guidelines above
-4. Add type annotations for all new functions/components
-5. Include JSDoc comments for complex utilities (optional but recommended)
+1. Run `npm run lint` and fix all issues.
+2. Run `npm run test:run` and ensure all tests pass.
+3. If modifying public pages or `prisma/schema.prisma`, run `npm run build` and confirm public routes remain static in the build output.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs are tracked as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout (`GLOSSARY.md` and `docs/adr/` at the repo root). See `docs/agents/domain.md`.

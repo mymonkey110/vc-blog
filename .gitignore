@@ -53,3 +53,8 @@ lerna-debug.log*
 next-env.d.ts
 .vercel
 .worktrees/
+.env*
+!.env.example
+
+# Coding Agent
+.gemini

@@ -7,14 +7,15 @@ Read `GLOSSARY.md` for canonical domain terminology (and legacy vs. active surfa
 ## Commands
 
 ```bash
-npm run dev           # Development server
-npm run build         # prisma generate && next build
-npm run start         # Production server
-npm run lint          # ESLint (next/core-web-vitals)
-npm run test          # Vitest watch mode
-npm run test:run      # Run all tests once
-npm test -- src/lib/__tests__/ai-config.test.ts   # Single test file
-npm test -- -t "test name"                        # Filter by test name
+pnpm dev              # Development server
+pnpm build            # prisma generate && next build
+pnpm start            # Production server
+pnpm lint             # ESLint (next/core-web-vitals)
+pnpm test             # Vitest watch mode
+pnpm test:run         # Run all tests once
+pnpm env:pull         # Pull Vercel Development env vars into .env
+pnpm test -- src/lib/__tests__/ai-config.test.ts   # Single test file
+pnpm test -- -t "test name"                        # Filter by test name
 ```
 
 ## Non-Negotiable Architecture Rules
@@ -58,9 +59,9 @@ src/
 
 ## Before Submitting Work
 
-1. Run `npm run lint` and fix all issues.
-2. Run `npm run test:run` and ensure all tests pass.
-3. If modifying public pages or `prisma/schema.prisma`, run `npm run build` and confirm public routes remain static in the build output.
+1. Run `pnpm lint` and fix all issues.
+2. Run `pnpm test:run` and ensure all tests pass.
+3. If modifying public pages or `prisma/schema.prisma`, run `pnpm build` and confirm public routes remain static in the build output.
 
 ## Agent skills
 

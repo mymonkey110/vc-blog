@@ -1,0 +1,9 @@
+overrides:
+  '@openrouter/ai-sdk-provider>ai': '^6.0.17'
+  node-domexception: 'npm:@aspect-build/node-domexception@1.0.0'
+
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  sharp: true

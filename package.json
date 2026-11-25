@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
-    "test:run": "vitest --run"
+    "test:run": "vitest --run",
+    "env:pull": "vercel env pull .env --environment development --yes"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.9",
@@ -79,12 +80,7 @@
     "typescript": "5.5.3",
     "vitest": "^4.0.16"
   },
-  "overrides": {
-    "@openrouter/ai-sdk-provider": {
-      "ai": "^6.0.17"
-    },
-    "node-domexception": "npm:@aspect-build/node-domexception@1.0.0"
-  },
   "type": "module",
-  "private": true
+  "private": true,
+  "packageManager": "pnpm@12.23.0"
 }

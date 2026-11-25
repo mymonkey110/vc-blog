@@ -77,10 +77,12 @@ export default function CoverImageInput({
   const [isUploadingToBlob, setIsUploadingToBlob] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     setUrlInputValue(value || '');
-  }, [value]);
+  }
 
   const handleModeSwitch = useCallback(
     (newMode: InputMode) => {
@@ -120,13 +122,6 @@ export default function CoverImageInput({
   const handleFileSelect = useCallback(() => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
-    }
-  }, []);
-
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
     }
   }, []);
 
@@ -207,6 +202,16 @@ export default function CoverImageInput({
       }
     },
     [onChange],
+  );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    },
+    [handleFileUpload],
   );
 
   const handleRetryUpload = useCallback(() => {

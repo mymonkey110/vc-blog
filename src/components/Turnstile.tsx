@@ -23,17 +23,20 @@ export function Turnstile({
 }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(
+    () => typeof document !== 'undefined' && Boolean(document.getElementById('cf-turnstile-script')),
+  );
 
   // 使用 Ref 保持回调函数的最新状态，而不触发 useEffect 重运行
   // 解决了 "验证成功后组件重置" 的 BUG
   const callbacks = useRef({ onVerify, onError, onExpire });
-  callbacks.current = { onVerify, onError, onExpire };
+  useEffect(() => {
+    callbacks.current = { onVerify, onError, onExpire };
+  });
 
   // 1. 加载脚本 (只加载一次，不要在 cleanup 里移除 script 标签)
   useEffect(() => {
     if (document.getElementById('cf-turnstile-script')) {
-      setIsScriptLoaded(true);
       return;
     }
 

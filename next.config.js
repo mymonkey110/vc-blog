@@ -3,6 +3,10 @@
  */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Reclaim Turbopack dev cache based on memory allocation & OS pressure (default)
+    turbopackMemoryEviction: 'auto',
+  },
   async redirects() {
     return [
       {

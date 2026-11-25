@@ -33,7 +33,6 @@ interface InlineAIState {
   showPromptEditor: boolean
   customPrompt: string
   error?: string
-  canReset: boolean
   isAIGenerated: boolean
 }
 
@@ -55,20 +54,12 @@ export default function InlineAIDescriptionInput({
     showPromptEditor: false,
     customPrompt: '请帮我总结文章内容，提取关键信息形成摘要，内容不要超过50个字。',
     error: undefined,
-    canReset: Boolean(originalValue && originalValue !== value),
     isAIGenerated: false
   })
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
-
-  // Update reset capability when values change
-  useEffect(() => {
-    setState(prev => ({
-      ...prev,
-      canReset: Boolean(originalValue && originalValue !== value)
-    }))
-  }, [originalValue, value])
+  const canReset = Boolean(originalValue && originalValue !== value)
 
   // Generate description with Server-Sent Events
   const handleGenerate = useCallback(async () => {
@@ -199,7 +190,6 @@ export default function InlineAIDescriptionInput({
       onChange(originalValue)
       setState(prev => ({
         ...prev,
-        canReset: false,
         isAIGenerated: false,
         error: undefined
       }))
@@ -287,7 +277,7 @@ export default function InlineAIDescriptionInput({
           )}
 
           {/* Reset to Original Button - only show if originalValue exists and differs */}
-          {state.canReset && (
+          {canReset && (
             <Button
               type="button"
               variant="ghost"

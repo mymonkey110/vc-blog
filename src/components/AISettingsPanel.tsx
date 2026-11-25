@@ -31,18 +31,13 @@ interface AISettingsPanelProps {
 }
 
 export default function AISettingsPanel({ className = '' }: AISettingsPanelProps) {
-  const [settings, setSettings] = useState<AISettings>(aiSettingsManager.getSettings());
+  const [settings, setSettings] = useState<AISettings>(() => aiSettingsManager.getSettings());
   const [validation, setValidation] = useState<AISettingsValidation>({ isValid: true, errors: {} });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [importExportText, setImportExportText] = useState('');
   const [showImportExport, setShowImportExport] = useState(false);
-
-  // Load settings on mount
-  useEffect(() => {
-    setSettings(aiSettingsManager.getSettings());
-  }, []);
 
   // Handle settings change
   const handleSettingsChange = (updates: Partial<AISettings>) => {

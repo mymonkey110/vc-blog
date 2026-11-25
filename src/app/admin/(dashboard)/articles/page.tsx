@@ -16,30 +16,42 @@ export default function ArticlesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchArticles();
-  }, [currentPage, pageSize]);
+    let cancelled = false;
 
-  const fetchArticles = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getArticles(currentPage, pageSize);
-      setArticles(data.articles);
-      setTotalPages(data.totalPages);
-      setTotalCount(data.totalCount);
-    } catch (error) {
-      console.error('Failed to fetch articles:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    getArticles(currentPage, pageSize)
+      .then((data) => {
+        if (cancelled) return;
+        setArticles(data.articles);
+        setTotalPages(data.totalPages);
+        setTotalCount(data.totalCount);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch articles:', error);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, pageSize]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this article?')) {
       try {
+        setIsLoading(true);
         await deleteArticle(id);
-        fetchArticles();
+        const data = await getArticles(currentPage, pageSize);
+        setArticles(data.articles);
+        setTotalPages(data.totalPages);
+        setTotalCount(data.totalCount);
       } catch (error) {
         console.error('Failed to delete article:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -48,7 +60,10 @@ export default function ArticlesPage() {
     article.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handlePageChange = (page: number) => setCurrentPage(page);
+  const handlePageChange = (page: number) => {
+    setIsLoading(true);
+    setCurrentPage(page);
+  };
 
   return (
     <div className="min-h-screen bg-white text-stone-900 font-sans selection:bg-stone-200">
@@ -206,7 +221,7 @@ export default function ArticlesPage() {
         ) : (
           <div className="py-20 text-center">
             <p className="text-stone-300 font-light text-2xl font-serif italic">
-              "Silence is golden."
+              &ldquo;Silence is golden.&rdquo;
             </p>
             <p className="text-stone-400 text-sm mt-2 uppercase tracking-widest">
               No stories found

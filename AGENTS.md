@@ -52,7 +52,7 @@ src/
 
 ## Conventions
 
-- **Formatting & Linting**: Follow `.prettierrc` (single quotes, trailing commas, 2 spaces, semicolons, 100-col width) and `.eslintrc.json`.
+- **Formatting & Linting**: Follow `.prettierrc` (single quotes, trailing commas, 2 spaces, semicolons, 100-col width) and `eslint.config.mjs`.
 - **Imports & Types**: Use `@/` path alias, `import type` for type-only imports, external imports before internal imports, and `cn()` from `@/lib/utils` for Tailwind class merging.
 - **API Routes**: Place admin endpoints under `src/app/admin/api/` using kebab-case paths (e.g. `/admin/api/ai/generate-description`), verify `admin_token` via `cookies()`, validate/sanitize inputs, return `{ success: boolean, ... }` or `{ error: string }` with standard HTTP status codes (`200`/`201`/`400`/`403`/`500`), and use Chinese for user-facing error messages.
 - **Testing**: Vitest with `jsdom` (`vitest.config.ts`, `src/test/setup.ts`). Co-locate tests in `__tests__/` or `src/test/`. Split complex component tests into focused files (`behavior`, `integration`, `error`, `property` with `fast-check`, `dragdrop`).
@@ -72,3 +72,13 @@ Issues and specs are tracked as local markdown files under `.scratch/<feature>/`
 ### Domain docs
 
 Single-context layout (`GLOSSARY.md` and `docs/adr/` at the repo root). See `docs/agents/domain.md`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -8,25 +8,43 @@ import VditorEditor from '@/components/VditorEditor';
 export default function ArticleEditor({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const [article, setArticle] = useState<Article>({
-    id: id === 'new' ? `draft-${Date.now()}` : id || `draft-${Date.now()}`,
-    title: '',
-    excerpt: '',
-    date: new Date().toISOString().split('T')[0],
-    content: '',
-    categories: [],
-    status: 'draft',
-    publishDate: undefined,
-    imageUrl: '',
-    imageAlt: '',
+  const isNewArticle = id === 'new';
+  const [article, setArticle] = useState<Article>(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (id && !isNewArticle) {
+      return {
+        id,
+        title: '示例文章标题',
+        excerpt: '这是文章摘要...',
+        date: today,
+        content:
+          '# 示例文章\n\n这是一篇示例文章的内容。\n\n## 二级标题\n\n这是正文内容，可以包含各种Markdown格式。\n\n- 项目1\n- 项目2\n- 项目3',
+        categories: ['技术', '教程'],
+        status: 'draft',
+        publishDate: undefined,
+        imageUrl: '',
+        imageAlt: '',
+      };
+    }
+    return {
+      id: id === 'new' ? `draft-${Date.now()}` : id || `draft-${Date.now()}`,
+      title: '',
+      excerpt: '',
+      date: today,
+      content: '',
+      categories: [],
+      status: 'draft',
+      publishDate: undefined,
+      imageUrl: '',
+      imageAlt: '',
+    };
   });
 
   const vditorRef = useRef<any>(null);
-  const isNewArticle = id === 'new';
   const [categoryInput, setCategoryInput] = useState('');
   const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [slug, setSlug] = useState('');
+  const [tags, setTags] = useState<string[]>(() => (id && !isNewArticle ? ['示例', '测试'] : []));
+  const [slug, setSlug] = useState(() => (id && !isNewArticle ? 'example-article' : ''));
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -76,29 +94,6 @@ export default function ArticleEditor({ params }: { params: Promise<{ id: string
   const handleContentChange = (content: string) => {
     setArticle((prevArticle) => ({ ...prevArticle, content }));
   };
-
-  useEffect(() => {
-    if (!id) return;
-    if (!isNewArticle) {
-      const mockArticleData: Article = {
-        id,
-        title: '示例文章标题',
-        excerpt: '这是文章摘要...',
-        date: new Date().toISOString().split('T')[0],
-        content:
-          '# 示例文章\n\n这是一篇示例文章的内容。\n\n## 二级标题\n\n这是正文内容，可以包含各种Markdown格式。\n\n- 项目1\n- 项目2\n- 项目3',
-        categories: ['技术', '教程'],
-        status: 'draft',
-        publishDate: undefined,
-        imageUrl: '',
-        imageAlt: '',
-      };
-
-      setArticle(mockArticleData);
-      setSlug('example-article');
-      setTags(['示例', '测试']);
-    }
-  }, [id]);
 
   const handleAddCategory = () => {
     if (categoryInput.trim() && !article.categories.includes(categoryInput.trim())) {
